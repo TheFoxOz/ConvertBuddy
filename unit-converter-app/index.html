@@ -17,9 +17,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- AdSense Auto Ads (replace ca-pub-XXXXXXXXXXXXXXXX with your ID later) -->
+    <!-- Google AdSense Main Script: Publisher ID ca-pub-9771422699626133 is inserted here -->
     <script
-    async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+    async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9771422699626133"
       crossorigin="anonymous"></script>
  
     <style>
@@ -61,29 +61,43 @@
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
- 
-    <!-- Top Ad Placeholder -->
+
+    <!-- AD 1: Desktop/Tablet Top Banner (Hidden on small screens) -->
+    <!-- !!! IMPORTANT: REPLACE '1234567890' with your actual Desktop Ad Slot ID !!! -->
     <div class="w-full max-w-lg mb-4 hidden sm:block">
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-          crossorigin="anonymous"></script>
         <ins class="adsbygoogle"
-        style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-        data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        style="display:block" 
+        data-ad-client="ca-pub-9771422699626133"
+        data-ad-slot="1234567890" 
+        data-ad-format="auto" 
+        data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
- 
+    
+    <!-- AD 2: Mobile Top Banner (Hidden on desktop) -->
+    <!-- !!! IMPORTANT: REPLACE '1122334455' with your actual Mobile Ad Slot ID !!! -->
+    <div class="w-full max-w-lg mb-4 sm:hidden">
+        <ins class="adsbygoogle"
+        style="display:block" 
+        data-ad-client="ca-pub-9771422699626133"
+        data-ad-slot="1122334455" 
+        data-ad-format="auto" 
+        data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
     <div id="app" class="converter-card w-full max-w-lg p-8 space-y-6">
         <h1 class="text-4xl font-bold text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
             ConvertBuddy
         </h1>
         <p class="text-center text-gray-600">Your friendly offline converter — length, weight, temperature, speed, volume & area</p>
- 
+
         <!-- Category -->
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-            <select id="category" onchange="loadUnits()" class="w-full p-4 text-lg"></select>
+            <select id="category" onchange="loadUnits()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
         </div>
- 
+
         <!-- Input -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="md:col-span-3">
@@ -94,51 +108,55 @@
                     value="1" 
                     min="0" 
                     oninput="convert()" 
-                    class="w-full p-4 text-lg" 
+                    class="w-full p-4 text-lg focus:ring-emerald-500" 
                     placeholder="Enter value"
                 >
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">From</label>
-                <select id="fromUnit" onchange="convert()" class="w-full p-4 text-lg"></select>
+                <select id="fromUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
             </div>
         </div>
- 
+
         <!-- Swap Button -->
         <div class="flex justify-center">
-            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition" aria-label="Swap Units">
+            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition transform hover:scale-105" aria-label="Swap Units">
                 <!-- Dedicated Swap Icon -->
                 <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
             </button>
         </div>
- 
+
         <!-- Output -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="md:col-span-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Result</label>
-                <output
+                <output 
                     id="outputValue" 
                     class="block w-full p-4 text-2xl font-bold min-h-[68px] flex items-center"
                 ></output>
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">To</label>
-                <select id="toUnit" onchange="convert()" class="w-full p-4 text-lg"></select>
+                <select id="toUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
             </div>
         </div>
- 
+
         <div id="error-message" class="text-red-500 text-center h-6"></div>
- 
-        <!-- Rectangle Ad Placeholder -->
+
+        <!-- AD 3: Bottom Rectangle Ad (Shown on both) -->
+        <!-- !!! IMPORTANT: REPLACE '9876543210' with your actual Bottom Ad Slot ID !!! -->
         <div class="my-6 text-center">
             <ins class="adsbygoogle"
-            style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-            data-ad-slot="9876543210" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            style="display:block" 
+            data-ad-client="ca-pub-9771422699626133"
+            data-ad-slot="9876543210" 
+            data-ad-format="auto" 
+            data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
- 
+
         <!-- History -->
         <div class="border-t pt-6 border-gray-100">
             <div class="flex justify-between items-center mb-3">
@@ -150,23 +168,53 @@
             </ul>
         </div>
     </div>
- 
+
     <script>
         const unitData = {
-            // Updated with correct emojis
+            // Units with factors (Length, Volume, Mass, Speed, Area)
             length: {name:"Length",icon:"📏",baseUnit:"meter",units:{meter:{label:"Meter (m)",factor:1},kilometer:{label:"Kilometer (km)",factor:1000},mile:{label:"Mile (mi)",factor:1609.34},foot:{label:"Foot (ft)",factor:0.3048},centimeter:{label:"Centimeter (cm)",factor:0.01},inch:{label:"Inch (in)",factor:0.0254}}},
             volume: {name:"Volume",icon:"🧪",baseUnit:"liter",units:{liter:{label:"Liter (L)",factor:1},dl:{label:"Deciliter (dl)",factor:0.1},cl:{label:"Centiliter (cl)",factor:0.01},ml:{label:"Milliliter (ml)",factor:0.001},cup:{label:"Cup (US)",factor:0.236588},floz:{label:"Fluid Ounce (fl oz)",factor:0.0295735},teaspoon:{label:"Teaspoon (tsp)",factor:0.00492892},tablespoon:{label:"Tablespoon (Tbsp)",factor:0.0147868}}},
             mass: {name:"Mass",icon:"⚖️",baseUnit:"kilogram",units:{kilogram:{label:"Kilogram (kg)",factor:1},pound:{label:"Pound (lb)",factor:0.453592},gram:{label:"Gram (g)",factor:0.001},ounce:{label:"Ounce (oz)",factor:0.0283495}}},
+            // Units with special conversion functions (Temperature)
             temperature: {name:"Temperature",icon:"🌡️",baseUnit:"celsius",conversionType:"temperature",units:{celsius:{label:"Celsius (°C)",toBase:v=>v,fromBase:v=>v},fahrenheit:{label:"Fahrenheit (°F)",toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},kelvin:{label:"Kelvin (K)",toBase:v=>v-273.15,fromBase:v=>v+273.15}}},
             speed: {name:"Speed",icon:"🏎️",baseUnit:"mps",units:{mps:{label:"Meter/Second (m/s)",factor:1},kph:{label:"Kilometer/Hour (km/h)",factor:1/3.6},mph:{label:"Mile/Hour (mph)",factor:0.44704},knots:{label:"Knot (kn)",factor:0.514444}}},
             area: {name:"Area",icon:"🖼️",baseUnit:"sq_meter",units:{sq_meter:{label:"Square Meter (m²)",factor:1},sq_foot:{label:"Square Foot (ft²)",factor:0.092903},sq_mile:{label:"Square Mile (mi²)",factor:2589988.11},hectare:{label:"Hectare (ha)",factor:10000},acre:{label:"Acre (ac)",factor:4046.86}}}
         };
- 
+
         const el = {};
+        // Use a unique key for localStorage
+        const HISTORY_KEY = 'convertBuddyHistory'; 
         let history = [];
- 
+
+        // Function to load history from localStorage
+        function loadHistory() {
+            try {
+                const storedHistory = localStorage.getItem(HISTORY_KEY);
+                if (storedHistory) {
+                    history = JSON.parse(storedHistory);
+                }
+            } catch (e) {
+                console.error("Error loading history from localStorage:", e);
+                history = []; // Default to empty array on error
+            }
+        }
+        
+        // Function to save history to localStorage
+        function saveHistory() {
+            try {
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            } catch (e) {
+                console.error("Error saving history to localStorage:", e);
+                // May happen if storage quota is exceeded
+            }
+        }
+
         // Formatting function for output (using Intl for localized number format)
-        function fmt(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:6, useGrouping: true}).format(n); }
+        function fmt(n) { 
+            // Handle infinity or NaN gracefully
+            if (!isFinite(n)) return 'Error';
+            return new Intl.NumberFormat('en-US',{maximumFractionDigits:6, useGrouping: true}).format(n); 
+        }
         
         function addHistory(result, from, to, val) {
             // Check for valid, finite result before adding to history
@@ -182,6 +230,7 @@
             });
             if(history.length>10) history.pop();
             renderHistory();
+            saveHistory(); // Save after adding/updating history
         }
         
         function renderHistory() {
@@ -197,8 +246,9 @@
         function clearHistory() { 
             history=[]; 
             renderHistory(); 
+            saveHistory(); // Save empty array
         }
- 
+
         document.addEventListener('DOMContentLoaded',()=>{
             el.cat = document.getElementById('category');
             el.from = document.getElementById('fromUnit');
@@ -206,7 +256,9 @@
             el.input = document.getElementById('inputValue');
             el.output = document.getElementById('outputValue');
             el.err = document.getElementById('error-message');
- 
+
+            loadHistory(); // Load history when the page loads
+
             // Populate Category dropdown
             Object.keys(unitData).forEach(k=>{
                 const o=document.createElement('option'); 
@@ -217,7 +269,7 @@
             loadUnits();
             renderHistory();
         });
- 
+
         function loadUnits(){
             const units = unitData[el.cat.value].units;
             [el.from, el.to].forEach(s=>{
@@ -227,29 +279,52 @@
                     s.add(o); 
                 }); 
             });
-            el.to.selectedIndex = 1; // Default to second item for common conversions
+            // Try to keep the selection from the previous state if units exist, otherwise default
+            if (el.from.options.length > 0) {
+                el.to.selectedIndex = el.from.selectedIndex === 0 ? 1 : 0; // Default to different units
+            }
             convert();
         }
         
         function convert(){
             el.err.textContent='';
             const v = parseFloat(el.input.value);
+            
             // Input validation
-            if(isNaN(v)||v<0) return el.err.textContent='Enter a valid positive number';
- 
-            const cat = unitData[el.cat.value];
-            const from = cat.units[el.from.value];
-            const to = cat.units[el.to.value];
-            let result;
- 
-            if(cat.conversionType==='temperature'){
-                // Temperature conversion requires functions (toBase/fromBase)
-                result = to.fromBase(from.toBase(v));
-            } else {
-                // Standard factor-based conversion
-                result = (v * from.factor) / to.factor;
+            if(isNaN(v) || v < 0) {
+                 el.output.textContent = '0';
+                 if (el.input.value !== '') {
+                    el.err.textContent='Enter a valid number';
+                 }
+                 return;
             }
- 
+
+            const cat = unitData[el.cat.value];
+            const fromKey = el.from.value;
+            const toKey = el.to.value;
+            
+            if (!cat || !cat.units[fromKey] || !cat.units[toKey]) {
+                el.err.textContent = 'Conversion units not found.';
+                return;
+            }
+
+            const from = cat.units[fromKey];
+            const to = cat.units[toKey];
+            let result;
+
+            try {
+                if(cat.conversionType==='temperature'){
+                    // Temperature conversion requires functions (toBase/fromBase)
+                    result = to.fromBase(from.toBase(v));
+                } else {
+                    // Standard factor-based conversion
+                    result = (v * from.factor) / to.factor;
+                }
+            } catch (e) {
+                el.err.textContent = 'Conversion error. Check unit data.';
+                return;
+            }
+
             el.output.textContent = fmt(result);
             addHistory(result, from.label, to.label, v);
         }
@@ -260,11 +335,12 @@
             el.to.value=temp;
             convert();
         }
- 
+
         // Service Worker Registration with Error Handling
         if('serviceWorker' in navigator){
             window.addEventListener('load',()=>{
                 // Registering the service worker at the root scope '/' is crucial for PWA
+                // Note: sw.js file must be present at the root of the deployment
                 navigator.serviceWorker.register('/sw.js', { scope: '/' })
                     .then(reg => console.log('SW Registered:', reg.scope))
                     .catch(err => console.error('SW Registration Failed:', err));
@@ -272,4 +348,3 @@
         }
     </script>
 </body>
-</html>
