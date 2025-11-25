@@ -1,10 +1,21 @@
 {
-  "buildCommand": "echo 'No build needed for static site'",
-  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "VERCEL_PROJECT_ID": "unit-converter-app"
+    }
+  },
+  "crons": [],
+  "git": {
+    "deploymentEnabled": true,
+    "projectId": "unit-converter-app"
+  },
+  "installCommand": "echo 'No install needed for static project'",
+  "buildCommand": "echo 'No build command needed for static project'",
+  "outputDirectory": "."
 }
