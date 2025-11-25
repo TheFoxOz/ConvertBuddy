@@ -5,129 +5,200 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ConvertBuddy – Universal Unit Converter</title>
     
-    <!-- PWA Essentials -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <!-- PWA Essentials (Links corrected to absolute path for root scope) -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta name="theme-color" content="#10b981">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ConvertBuddy">
     <meta name="application-name" content="ConvertBuddy">
-
+ 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- AdSense Auto Ads (replace ca-pub-XXXXXXXXXXXXXXXX with your ID later) -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-         crossorigin="anonymous"></script>
-
+    <script
+    async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+      crossorigin="anonymous"></script>
+ 
     <style>
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(to bottom, #f0fdf4, #dcfce7); min-height: 100vh; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(to bottom, #f0fdf4, #dcfce7); 
+            min-height: 100vh; 
+        }
         * { -webkit-tap-highlight-color: transparent; }
-        .converter-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); }
-        .btn-swap { background: #10b981; }
-        .btn-swap:hover { background: #059669; }
-        select, input { border: 2px solid #86efac; }
-        select:focus, input:focus { border-color: #10b981; outline: none; }
-        #outputValue { background: #ecfdf5; color: #065f46; }
+        .converter-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); 
+        }
+        .btn-swap { 
+            background: #10b981; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
+        }
+        .btn-swap:hover { 
+            background: #059669; 
+        }
+        select, input { 
+            border: 2px solid #86efac; 
+            transition: border-color 0.2s;
+            /* Ensure inputs and selects have rounded corners */
+            border-radius: 0.75rem; 
+        }
+        select:focus, input:focus { 
+            border-color: #10b981; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        #outputValue { 
+            background: #ecfdf5; 
+            color: #065f46; 
+            border: 2px solid #34d399;
+            border-radius: 0.75rem; 
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
-
-    <!-- Top Ad -->
+ 
+    <!-- Top Ad Placeholder -->
     <div class="w-full max-w-lg mb-4 hidden sm:block">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
-             crossorigin="anonymous"></script>
-        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+          crossorigin="anonymous"></script>
+        <ins class="adsbygoogle"
+        style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
-
+ 
     <div id="app" class="converter-card w-full max-w-lg p-8 space-y-6">
         <h1 class="text-4xl font-bold text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
             ConvertBuddy
         </h1>
         <p class="text-center text-gray-600">Your friendly offline converter — length, weight, temperature, speed, volume & area</p>
-
+ 
         <!-- Category -->
         <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-            <select id="category" onchange="loadUnits()" class="w-full p-4 rounded-xl text-lg"></select>
+            <select id="category" onchange="loadUnits()" class="w-full p-4 text-lg"></select>
         </div>
-
+ 
         <!-- Input -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="md:col-span-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Value</label>
-                <input type="number" id="inputValue" value="1" min="0" oninput="convert()" class="w-full p-4 rounded-xl text-lg" placeholder="Enter value">
+                <input
+                    type="number" 
+                    id="inputValue" 
+                    value="1" 
+                    min="0" 
+                    oninput="convert()" 
+                    class="w-full p-4 text-lg" 
+                    placeholder="Enter value"
+                >
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">From</label>
-                <select id="fromUnit" onchange="convert()" class="w-full p-4 rounded-xl text-lg"></select>
+                <select id="fromUnit" onchange="convert()" class="w-full p-4 text-lg"></select>
             </div>
         </div>
-
+ 
         <!-- Swap Button -->
         <div class="flex justify-center">
-            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/></svg>
+            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition" aria-label="Swap Units">
+                <!-- Dedicated Swap Icon -->
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
             </button>
         </div>
-
+ 
         <!-- Output -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="md:col-span-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Result</label>
-                <output id="outputValue" class="block w-full p-4 rounded-xl text-2xl font-bold min-h-[68px] flex items-center"></output>
+                <output
+                    id="outputValue" 
+                    class="block w-full p-4 text-2xl font-bold min-h-[68px] flex items-center"
+                ></output>
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">To</label>
-                <select id="toUnit" onchange="convert()" class="w-full p-4 rounded-xl text-lg"></select>
+                <select id="toUnit" onchange="convert()" class="w-full p-4 text-lg"></select>
             </div>
         </div>
-
+ 
         <div id="error-message" class="text-red-500 text-center h-6"></div>
-
-        <!-- Rectangle Ad -->
+ 
+        <!-- Rectangle Ad Placeholder -->
         <div class="my-6 text-center">
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="9876543210" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <ins class="adsbygoogle"
+            style="display:block" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+            data-ad-slot="9876543210" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
-
+ 
         <!-- History -->
-        <div class="border-t pt-6">
+        <div class="border-t pt-6 border-gray-100">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-xl font-bold text-gray-800">Recent Conversions</h2>
-                <button onclick="clearHistory()" class="text-sm text-red-600 hover:text-red-800">Clear all</button>
+                <button onclick="clearHistory()" class="text-sm text-red-600 hover:text-red-800 transition">Clear all</button>
             </div>
-            <ul id="historyList" class="space-y-2 max-h-48 overflow-y-auto text-sm"></ul>
+            <ul id="historyList" class="space-y-2 max-h-48 overflow-y-auto text-sm">
+                <li class="text-gray-400 italic">No recent conversions</li>
+            </ul>
         </div>
     </div>
-
+ 
     <script>
         const unitData = {
-            length: {name:"Length",icon:"Ruler",baseUnit:"meter",units:{meter:{label:"Meter (m)",factor:1},kilometer:{label:"Kilometer (km)",factor:1000},mile:{label:"Mile (mi)",factor:1609.34},foot:{label:"Foot (ft)",factor:0.3048},centimeter:{label:"Centimeter (cm)",factor:0.01},inch:{label:"Inch (in)",factor:0.0254}}},
-            volume: {name:"Volume",icon:"Beaker",baseUnit:"liter",units:{liter:{label:"Liter (L)",factor:1},dl:{label:"Deciliter (dl)",factor:0.1},cl:{label:"Centiliter (cl)",factor:0.01},ml:{label:"Milliliter (ml)",factor:0.001},cup:{label:"Cup (US)",factor:0.236588},floz:{label:"Fluid Ounce (fl oz)",factor:0.0295735},teaspoon:{label:"Teaspoon (tsp)",factor:0.00492892},tablespoon:{label:"Tablespoon (Tbsp)",factor:0.0147868}}},
-            mass: {name:"Mass",icon:"Scale",baseUnit:"kilogram",units:{kilogram:{label:"Kilogram (kg)",factor:1},pound:{label:"Pound (lb)",factor:0.453592},gram:{label:"Gram (g)",factor:0.001},ounce:{label:"Ounce (oz)",factor:0.0283495}}},
-            temperature: {name:"Temperature",icon:"Thermometer",baseUnit:"celsius",conversionType:"temperature",units:{celsius:{label:"Celsius (°C)",toBase:v=>v,fromBase:v=>v},fahrenheit:{label:"Fahrenheit (°F)",toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},kelvin:{label:"Kelvin (K)",toBase:v=>v-273.15,fromBase:v=>v+273.15}}},
-            speed: {name:"Speed",icon:"Speedometer",baseUnit:"mps",units:{mps:{label:"Meter/Second (m/s)",factor:1},kph:{label:"Kilometer/Hour (km/h)",factor:1/3.6},mph:{label:"Mile/Hour (mph)",factor:0.44704},knots:{label:"Knot (kn)",factor:0.514444}}},
-            area: {name:"Area",icon:"Grid",baseUnit:"sq_meter",units:{sq_meter:{label:"Square Meter (m²)",factor:1},sq_foot:{label:"Square Foot (ft²)",factor:0.092903},sq_mile:{label:"Square Mile (mi²)",factor:2589988.11},hectare:{label:"Hectare (ha)",factor:10000},acre:{label:"Acre (ac)",factor:4046.86}}}
+            // Updated with correct emojis
+            length: {name:"Length",icon:"📏",baseUnit:"meter",units:{meter:{label:"Meter (m)",factor:1},kilometer:{label:"Kilometer (km)",factor:1000},mile:{label:"Mile (mi)",factor:1609.34},foot:{label:"Foot (ft)",factor:0.3048},centimeter:{label:"Centimeter (cm)",factor:0.01},inch:{label:"Inch (in)",factor:0.0254}}},
+            volume: {name:"Volume",icon:"🧪",baseUnit:"liter",units:{liter:{label:"Liter (L)",factor:1},dl:{label:"Deciliter (dl)",factor:0.1},cl:{label:"Centiliter (cl)",factor:0.01},ml:{label:"Milliliter (ml)",factor:0.001},cup:{label:"Cup (US)",factor:0.236588},floz:{label:"Fluid Ounce (fl oz)",factor:0.0295735},teaspoon:{label:"Teaspoon (tsp)",factor:0.00492892},tablespoon:{label:"Tablespoon (Tbsp)",factor:0.0147868}}},
+            mass: {name:"Mass",icon:"⚖️",baseUnit:"kilogram",units:{kilogram:{label:"Kilogram (kg)",factor:1},pound:{label:"Pound (lb)",factor:0.453592},gram:{label:"Gram (g)",factor:0.001},ounce:{label:"Ounce (oz)",factor:0.0283495}}},
+            temperature: {name:"Temperature",icon:"🌡️",baseUnit:"celsius",conversionType:"temperature",units:{celsius:{label:"Celsius (°C)",toBase:v=>v,fromBase:v=>v},fahrenheit:{label:"Fahrenheit (°F)",toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},kelvin:{label:"Kelvin (K)",toBase:v=>v-273.15,fromBase:v=>v+273.15}}},
+            speed: {name:"Speed",icon:"🏎️",baseUnit:"mps",units:{mps:{label:"Meter/Second (m/s)",factor:1},kph:{label:"Kilometer/Hour (km/h)",factor:1/3.6},mph:{label:"Mile/Hour (mph)",factor:0.44704},knots:{label:"Knot (kn)",factor:0.514444}}},
+            area: {name:"Area",icon:"🖼️",baseUnit:"sq_meter",units:{sq_meter:{label:"Square Meter (m²)",factor:1},sq_foot:{label:"Square Foot (ft²)",factor:0.092903},sq_mile:{label:"Square Mile (mi²)",factor:2589988.11},hectare:{label:"Hectare (ha)",factor:10000},acre:{label:"Acre (ac)",factor:4046.86}}}
         };
-
+ 
         const el = {};
         let history = [];
-
-        function fmt(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:6}).format(n); }
+ 
+        // Formatting function for output (using Intl for localized number format)
+        function fmt(n) { return new Intl.NumberFormat('en-US',{maximumFractionDigits:6, useGrouping: true}).format(n); }
+        
         function addHistory(result, from, to, val) {
-            history.unshift({val:fmt(val),res:fmt(result),from:from.split(' ')[0],to:to.split(' ')[0],time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+            // Check for valid, finite result before adding to history
+            if (!isFinite(result)) return;
+
+            history.unshift({
+                val: fmt(val),
+                res: fmt(result),
+                // Only take the name part before parentheses
+                from: from.split(' (')[0], 
+                to: to.split(' (')[0], 
+                time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+            });
             if(history.length>10) history.pop();
             renderHistory();
         }
+        
         function renderHistory() {
             const list = document.getElementById('historyList');
-            list.innerHTML = history.length===0 ? '<li class="text-gray-400 italic">No recent conversions</li>' : history.map(h=>`<li class="bg-emerald-50 p-3 rounded-lg flex justify-between"><span>${h.val} ${h.from} → ${h.res} ${h.to}</span><span class="text-gray-500">${h.time}</span></li>`).join('');
+            list.innerHTML = history.length===0
+                ? '<li class="text-gray-400 italic">No recent conversions</li>' 
+                : history.map(h=>`<li class="bg-emerald-50 p-3 rounded-xl flex justify-between items-center hover:bg-emerald-100 transition duration-150">
+                    <span class="truncate pr-2">${h.val} ${h.from} <span class="text-teal-600 font-bold">→</span> ${h.res} ${h.to}</span>
+                    <span class="text-xs text-gray-500 flex-shrink-0">${h.time}</span>
+                </li>`).join('');
         }
-        function clearHistory() { history=[]; renderHistory(); }
-
+        
+        function clearHistory() { 
+            history=[]; 
+            renderHistory(); 
+        }
+ 
         document.addEventListener('DOMContentLoaded',()=>{
             el.cat = document.getElementById('category');
             el.from = document.getElementById('fromUnit');
@@ -135,48 +206,69 @@
             el.input = document.getElementById('inputValue');
             el.output = document.getElementById('outputValue');
             el.err = document.getElementById('error-message');
-
+ 
+            // Populate Category dropdown
             Object.keys(unitData).forEach(k=>{
-                const o=document.createElement('option'); o.value=k; o.text=`${unitData[k].icon} ${unitData[k].name}`;
+                const o=document.createElement('option'); 
+                o.value=k; 
+                o.text=`${unitData[k].icon} ${unitData[k].name}`;
                 el.cat.appendChild(o);
             });
             loadUnits();
+            renderHistory();
         });
-
+ 
         function loadUnits(){
             const units = unitData[el.cat.value].units;
-            [el.from, el.to].forEach(s=>{ s.innerHTML=''; Object.keys(units).forEach(k=>{ const o=new Option(units[k].label,k); s.add(o); }); });
-            el.to.selectedIndex = 1;
+            [el.from, el.to].forEach(s=>{
+                s.innerHTML=''; 
+                Object.keys(units).forEach(k=>{ 
+                    const o=new Option(units[k].label,k);
+                    s.add(o); 
+                }); 
+            });
+            el.to.selectedIndex = 1; // Default to second item for common conversions
             convert();
         }
+        
         function convert(){
             el.err.textContent='';
             const v = parseFloat(el.input.value);
+            // Input validation
             if(isNaN(v)||v<0) return el.err.textContent='Enter a valid positive number';
-
+ 
             const cat = unitData[el.cat.value];
             const from = cat.units[el.from.value];
             const to = cat.units[el.to.value];
             let result;
-
+ 
             if(cat.conversionType==='temperature'){
+                // Temperature conversion requires functions (toBase/fromBase)
                 result = to.fromBase(from.toBase(v));
             } else {
+                // Standard factor-based conversion
                 result = (v * from.factor) / to.factor;
             }
-
+ 
             el.output.textContent = fmt(result);
             addHistory(result, from.label, to.label, v);
         }
+        
         function swapUnits(){
-            const temp=el.from.value; el.from.value=el.to.value; el.to.value=temp;
+            const temp=el.from.value;
+            el.from.value=el.to.value; 
+            el.to.value=temp;
             convert();
         }
-
-        // Service Worker
+ 
+        // Service Worker Registration with Error Handling
         if('serviceWorker' in navigator){
-            window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js'));
+            window.addEventListener('load',()=>{
+                // Registering the service worker at the root scope '/' is crucial for PWA
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(reg => console.log('SW Registered:', reg.scope))
+                    .catch(err => console.error('SW Registration Failed:', err));
+            });
         }
     </script>
 </body>
-</html>
