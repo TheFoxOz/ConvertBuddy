@@ -1,74 +1,61 @@
-const CACHE_NAME = 'convertbuddy-v9';
-const DATA_CACHE = 'convertbuddy-data-v1';
+const CACHE = "convertbuddy-v10";
+const DATA_CACHE = "convertbuddy-data-v1";
 
-const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/privacy.html',
-  '/manifest.json',
-  '/scripts/ui.js',
-  '/scripts/converter.js',
-  '/scripts/currency.js',
-  '/scripts/units.js',
-  '/icons/Icon-192.png',
-  '/icons/Icon-512.png',
-  '/icons/Icon-maskable.png'
+const FILES = [
+    "/",
+    "/index.html",
+    "/privacy.html",
+    "/manifest.json",
+
+    "/scripts/ui.js",
+    "/scripts/converter.js",
+    "/scripts/currency.js",
+    "/scripts/units.js",
+
+    "/icons/Icon-192.png",
+    "/icons/Icon-512.png",
+    "/icons/Icon-maskable.png"
 ];
 
-// Install
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
-  );
-  self.skipWaiting();
+self.addEventListener("install", e => {
+    e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+    self.skipWaiting();
 });
 
-// Activate
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME && key !== DATA_CACHE) {
-            return caches.delete(key);
-          }
-        })
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Handle currency API
-  if (url.href.includes("exchangerate-api.com")) {
-    event.respondWith(
-      caches.open(DATA_CACHE).then(cache => {
-        return fetch(event.request)
-          .then(response => {
-            if (response.ok) cache.put(event.request, response.clone());
-            return response;
-          })
-          .catch(() => cache.match(event.request));
-      })
+self.addEventListener("activate", e => {
+    e.waitUntil(
+        caches.keys().then(keys =>
+            Promise.all(keys.map(k => (k !== CACHE && k !== DATA_CACHE ? caches.delete(k) : null)))
+        )
     );
-    return;
-  }
+    self.clients.claim();
+});
 
-  // Cache-first for app shell
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      return (
-        cached ||
-        fetch(event.request).catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-        })
-      );
-    })
-  );
+self.addEventListener("fetch", e => {
+    const url = new URL(e.request.url);
+
+    // Currency API
+    if (url.href.includes("exchangerate-api.com")) {
+        e.respondWith(
+            caches.open(DATA_CACHE).then(cache =>
+                fetch(e.request)
+                    .then(res => {
+                        if (res.ok) cache.put(e.request, res.clone());
+                        return res;
+                    })
+                    .catch(() => cache.match(e.request))
+            )
+        );
+        return;
+    }
+
+    // App shell
+    e.respondWith(
+        caches.match(e.request).then(cached =>
+            cached ||
+            fetch(e.request).catch(() =>
+                e.request.mode === "navigate" ? caches.match("/index.html") : null
+            )
+        )
+    );
 });
