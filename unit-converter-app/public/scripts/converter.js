@@ -1,9 +1,14 @@
 import { conversionData } from "./units.js";
+import { addConversionToHistory } from "./firestore.js"; 
+// The above function will safely do nothing if Firestore is not initialized.
 
 export function convertValue(el, category) {
     const data = conversionData[category];
-    const from = data.units[el.fromUnit.value];
-    const to = data.units[el.toUnit.value];
+    const fromUnitKey = el.fromUnit.value;
+    const toUnitKey = el.toUnit.value;
+
+    const from = data.units[fromUnitKey];
+    const to = data.units[toUnitKey];
     const input = parseFloat(el.fromValue.value);
 
     if (isNaN(input)) {
@@ -13,18 +18,42 @@ export function convertValue(el, category) {
 
     let converted;
 
+    // ---------------------------
+    // TEMPERATURE
+    // ---------------------------
     if (category === "Temperature") {
         converted = to.fromBase(from.toBase(input));
-    } else {
-        converted = input * from.toBase / to.toBase;
     }
 
+    // ---------------------------
+    // NORMAL MULTIPLICATIVE UNITS
+    // ---------------------------
+    else {
+        converted = input * (from.toBase / to.toBase);
+    }
+
+    // ---------------------------
+    // FORMATTING
+    // ---------------------------
     const formatted =
         category === "Temperature"
             ? converted.toFixed(2)
             : Number(converted.toPrecision(12)).toString();
 
-    el.toValue.value = (to.symbol ? to.symbol + " " : "") + formatted;
+    const finalOutput = (to.symbol ? to.symbol + " " : "") + formatted;
+    el.toValue.value = finalOutput;
+
+    // ---------------------------
+    // SAVE TO HISTORY (Firestore or local fallback)
+    // ---------------------------
+    addConversionToHistory({
+        category,
+        fromUnit: fromUnitKey,
+        toUnit: toUnitKey,
+        input,
+        output: finalOutput,
+        timestamp: Date.now()
+    });
 }
 
 export function swapUnits(el, callback) {
