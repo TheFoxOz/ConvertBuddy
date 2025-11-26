@@ -7,42 +7,37 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
-        body {
-            background-color: #e5f5e5;
-        }
-        .app-container {
-            max-width: 600px; /* Slightly wider container for side-by-side */
-            margin: 50px auto;
-        }
-        /* Custom class for the box design */
+        body { background-color: #e5f5e5; }
+        .app-container { max-width: 600px; margin: 50px auto; }
         .conversion-box {
-            border: 2px solid #34D399; /* Emerald 400 border */
+            border: 2px solid #34D399;
             border-radius: 12px;
             padding: 1rem;
-            background-color: #F0FFF4; /* Light green background */
-            min-height: 180px; /* Ensures consistent height */
+            background-color: #F0FFF4;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-        /* Refinements for inputs/selects */
         .conversion-box input, .conversion-box select {
             border: 1px solid #D1D5DB; 
             box-shadow: none;
             transition: border-color 0.2s, box-shadow 0.2s;
             background-color: white;
             padding: 0.75rem;
-            margin-bottom: 0.5rem; /* Space below inputs */
+            margin-bottom: 0.5rem;
         }
-        /* Focus state based on Tailwind emerald-500 */
         .conversion-box input:focus, .conversion-box select:focus {
             border-color: #10B981; 
             box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
+        #swap-button:active {
+            transform: rotate(180deg);
+            transition: transform 0.3s;
+        }
     </style>
 </head>
 <body>
-
     <div class="app-container p-6 bg-white rounded-xl shadow-2xl">
 
         <h1 class="text-3xl font-bold text-center text-emerald-600 mb-2">ConvertBuddy</h1>
@@ -52,57 +47,40 @@
         <div class="flex items-center mb-6 border rounded-lg overflow-hidden bg-gray-50">
             <i class="fas fa-ruler-combined text-gray-400 p-3"></i>
             <select id="category-select" class="flex-grow p-3 border-none focus:ring-0">
-                <option value="Currency" selected>Currency</option>
-                </select>
+                <!-- categories populated dynamically -->
+            </select>
         </div>
 
         <p id="loading-info" class="text-sm text-gray-500 text-center mb-4">Loading currencies...</p>
 
-        <div id="conversion-form" class="relative flex items-center justify-between space-x-4">
+        <!-- Conversion Form -->
+        <div id="conversion-form" class="relative flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
 
-            <div class="conversion-box flex-grow">
+            <!-- FROM box -->
+            <div class="conversion-box flex-grow relative">
                 <label class="block text-lg font-semibold text-gray-800 mb-2">FROM</label>
-                
-                <input 
-                    id="from-value" 
-                    type="number" 
-                    step="any" 
-                    value="1" 
-                    placeholder="Enter value" 
-                    class="w-full"
-                >
-                
-                <select id="from-unit" class="w-full">
-                    </select>
+                <input id="from-value" type="number" step="any" value="1" placeholder="Enter value" class="w-full">
+                <select id="from-unit" class="w-full"></select>
             </div>
 
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <button 
-                    id="swap-button" 
-                    class="w-12 h-12 flex items-center justify-center bg-emerald-500 text-white rounded-full shadow-xl hover:bg-emerald-600 transition duration-200 z-10 pointer-events-auto"
-                >
-                    <i class="fas fa-arrows-alt-h"></i>
-                </button>
-            </div>
+            <!-- Swap button -->
+            <button id="swap-button" 
+                class="absolute sm:relative -top-6 sm:top-0 w-12 h-12 flex items-center justify-center bg-emerald-500 text-white rounded-full shadow-xl hover:bg-emerald-600 transition duration-200 z-10">
+                <i class="fas fa-arrows-alt-h"></i>
+            </button>
 
-            <div class="conversion-box flex-grow">
+            <!-- TO box -->
+            <div class="conversion-box flex-grow relative">
                 <label class="block text-lg font-semibold text-gray-800 mb-2">TO (Result)</label>
-                
-                <input 
-                    id="to-value" 
-                    type="text" 
-                    readonly 
-                    placeholder="Result" 
-                    class="w-full bg-gray-100 text-gray-800 font-bold"
-                >
-                
-                <select id="to-unit" class="w-full">
-                    </select>
+                <input id="to-value" type="text" readonly placeholder="Result" class="w-full bg-gray-100 text-gray-800 font-bold">
+                <select id="to-unit" class="w-full"></select>
             </div>
+
         </div>
 
-        <div class="flex justify-center pt-6">
-            <a href="#" class="text-sm text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
+        <div class="flex justify-between pt-6">
+            <a href="/privacy.html" class="text-sm text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
+            <button id="clear-history-button" class="text-sm text-red-500 hover:text-red-700">Clear History</button>
         </div>
 
         <hr class="my-6">
