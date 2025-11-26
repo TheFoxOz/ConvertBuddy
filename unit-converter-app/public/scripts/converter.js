@@ -2,7 +2,14 @@
 import { conversionData } from "./units.js";
 import { saveHistory } from "./firestore.js";
 
-export function convertValue(el, category, onComplete) {
+/**
+ * Performs the unit conversion and optionally saves the history entry.
+ * @param {object} el - DOM elements object
+ * @param {string} category - Current conversion category
+ * @param {function} onComplete - Callback to refresh UI history
+ * @param {boolean} saveHistoryFlag - Whether to save this conversion to history
+ */
+export function convertValue(el, category, onComplete, saveHistoryFlag = true) {
     const data = conversionData[category];
     const from = data.units[el.fromUnit.value];
     const to = data.units[el.toUnit.value];
@@ -26,18 +33,23 @@ export function convertValue(el, category, onComplete) {
 
     el.toValue.value = (to.symbol ? to.symbol + " " : "") + formatted;
 
-    saveHistory({
-        category,
-        fromUnit: el.fromUnit.value,
-        toUnit: el.toUnit.value,
-        input,
-        output: el.toValue.value,
-        timestamp: Date.now()
-    });
+    if (saveHistoryFlag) {
+        saveHistory({
+            category,
+            fromUnit: el.fromUnit.value,
+            toUnit: el.toUnit.value,
+            input,
+            output: el.toValue.value,
+            timestamp: Date.now()
+        });
+    }
 
     if (onComplete) onComplete();
 }
 
+/**
+ * Swap 'from' and 'to' units and values safely
+ */
 export function swapUnits(el, callback) {
     const tempUnit = el.fromUnit.value;
     el.fromUnit.value = el.toUnit.value;
