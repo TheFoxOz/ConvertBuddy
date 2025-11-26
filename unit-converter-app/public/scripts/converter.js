@@ -3,11 +3,6 @@ import { conversionData } from "./units.js";
 
 /**
  * Convert a value from one unit to another
- * @param {string} category - e.g., 'Length', 'Weight', 'Temperature', 'Currency'
- * @param {string} fromUnit - unit to convert from
- * @param {string} toUnit - unit to convert to
- * @param {number|string} value - numeric value to convert
- * @returns {number} converted value (rounded to 6 decimals)
  */
 export function convert(category, fromUnit, toUnit, value) {
     const cat = conversionData[category];
@@ -41,15 +36,13 @@ export function convert(category, fromUnit, toUnit, value) {
 
 /**
  * List all units for a category
- * @param {string} category
- * @returns {Array<string>} unit names
  */
 export function listUnits(category) {
     return Object.keys(conversionData[category]?.units || []);
 }
 
 /**
- * Helper: swap from/to values in UI
+ * Swap from/to units and values in UI
  */
 export function swapUnits(el, callback) {
     const tmpUnit = el.fromUnit.value;
@@ -64,9 +57,9 @@ export function swapUnits(el, callback) {
 }
 
 /**
- * Convert and display result in UI
+ * Convert value and optionally save history
  */
-export function convertValue(el, category, callback, saveHistory = true) {
+export async function convertValue(el, category, callback, saveHistory = true) {
     try {
         if (!el.fromValue.value || isNaN(Number(el.fromValue.value))) {
             el.toValue.value = "---";
@@ -75,12 +68,11 @@ export function convertValue(el, category, callback, saveHistory = true) {
 
         const input = Number(el.fromValue.value);
         const output = convert(category, el.fromUnit.value, el.toUnit.value, input);
-
         el.toValue.value = output;
 
         if (saveHistory) {
             const { saveHistory: save } = await import("./firestore.js");
-            save({
+            await save({
                 category,
                 input,
                 fromUnit: el.fromUnit.value,
