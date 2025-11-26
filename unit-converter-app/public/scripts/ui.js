@@ -7,6 +7,7 @@ import { fetchCurrencyRates } from "./currency.js";
 /* --------------------- */
 /* UTILS                 */
 /* --------------------- */
+
 function debounce(func, delay) {
     let timeoutId;
     return function(...args) {
@@ -14,6 +15,7 @@ function debounce(func, delay) {
         timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
 }
+
 function formatTime(timestamp) {
     const diff = (Date.now() - timestamp) / 1000;
     if (diff < 60) return "just now";
@@ -25,6 +27,7 @@ function formatTime(timestamp) {
 /* --------------------- */
 /* ELEMENTS INIT         */
 /* --------------------- */
+
 export function initializeElements() {
     return {
         category: document.getElementById("category-select"),
@@ -33,22 +36,16 @@ export function initializeElements() {
         fromUnit: document.getElementById("from-unit"),
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
-        historyList: document.getElementById("history-list"),
-        loadingInfo: document.getElementById("loading-info") // Added for status messages
+        historyList: document.getElementById("history-list")
     };
 }
 
 /* --------------------- */
 /* APP INIT              */
 /* --------------------- */
+
 export async function initApp(el) {
-    el.loadingInfo.textContent = "Loading live currency rates...";
-
-    await fetchCurrencyRates(); // Ensure currency units are loaded
-
-    const currencyCount = Object.keys(conversionData.Currency.units).length;
-    el.loadingInfo.textContent = `Successfully loaded ${currencyCount} currency rates.`;
-
+    await fetchCurrencyRates(); // ensure currency units are loaded
     populateCategories(el);
     updateUnits(el); // sets default GBP -> USD for Currency
     attachListeners(el);
@@ -58,8 +55,9 @@ export async function initApp(el) {
 /* --------------------- */
 /* CATEGORY + UNITS      */
 /* --------------------- */
+
 function populateCategories(el) {
-    el.category.innerHTML = ""; // FIX: Clear duplicates before populating
+    el.category.innerHTML = ""; // clear duplicates
     Object.keys(conversionData).forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
@@ -67,6 +65,7 @@ function populateCategories(el) {
         el.category.appendChild(option);
     });
 }
+
 function updateUnits(el) {
     const category = el.category.value;
     const units = conversionData[category].units;
@@ -97,16 +96,16 @@ function updateUnits(el) {
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
-    // Run conversion but FIX: DO NOT save history on programmatic update (pass false)
-    convertValue(el, category, () => refreshHistory(el), false); 
+    // Run conversion but DO NOT save history on init
+    convertValue(el, category, () => refreshHistory(el), false);
 }
 
 /* --------------------- */
 /* LISTENERS             */
 /* --------------------- */
+
 function attachListeners(el) {
-    // User actions (input, unit change, swap) save history (default = true)
-    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el)); 
+    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
     const debouncedConversion = debounce(conversionCallback, 300);
 
     el.category.addEventListener("change", () => updateUnits(el));
@@ -119,6 +118,7 @@ function attachListeners(el) {
 /* --------------------- */
 /* HISTORY               */
 /* --------------------- */
+
 export async function refreshHistory(el) {
     const list = el.historyList;
     const history = await getHistory();
