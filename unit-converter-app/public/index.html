@@ -3,101 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConvertBuddy - Universal Unit Converter</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <style>
-        body { background-color: #e5f5e5; }
-        .app-container { max-width: 600px; margin: 50px auto; }
-        .conversion-box {
-            border: 2px solid #34D399;
-            border-radius: 12px;
-            padding: 1rem;
-            background-color: #F0FFF4;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .conversion-box input, .conversion-box select {
-            border: 1px solid #D1D5DB; 
-            box-shadow: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: white;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-        }
-        .conversion-box input:focus, .conversion-box select:focus {
-            border-color: #10B981; 
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-        }
-        #swap-button:active {
-            transform: rotate(180deg);
-            transition: transform 0.3s;
-        }
-    </style>
+    <title>Universal Unit Converter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="app-container p-6 bg-white rounded-xl shadow-2xl">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
 
-        <h1 class="text-3xl font-bold text-center text-emerald-600 mb-2">ConvertBuddy</h1>
-        <p class="text-center text-gray-500 mb-6">Your universal unit converter.</p>
+    <div class="w-full max-w-xl bg-white rounded-xl shadow p-6">
+        <h1 class="text-2xl font-bold text-center mb-4">Universal Unit Converter</h1>
 
-        <label for="category-select" class="block text-sm font-medium text-gray-700 mb-1">Conversion Category</label>
-        <div class="flex items-center mb-6 border rounded-lg overflow-hidden bg-gray-50">
-            <i class="fas fa-ruler-combined text-gray-400 p-3"></i>
-            <select id="category-select" class="flex-grow p-3 border-none focus:ring-0">
-                <!-- categories populated dynamically -->
+        <!-- Category selection with icon -->
+        <div class="flex items-center gap-2 mb-4">
+            <select id="category-select" class="flex-1 p-2 border rounded">
+                <!-- Populated by JS -->
+            </select>
+            <i class="fas fa-question text-xl text-gray-500"></i>
+        </div>
+
+        <!-- From unit input -->
+        <div class="flex items-center gap-2 mb-2">
+            <input type="number" id="from-value" placeholder="Enter value" class="flex-1 p-2 border rounded" />
+            <select id="from-unit" class="p-2 border rounded">
+                <!-- Populated by JS -->
             </select>
         </div>
 
-        <p id="loading-info" class="text-sm text-gray-500 text-center mb-4">Loading currencies...</p>
-
-        <!-- Conversion Form -->
-        <div id="conversion-form" class="relative flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-
-            <!-- FROM box -->
-            <div class="conversion-box flex-grow relative">
-                <label class="block text-lg font-semibold text-gray-800 mb-2">FROM</label>
-                <input id="from-value" type="number" step="any" value="1" placeholder="Enter value" class="w-full">
-                <select id="from-unit" class="w-full"></select>
-            </div>
-
-            <!-- Swap button -->
-            <button id="swap-button" 
-                class="absolute sm:relative -top-6 sm:top-0 w-12 h-12 flex items-center justify-center bg-emerald-500 text-white rounded-full shadow-xl hover:bg-emerald-600 transition duration-200 z-10">
-                <i class="fas fa-arrows-alt-h"></i>
+        <!-- Swap button -->
+        <div class="flex justify-center mb-2">
+            <button id="swap-button" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                <i class="fas fa-exchange-alt"></i> Swap
             </button>
-
-            <!-- TO box -->
-            <div class="conversion-box flex-grow relative">
-                <label class="block text-lg font-semibold text-gray-800 mb-2">TO (Result)</label>
-                <input id="to-value" type="text" readonly placeholder="Result" class="w-full bg-gray-100 text-gray-800 font-bold">
-                <select id="to-unit" class="w-full"></select>
-            </div>
-
         </div>
 
-        <div class="flex justify-between pt-6">
-            <a href="/privacy.html" class="text-sm text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
-            <button id="clear-history-button" class="text-sm text-red-500 hover:text-red-700">Clear History</button>
+        <!-- To unit output -->
+        <div class="flex items-center gap-2 mb-4">
+            <input type="text" id="to-value" readonly class="flex-1 p-2 border rounded bg-gray-100" />
+            <select id="to-unit" class="p-2 border rounded">
+                <!-- Populated by JS -->
+            </select>
         </div>
 
-        <hr class="my-6">
+        <!-- Loading info -->
+        <div id="loading-info" class="text-sm text-gray-500 mb-4 text-center"></div>
 
-        <h2 class="text-xl font-semibold text-gray-800 mb-3">Conversion History</h2>
-        <div id="history-list" class="space-y-3">
+        <!-- Clear history -->
+        <div class="flex justify-end mb-4">
+            <button id="clear-history-button" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                Clear History
+            </button>
+        </div>
+
+        <!-- History list -->
+        <div id="history-list" class="space-y-2 max-h-64 overflow-y-auto">
             <p class="text-sm text-gray-500">Your recent conversions will appear here.</p>
         </div>
     </div>
 
     <script type="module">
-        import { initApp, initializeElements } from './scripts/ui.js';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const elements = initializeElements();
-            initApp(elements);
-        });
+        import { initializeElements, initApp } from "./ui.js";
+
+        const elements = initializeElements();
+        initApp(elements);
     </script>
 </body>
 </html>
