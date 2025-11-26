@@ -1,68 +1,100 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Politique de Confidentialité – ConvertBuddy</title>
+    <title>Privacy Policy - ConvertBuddy</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(to bottom, #f0fdf4, #dcfce7); 
-            min-height: 100vh; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0fdf4; /* bg-emerald-50 */
         }
-        .policy-container {
-            background: white; 
-            border-radius: 1.5rem; 
-            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1); 
-        }
-        h1 { @apply text-4xl font-extrabold text-emerald-800 mb-6 border-b pb-3; }
-        h2 { @apply text-2xl font-bold text-teal-700 mt-8 mb-4; }
-        h3 { @apply text-xl font-semibold text-emerald-600 mt-6 mb-3; }
-        ul { @apply list-disc list-inside space-y-2 pl-4; }
-        p, li { @apply text-gray-700 leading-relaxed; }
-        a { @apply text-emerald-600 hover:text-emerald-800 font-medium; }
     </style>
 </head>
-<body class="flex justify-center p-6">
-    <div class="policy-container w-full max-w-4xl p-8 md:p-12">
-        <header class="text-center mb-10">
-            <h1 class="text-center">Politique de Confidentialité pour ConvertBuddy</h1>
-            <p class="text-gray-500 text-sm">Date d'entrée en vigueur : 26 Novembre 2025</p>
+<body class="bg-emerald-50 text-gray-800 p-4 sm:p-8">
+
+    <div class="max-w-3xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-2xl">
+        
+        <header class="mb-8 border-b pb-4 border-emerald-200">
+            <h1 class="text-4xl font-extrabold text-emerald-700 mb-2">
+                Privacy Policy
+            </h1>
+            <p class="text-gray-600">Last updated: November 26, 2025</p>
         </header>
 
-        <p>Cette Politique de Confidentialité décrit comment ConvertBuddy ("le Service," "nous," "notre") gère les informations lorsque vous utilisez notre site web/application de conversion d'unités.</p>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">1. Introduction</h2>
+            <p class="mb-4">
+                Welcome to ConvertBuddy ("we," "our," or "us"). We are committed to protecting your personal data and your right to privacy. This Privacy Policy explains what information we collect, how we use it, and what rights you have in relation to it.
+            </p>
+            <p>
+                This app is primarily a functional utility and does not aim to collect extensive personal data.
+            </p>
+        </section>
 
-        <h2>1. Collecte et Utilisation des Données</h2>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">2. Data We Collect</h2>
+            <ul class="list-disc list-inside space-y-3 pl-4">
+                <li>
+                    <strong class="font-semibold">Conversion History:</strong> We store your conversion inputs (value, units, category) and results in our database (Firestore) to provide a persistent "Conversion History" feature. This data is associated with a unique user ID.
+                </li>
+                <li>
+                    <strong class="font-semibold">Unique User ID:</strong> When you use ConvertBuddy, we automatically assign you a unique ID via Firebase Authentication (either an anonymous ID or a temporary custom ID). This ID is used exclusively to link your conversion history to your session. We do not link this ID to your real-world identity or other external accounts.
+                </li>
+                <li>
+                    <strong class="font-semibold">Usage Data:</strong> We may collect non-identifiable usage data to monitor the performance of the app, such as which unit categories are most popular.
+                </li>
+            </ul>
+        </section>
 
-        <h3>A. Données Personnelles</h3>
-        <p>Nous ne collectons, ne stockons et ne traitons aucune information d'identification personnelle (PII) concernant nos utilisateurs. Nous n'exigeons ni inscription ni connexion pour utiliser le Service.</p>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">3. How We Use Your Information</h2>
+            <p class="mb-4">
+                We use the information we collect to:
+            </p>
+            <ul class="list-disc list-inside space-y-3 pl-4">
+                <li>
+                    <strong class="font-semibold">Provide the Service:</strong> To perform unit and currency conversions and display your saved history.
+                </li>
+                <li>
+                    <strong class="font-semibold">Maintain Security:</strong> To ensure the database functions correctly and securely.
+                </li>
+                <li>
+                    <strong class="font-semibold">Improve the App:</strong> To understand usage patterns and enhance app features.
+                </li>
+            </ul>
+        </section>
 
-        <h3>B. Historique des Conversions (Stockage Local)</h3>
-        <ul>
-            <li><strong>Ce que nous stockons :</strong> Lorsque vous effectuez une conversion, l'enregistrement (la valeur d'entrée, les noms d'unités et le résultat) est stocké pour votre commodité.</li>
-            <li><strong>Où il est stocké :</strong> Ces données sont stockées **uniquement** dans le stockage local de votre navigateur (`localStorage`).</li>
-            <li><strong>Partage des Données :</strong> Ces données locales ne sont **jamais** transmises à nos serveurs ni partagées avec des tiers. Effacer le cache de votre navigateur ou utiliser un autre appareil supprimera l'accès à ces données.</li>
-        </ul>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">4. Data Storage and Security</h2>
+            <p class="mb-4">
+                Your data, primarily conversion history, is stored securely using Google's Firebase Firestore service. We implement appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure.
+            </p>
+        </section>
 
-        <h3>C. Partenaires Publicitaires (AdSense)</h3>
-        <ul>
-            <li>Nous utilisons Google AdSense pour diffuser des publicités sur notre Service.</li>
-            <li>AdSense utilise des cookies et des technologies similaires pour diffuser des annonces basées sur les visites précédentes d'un utilisateur sur ce site et d'autres sites (publicité personnalisée).</li>
-            <li>Dans l'Espace Économique Européen (EEE), au Royaume-Uni et en Suisse, nous utilisons une **Plateforme de Gestion du Consentement (CMP)** pour recueillir votre consentement concernant l'utilisation des cookies pour les annonces personnalisées. Vous avez le droit d'accepter ou de refuser la publicité personnalisée.</li>
-        </ul>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">5. Your Privacy Rights</h2>
+            <p class="mb-4">
+                You have the right to request access to the data we have stored for your unique user ID and the right to request that it be deleted. Since your user ID is only displayed in the application, please provide your current user ID (visible in the History section of the app) in any data request.
+            </p>
+        </section>
 
-        <h2>2. Modifications de Cette Politique</h2>
-        <p>Nous pouvons mettre à jour notre Politique de Confidentialité de temps à autre. Nous vous informerons de tout changement en publiant la nouvelle Politique de Confidentialité sur cette page.</p>
+        <section>
+            <h2 class="text-2xl font-bold text-emerald-600 mb-4">6. Contact Us</h2>
+            <p>
+                If you have questions or comments about this policy, please contact us through the platform where you are using this application.
+            </p>
+        </section>
 
-        <h2>3. Contactez-Nous</h2>
-        <p>Si vous avez des questions concernant cette Politique de Confidentialité, veuillez nous contacter.</p>
-        <!-- Replace 'YOUR_CONTACT_METHOD' with an actual email or contact form link -->
-        <p>Email: <a href="mailto:support@example.com">support@example.com</a></p>
-        
-        <div class="mt-12 text-center">
-            <a href="index.html" class="inline-block px-6 py-3 text-lg font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition duration-150">Retour à ConvertBuddy</a>
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <a href="/" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 transition-colors font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Converter
+            </a>
         </div>
     </div>
 </body>
