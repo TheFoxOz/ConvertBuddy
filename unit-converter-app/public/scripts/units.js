@@ -1,10 +1,17 @@
 // scripts/units.js
+
 export const conversionData = {
+    /* ------------------------- */
+    /* Currency (Dynamic API)   */
+    /* ------------------------- */
     Currency: {
         icon: "fas fa-dollar-sign",
-        units: {} // auto-filled dynamically
+        units: {} // Auto-filled dynamically by fetchCurrencyRates()
     },
 
+    /* ------------------------- */
+    /* Length                   */
+    /* ------------------------- */
     Length: {
         icon: "fas fa-ruler",
         units: {
@@ -12,6 +19,8 @@ export const conversionData = {
             Kilometer: { name: "Kilometer (km)", toBase: 1000 },
             Centimeter: { name: "Centimeter (cm)", toBase: 0.01 },
             Millimeter: { name: "Millimeter (mm)", toBase: 0.001 },
+            Micrometer: { name: "Micrometer (µm)", toBase: 1e-6 },
+            Nanometer: { name: "Nanometer (nm)", toBase: 1e-9 },
             Mile: { name: "Mile (mi)", toBase: 1609.34 },
             Yard: { name: "Yard (yd)", toBase: 0.9144 },
             Foot: { name: "Foot (ft)", toBase: 0.3048 },
@@ -19,6 +28,9 @@ export const conversionData = {
         }
     },
 
+    /* ------------------------- */
+    /* Weight / Mass            */
+    /* ------------------------- */
     Weight: {
         icon: "fas fa-weight-scale",
         units: {
@@ -28,19 +40,37 @@ export const conversionData = {
             Tonne: { name: "Tonne (t)", toBase: 1_000_000 },
             Pound: { name: "Pound (lb)", toBase: 453.592 },
             Ounce: { name: "Ounce (oz)", toBase: 28.3495 },
-            Stone: { name: "Stone (st)", toBase: 6350.29 } // already included
+            Stone: { name: "Stone (st)", toBase: 6350.29 }
         }
     },
 
+    /* ------------------------- */
+    /* Temperature              */
+    /* ------------------------- */
     Temperature: {
         icon: "fas fa-temperature-half",
         units: {
-            Celsius: { name: "Celsius (°C)", toBase: v => v, fromBase: v => v },
-            Fahrenheit: { name: "Fahrenheit (°F)", toBase: v => (v - 32) * 5/9, fromBase: v => v * 9/5 + 32 },
-            Kelvin: { name: "Kelvin (K)", toBase: v => v - 273.15, fromBase: v => v + 273.15 }
+            Celsius: {
+                name: "Celsius (°C)",
+                toBase: v => v,
+                fromBase: v => v
+            },
+            Fahrenheit: {
+                name: "Fahrenheit (°F)",
+                toBase: v => (v - 32) * (5 / 9),
+                fromBase: v => v * (9 / 5) + 32
+            },
+            Kelvin: {
+                name: "Kelvin (K)",
+                toBase: v => v - 273.15,
+                fromBase: v => v + 273.15
+            }
         }
     },
 
+    /* ------------------------- */
+    /* Volume                   */
+    /* ------------------------- */
     Volume: {
         icon: "fas fa-wine-bottle",
         units: {
@@ -49,12 +79,16 @@ export const conversionData = {
             CubicMeter: { name: "Cubic Meter (m³)", toBase: 1000 },
             Gallon: { name: "Gallon (gal)", toBase: 3.78541 },
             Quart: { name: "Quart (qt)", toBase: 0.946353 },
+            Pint: { name: "Pint (pt)", toBase: 0.473176 },
             Cup: { name: "Cup (cup)", toBase: 0.236588 },
             Tablespoon: { name: "Tablespoon (tbsp)", toBase: 0.0147868 },
             Teaspoon: { name: "Teaspoon (tsp)", toBase: 0.00492892 }
         }
     },
 
+    /* ------------------------- */
+    /* Area                     */
+    /* ------------------------- */
     Area: {
         icon: "fas fa-vector-square",
         units: {
@@ -62,31 +96,43 @@ export const conversionData = {
             SquareKilometer: { name: "Square Kilometer (km²)", toBase: 1_000_000 },
             SquareFoot: { name: "Square Foot (ft²)", toBase: 0.092903 },
             SquareInch: { name: "Square Inch (in²)", toBase: 0.00064516 },
+            SquareMile: { name: "Square Mile (mi²)", toBase: 2_589_988 },
             Hectare: { name: "Hectare (ha)", toBase: 10_000 },
-            Acre: { name: "Acre (acre)", toBase: 4046.86 }
+            Acre: { name: "Acre (ac)", toBase: 4046.86 }
         }
     },
 
+    /* ------------------------- */
+    /* Speed                    */
+    /* ------------------------- */
     Speed: {
         icon: "fas fa-tachometer-alt",
         units: {
             "Meter/Second": { name: "Meter/Second (m/s)", toBase: 1 },
             "Kilometer/Hour": { name: "Kilometer/Hour (km/h)", toBase: 0.277778 },
             "Mile/Hour": { name: "Mile/Hour (mph)", toBase: 0.44704 },
-            "Foot/Second": { name: "Foot/Second (ft/s)", toBase: 0.3048 }
+            "Foot/Second": { name: "Foot/Second (ft/s)", toBase: 0.3048 },
+            Knot: { name: "Knot (kn)", toBase: 0.514444 }
         }
     },
 
+    /* ------------------------- */
+    /* Time                     */
+    /* ------------------------- */
     Time: {
         icon: "fas fa-clock",
         units: {
             Second: { name: "Second (s)", toBase: 1 },
             Minute: { name: "Minute (min)", toBase: 60 },
             Hour: { name: "Hour (h)", toBase: 3600 },
-            Day: { name: "Day (d)", toBase: 86400 }
+            Day: { name: "Day (d)", toBase: 86400 },
+            Week: { name: "Week (wk)", toBase: 604800 }
         }
     },
 
+    /* ------------------------- */
+    /* Storage / Digital        */
+    /* ------------------------- */
     Storage: {
         icon: "fas fa-database",
         units: {
@@ -94,10 +140,14 @@ export const conversionData = {
             Kilobyte: { name: "Kilobyte (KB)", toBase: 1024 },
             Megabyte: { name: "Megabyte (MB)", toBase: 1024 ** 2 },
             Gigabyte: { name: "Gigabyte (GB)", toBase: 1024 ** 3 },
-            Terabyte: { name: "Terabyte (TB)", toBase: 1024 ** 4 }
+            Terabyte: { name: "Terabyte (TB)", toBase: 1024 ** 4 },
+            Petabyte: { name: "Petabyte (PB)", toBase: 1024 ** 5 }
         }
     },
 
+    /* ------------------------- */
+    /* Energy                   */
+    /* ------------------------- */
     Energy: {
         icon: "fas fa-bolt",
         units: {
@@ -105,13 +155,95 @@ export const conversionData = {
             Kilojoule: { name: "Kilojoule (kJ)", toBase: 1000 },
             Calorie: { name: "Calorie (cal)", toBase: 4.184 },
             Kilocalorie: { name: "Kilocalorie (kcal)", toBase: 4184 },
-            WattHour: { name: "WattHour (Wh)", toBase: 3600 },
-            KilowattHour: { name: "KilowattHour (kWh)", toBase: 3_600_000 }
+            WattHour: { name: "Watt Hour (Wh)", toBase: 3600 },
+            KilowattHour: { name: "Kilowatt Hour (kWh)", toBase: 3_600_000 }
+        }
+    },
+
+    /* ------------------------- */
+    /* Pressure                 */
+    /* ------------------------- */
+    Pressure: {
+        icon: "fas fa-compress-alt",
+        units: {
+            Pascal: { name: "Pascal (Pa)", toBase: 1 },
+            Kilopascal: { name: "Kilopascal (kPa)", toBase: 1000 },
+            Bar: { name: "Bar (bar)", toBase: 100000 },
+            PSI: { name: "Pound/psi", toBase: 6894.76 },
+            Atmosphere: { name: "Atmosphere (atm)", toBase: 101325 }
+        }
+    },
+
+    /* ------------------------- */
+    /* Frequency                */
+    /* ------------------------- */
+    Frequency: {
+        icon: "fas fa-wave-square",
+        units: {
+            Hertz: { name: "Hertz (Hz)", toBase: 1 },
+            Kilohertz: { name: "Kilohertz (kHz)", toBase: 1000 },
+            Megahertz: { name: "Megahertz (MHz)", toBase: 1_000_000 },
+            Gigahertz: { name: "Gigahertz (GHz)", toBase: 1_000_000_000 }
+        }
+    },
+
+    /* ------------------------- */
+    /* Angle                    */
+    /* ------------------------- */
+    Angle: {
+        icon: "fas fa-compass-drafting",
+        units: {
+            Degree: { name: "Degree (°)", toBase: 1 },
+            Radian: { name: "Radian (rad)", toBase: 57.2958 },
+            Gradian: { name: "Gradian (grad)", toBase: 0.9 }
+        }
+    },
+
+    /* ------------------------- */
+    /* Power                    */
+    /* ------------------------- */
+    Power: {
+        icon: "fas fa-plug",
+        units: {
+            Watt: { name: "Watt (W)", toBase: 1 },
+            Kilowatt: { name: "Kilowatt (kW)", toBase: 1000 },
+            Megawatt: { name: "Megawatt (MW)", toBase: 1_000_000 },
+            Horsepower: { name: "Horsepower (hp)", toBase: 745.7 }
+        }
+    },
+
+    /* ------------------------- */
+    /* Fuel Economy             */
+    /* ------------------------- */
+    FuelEconomy: {
+        icon: "fas fa-gas-pump",
+        units: {
+            "MPG(US)": { name: "Miles per Gallon (US)", toBase: 1 },
+            "MPG(UK)": { name: "Miles per Gallon (UK)", toBase: 1.20095 },
+            "L/100km": {
+                name: "Liters per 100km",
+                toBase: v => 235.214 / v,
+                fromBase: v => 235.214 / v
+            }
+        }
+    },
+
+    /* ------------------------- */
+    /* Force                    */
+    /* ------------------------- */
+    Force: {
+        icon: "fas fa-hand-fist",
+        units: {
+            Newton: { name: "Newton (N)", toBase: 1 },
+            Kilonewton: { name: "Kilonewton (kN)", toBase: 1000 },
+            PoundForce: { name: "Pound Force (lbf)", toBase: 4.44822 }
         }
     }
 };
 
-// fallback icons
+/* Default fallback icons */
 for (const cat in conversionData) {
-    if (!conversionData[cat].icon) conversionData[cat].icon = "fas fa-question";
+    if (!conversionData[cat].icon) {
+        conversionData[cat].icon = "fas fa-question";
+    }
 }
