@@ -1,53 +1,71 @@
-import { conversionData } from './units.js';
-import { convertValue, swapUnits } from './converter.js';
-import { fetchCurrencyRates } from './currency.js';
+import { conversionData } from "./units.js";
+import { convertValue, swapUnits } from "./converter.js";
+import { fetchCurrencyRates } from "./currency.js";
 
 export function initializeElements() {
-    const el = {};
-    el.categorySelect = document.getElementById('category-select');
-    el.categoryIcon = document.getElementById('category-icon');
-    el.fromValue = document.getElementById('from-value');
-    el.fromUnit = document.getElementById('from-unit');
-    el.toValue = document.getElementById('to-value');
-    el.toUnit = document.getElementById('to-unit');
-    el.swapButton = document.getElementById('swap-button');
-    el.currencyInfo = document.getElementById('currency-info');
-    el.loading = document.getElementById('loading-spinner');
-    return el;
+    return {
+        categorySelect: document.getElementById("category-select"),
+        categoryIcon: document.getElementById("category-icon"),
+        fromValue: document.getElementById("from-value"),
+        fromUnit: document.getElementById("from-unit"),
+        toValue: document.getElementById("to-value"),
+        toUnit: document.getElementById("to-unit"),
+        swapButton: document.getElementById("swap-button"),
+        currencyInfo: document.getElementById("currency-info"),
+        loading: document.getElementById("loading-spinner")
+    };
 }
 
 export function populateCategories(el) {
     const categories = Object.keys(conversionData);
-    el.categorySelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    el.categorySelect.innerHTML = categories
+        .map(c => `<option value="${c}">${c}</option>`)
+        .join("");
     return el.categorySelect.value;
 }
 
-export function populateUnits(el, currentCategory) {
-    const units = conversionData[currentCategory].units;
-    const options = Object.keys(units).map(name => `<option value="${name}">${name}${units[name].symbol ? ` (${units[name].symbol})` : ""}</option>`).join('');
-    el.fromUnit.innerHTML = options;
-    el.toUnit.innerHTML = options;
+export function populateUnits(el, category) {
+    const units = conversionData[category].units;
+    const opts = Object.keys(units).map(
+        name => `<option value="${name}">${name}${units[name].symbol ? ` (${units[name].symbol})` : ""}</option>`
+    );
+
+    el.fromUnit.innerHTML = opts.join("");
+    el.toUnit.innerHTML = opts.join("");
+
     el.fromUnit.value = Object.keys(units)[0];
     el.toUnit.value = Object.keys(units)[1] || Object.keys(units)[0];
 }
 
-export function setupEventListeners(el, currentCategory) {
-    el.categorySelect.addEventListener('change', () => {
-        currentCategory = el.categorySelect.value;
-        el.categoryIcon.innerHTML = `<i class="${conversionData[currentCategory].icon}"></i>`;
-        populateUnits(el, currentCategory);
-        convertValue(el, currentCategory);
+export function setupEventListeners(el, state) {
+
+    el.categorySelect.addEventListener("change", () => {
+        state.category = el.categorySelect.value;
+        el.categoryIcon.innerHTML = `<i class="${conversionData[state.category].icon}"></i>`;
+        populateUnits(el, state.category);
+        convertValue(el, state.category);
     });
-    el.fromValue.addEventListener('input', () => convertValue(el, currentCategory));
-    el.fromUnit.addEventListener('change', () => convertValue(el, currentCategory));
-    el.toUnit.addEventListener('change', () => convertValue(el, currentCategory));
-    el.swapButton.addEventListener('click', () => swapUnits(el, () => convertValue(el, currentCategory)));
+
+    el.fromValue.addEventListener("input", () => convertValue(el, state.category));
+    el.fromUnit.addEventListener("change", () => convertValue(el, state.category));
+    el.toUnit.addEventListener("change", () => convertValue(el, state.category));
+
+    el.swapButton.addEventListener("click", () =>
+        swapUnits(el, () => convertValue(el, state.category))
+    );
 }
 
 export async function initApp(el) {
-    let currentCategory = populateCategories(el);
-    populateUnits(el, currentCategory);
-    setupEventListeners(el, currentCategory);
-    await fetchCurrencyRates("b55c79e2ac77eeb4091f0253", "https://v6.exchangerate-api.com/v6/", el);
-    convertValue(el, currentCategory);
+    const state = { category: populateCategories(el) };
+
+    populateUnits(el, state.category);
+    setupEventListeners(el, state);
+
+    await fetchCurrencyRates(
+        "b55c79e2ac77eeb4091f0253",
+        "https://v6.exchangerate-api.com/v6/",
+        el
+    );
+
+    convertValue(el, state.category);
 }
