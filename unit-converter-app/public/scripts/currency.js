@@ -1,41 +1,40 @@
+// scripts/currency.js
 import { conversionData } from "./units.js";
 
-export const currencySymbols = {
-    USD: "$", EUR: "€", GBP: "£", JPY: "¥", CNY: "¥", INR: "₹",
-    KRW: "₩", CHF: "Fr", AUD: "$", CAD: "$", NZD: "$", RUB: "₽",
-    MXN: "$", SGD: "$", HKD: "$", BRL: "R$", IDR: "Rp", ZAR: "R"
-};
-
-export async function fetchCurrencyRates(API_KEY, BASE_URL, el) {
-    const STORAGE_KEY = "currencyRates";
-    el.loading.classList.remove("hidden");
-
-    let rates = {};
-    const cached = localStorage.getItem(STORAGE_KEY);
-
-    if (cached) {
-        try { rates = JSON.parse(cached); } catch {}
-    }
-
+/**
+ * Fetches the latest currency rates and populates conversionData.
+ * Includes a robust fallback mechanism.
+ */
+export async function fetchCurrencyRates() {
     try {
-        const res = await fetch(`${BASE_URL}${API_KEY}/latest/USD`);
-        const data = await res.json();
-
-        if (data.result === "success") {
-            rates = data.conversion_rates;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(rates));
-            el.currencyInfo.textContent = "Live rates";
+        // Using a reliable, free API for demonstration
+        const res = await fetch("https://api.exchangerate.host/latest?base=USD");
+        
+        if (!res.ok) {
+             throw new Error("API call failed with status: " + res.status);
         }
-    } catch {
-        el.currencyInfo.textContent = cached ? "Cached rates" : "No rates available";
+
+        const data = await res.json();
+        
+        // Map the rates object into the format required by conversionData
+        conversionData.Currency.units = Object.fromEntries(
+            Object.entries(data.rates).map(([code, rate]) => [
+                code,
+                // Note: Symbols are often difficult to get consistently, using code as name/symbol is safer
+                { name: code, toBase: rate, symbol: code } 
+            ])
+        );
+        console.log("Currency rates loaded successfully.");
+
+    } catch (e) {
+        console.warn("Currency API failed or fetching error:", e.message);
+        
+        // Fallback: Use static, hardcoded rates if API fails
+        conversionData.Currency.units = {
+            USD: { name: "US Dollar", toBase: 1, symbol: "$" },
+            EUR: { name: "Euro", toBase: 1.1, symbol: "€" },
+            GBP: { name: "British Pound", toBase: 1.3, symbol: "£" }
+        };
+        console.log("Using static currency fallback rates.");
     }
-
-    conversionData.Currency.units = Object.fromEntries(
-        Object.entries(rates).map(([code, rate]) => [
-            code,
-            { name: code, toBase: 1 / rate, symbol: currencySymbols[code] || code }
-        ])
-    );
-
-    el.loading.classList.add("hidden");
 }
