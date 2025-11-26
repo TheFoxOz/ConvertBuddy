@@ -64,11 +64,16 @@ export function initializeElements() {
 export async function initApp(el) {
     el.loadingInfo.textContent = "Loading live currency rates...";
 
-    // Fetch currency rates (Option A – exchangerate-api.com only)
-    await fetchCurrencyRates();
+    // OPTION A — Always fetch all currencies using ExchangeRate-API
+    const liveRates = await fetchCurrencyRates();
 
-    const currencyCount = Object.keys(conversionData.Currency.units).length;
-    el.loadingInfo.textContent = `Loaded ${currencyCount} currencies from live API.`;
+    // Replace the Currency.units dynamically
+    conversionData.Currency.units = {};
+    Object.keys(liveRates).forEach((code) => {
+        conversionData.Currency.units[code] = { name: `${code}`, rate: liveRates[code] };
+    });
+
+    el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies from exchangerate-api.com`;
 
     populateCategories(el);
     updateUnits(el);
@@ -121,14 +126,13 @@ function updateUnits(el) {
         el.toUnit.appendChild(opt2);
     });
 
-    // Default units for currency
+    // Default currency units
     if (category === "Currency") {
         el.fromUnit.value = "GBP";
         el.toUnit.value = "USD";
     } else {
         el.fromUnit.selectedIndex = 0;
-        el.toUnit.selectedIndex =
-            Object.keys(units).length > 1 ? 1 : 0;
+        el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
     convertValue(el, category, () => refreshHistory(el), false);
@@ -149,9 +153,11 @@ function attachListeners(el) {
     el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
+
     el.swapButton.addEventListener("click", () =>
         swapUnits(el, conversionCallback)
     );
+
     el.clearHistoryButton.addEventListener("click", () =>
         handleClearHistory(el)
     );
@@ -178,7 +184,7 @@ export async function refreshHistory(el) {
                 <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
             </div>
             <div class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} → 
+                ${entry.input} ${entry.fromUnit} →
                 <span class="font-semibold">${entry.output}</span>
             </div>
         `;
