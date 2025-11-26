@@ -21,6 +21,7 @@ function formatTime(timestamp) {
     if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
     return new Date(timestamp).toLocaleDateString();
 }
+
 /* --------------------- */
 /* ELEMENTS INIT         */
 /* --------------------- */
@@ -32,19 +33,28 @@ export function initializeElements() {
         fromUnit: document.getElementById("from-unit"),
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
-        historyList: document.getElementById("history-list")
+        historyList: document.getElementById("history-list"),
+        loadingInfo: document.getElementById("loading-info") // Added for status messages
     };
 }
+
 /* --------------------- */
 /* APP INIT              */
 /* --------------------- */
 export async function initApp(el) {
-    await fetchCurrencyRates(); // ensure currency units are loaded
+    el.loadingInfo.textContent = "Loading live currency rates...";
+
+    await fetchCurrencyRates(); // Ensure currency units are loaded
+
+    const currencyCount = Object.keys(conversionData.Currency.units).length;
+    el.loadingInfo.textContent = `Successfully loaded ${currencyCount} currency rates.`;
+
     populateCategories(el);
-    updateUnits(el); // sets default GBP -> USD for Currency and runs conversion
+    updateUnits(el); // sets default GBP -> USD for Currency
     attachListeners(el);
     refreshHistory(el);
 }
+
 /* --------------------- */
 /* CATEGORY + UNITS      */
 /* --------------------- */
@@ -90,14 +100,13 @@ function updateUnits(el) {
     // Run conversion but FIX: DO NOT save history on programmatic update (pass false)
     convertValue(el, category, () => refreshHistory(el), false); 
 }
+
 /* --------------------- */
 /* LISTENERS             */
 /* --------------------- */
 function attachListeners(el) {
-    // User actions (input, unit change) should save history (default = true)
+    // User actions (input, unit change, swap) save history (default = true)
     const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el)); 
-    // The swap button callback automatically passes true as well
-
     const debouncedConversion = debounce(conversionCallback, 300);
 
     el.category.addEventListener("change", () => updateUnits(el));
@@ -106,6 +115,7 @@ function attachListeners(el) {
     el.toUnit.addEventListener("change", conversionCallback);
     el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
 }
+
 /* --------------------- */
 /* HISTORY               */
 /* --------------------- */
