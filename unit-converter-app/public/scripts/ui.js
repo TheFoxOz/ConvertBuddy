@@ -3,10 +3,9 @@ import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.j
 import { conversionData } from "./units.js";
 import { fetchCurrencyRates } from "./currency.js";
 
-/* --------------------- */
-/* UTILS                 */
-/* --------------------- */
-
+// -----------------
+// Utils
+// -----------------
 function debounce(func, delay) {
     let timeoutId;
     return function (...args) {
@@ -24,23 +23,21 @@ function formatTime(timestamp) {
 }
 
 function handleClearHistory(el) {
-    if (confirm("Are you sure you want to clear your entire conversion history (local and cloud)?")) {
+    if (confirm("Are you sure you want to clear your conversion history?")) {
         firestoreClearHistory()
             .then(() => {
-                el.historyList.innerHTML =
-                    '<p class="text-sm text-gray-500">History cleared. Start converting!</p>';
+                el.historyList.innerHTML = '<p class="text-sm text-gray-500">History cleared.</p>';
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error("Error clearing history:", error);
-                alert("Could not clear history due to an error.");
+                alert("Could not clear history.");
             });
     }
 }
 
-/* --------------------- */
-/* ELEMENTS INIT         */
-/* --------------------- */
-
+// -----------------
+// Elements init
+// -----------------
 export function initializeElements() {
     return {
         category: document.getElementById("category-select"),
@@ -56,36 +53,31 @@ export function initializeElements() {
     };
 }
 
-/* --------------------- */
-/* APP INIT              */
-/* --------------------- */
-
+// -----------------
+// App init
+// -----------------
 export async function initApp(el) {
-    el.loadingInfo.textContent = "Loading live currency rates...";
-
-    // Try to load from API
+    el.loadingInfo.textContent = "Loading currency rates...";
     let liveRates = {};
+
     try {
         liveRates = await fetchCurrencyRates();
-        // Cache in localStorage for offline use
         localStorage.setItem("cachedCurrencyRates", JSON.stringify(liveRates));
-        el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies from exchangerate-api.com`;
+        el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies`;
     } catch (error) {
-        console.warn("Could not fetch live currency rates, using cached data if available.", error);
-
-        // Use cached rates if available
         const cached = localStorage.getItem("cachedCurrencyRates");
         if (cached) {
             liveRates = JSON.parse(cached);
             el.loadingInfo.textContent = `Using cached ${Object.keys(liveRates).length} currencies`;
         } else {
-            el.loadingInfo.textContent = `Currency rates unavailable. Offline conversion limited.`;
+            el.loadingInfo.textContent = `Currency rates unavailable`;
         }
     }
 
-    // Populate Currency.units only if we have rates
     if (liveRates && Object.keys(liveRates).length) {
-        conversionData.Currency.units = liveRates;
+        conversionData.Currency.units = Object.fromEntries(
+            Object.entries(liveRates).map(([k, v]) => [k, { name: k, toBase: v }])
+        );
     }
 
     populateCategories(el);
@@ -94,28 +86,24 @@ export async function initApp(el) {
     refreshHistory(el);
 }
 
-/* --------------------- */
-/* CATEGORY + UNITS      */
-/* --------------------- */
-
+// -----------------
+// Categories & Units
+// -----------------
 function populateCategories(el) {
     el.category.innerHTML = "";
-
-    Object.keys(conversionData).forEach((cat) => {
+    Object.keys(conversionData).forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
         option.textContent = cat;
         el.category.appendChild(option);
     });
-
     updateCategoryIcon(el);
 }
 
 function updateCategoryIcon(el) {
     if (!el.categoryIcon) return;
     const cat = el.category.value;
-    el.categoryIcon.className =
-        conversionData[cat]?.icon || "fas fa-question";
+    el.categoryIcon.className = conversionData[cat]?.icon || "fas fa-question";
 }
 
 function updateUnits(el) {
@@ -125,21 +113,15 @@ function updateUnits(el) {
     el.fromUnit.innerHTML = "";
     el.toUnit.innerHTML = "";
 
-    Object.keys(units).forEach((unitKey) => {
+    Object.keys(units).forEach(key => {
         const opt1 = document.createElement("option");
         const opt2 = document.createElement("option");
-
-        opt1.value = unitKey;
-        opt1.textContent = units[unitKey].name;
-
-        opt2.value = unitKey;
-        opt2.textContent = units[unitKey].name;
-
+        opt1.value = opt2.value = key;
+        opt1.textContent = opt2.textContent = units[key].name;
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
 
-    // Default currency units
     if (category === "Currency") {
         el.fromUnit.value = "GBP";
         el.toUnit.value = "USD";
@@ -152,61 +134,46 @@ function updateUnits(el) {
     updateCategoryIcon(el);
 }
 
-/* --------------------- */
-/* LISTENERS             */
-/* --------------------- */
-
+// -----------------
+// Listeners
+// -----------------
 function attachListeners(el) {
-    const conversionCallback = () =>
-        convertValue(el, el.category.value, () => refreshHistory(el));
-
+    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
     const debouncedConversion = debounce(conversionCallback, 300);
 
     el.category.addEventListener("change", () => updateUnits(el));
     el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
-
-    el.swapButton.addEventListener("click", () =>
-        swapUnits(el, conversionCallback)
-    );
-
-    el.clearHistoryButton.addEventListener("click", () =>
-        handleClearHistory(el)
-    );
+    el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
+    el.clearHistoryButton.addEventListener("click", () => handleClearHistory(el));
 }
 
-/* --------------------- */
-/* HISTORY               */
-/* --------------------- */
-
+// -----------------
+// History
+// -----------------
 export async function refreshHistory(el) {
-    const list = el.historyList;
     const history = await getHistory();
-
+    const list = el.historyList;
     list.innerHTML = "";
 
-    history.slice(0, 10).forEach((entry) => {
-        const item = document.createElement("div");
-        item.className =
-            "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
+    if (!history.length) {
+        list.innerHTML = '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
+        return;
+    }
 
+    history.slice(0, 10).forEach(entry => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
         item.innerHTML = `
             <div class="flex justify-between text-sm text-gray-700">
                 <span class="font-semibold text-emerald-700">${entry.category}</span>
                 <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
             </div>
             <div class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} →
-                <span class="font-semibold">${entry.output}</span>
+                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
             </div>
         `;
-
         list.appendChild(item);
     });
-
-    if (!history.length) {
-        list.innerHTML =
-            '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
-    }
 }
