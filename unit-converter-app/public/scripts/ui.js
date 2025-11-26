@@ -3,6 +3,64 @@ import { convertValue, swapUnits } from "./converter.js";
 import { getHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
 
+/**
+ * Utility function to debounce a function call.
+ * @param {function} func The function to debounce.
+ * @param {number} delay The delay in milliseconds.
+ * @returns {function} The debounced function.
+ */
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+}
+
+/**
+ * Utility function to format timestamp into human-readable time difference.
+ */
+function formatTime(timestamp) {
+    const diff = (Date.now() - timestamp) / 1000;
+
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
+
+    return new Date(timestamp).toLocaleDateString();
+}
+
+/**
+ * HISTORY UI: Fetches and displays the history list.
+ */
+export async function refreshHistory(el) {
+    const list = el.historyList;
+    const history = await getHistory(); // Fetches from Firestore with local fallback
+
+    list.innerHTML = "";
+
+    history.slice(0, 15).forEach(entry => {
+        const item = document.createElement("div");
+        item.className =
+            "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
+
+        item.innerHTML = `
+            <div class="flex justify-between text-sm text-gray-700">
+                <span class="font-semibold text-emerald-700">${entry.category}</span>
+                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
+            </div>
+
+            <div class="mt-1 text-gray-800">
+                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
+            </div>
+        `;
+
+        list.appendChild(item);
+    });
+}
+
 export function initializeElements() {
     return {
         category: document.getElementById("category-select"),
@@ -56,7 +114,8 @@ function updateUnits(el) {
         el.toUnit.appendChild(opt2);
     });
 
-    convertValue(el, category);
+    // Run initial conversion and refresh history
+    convertValue(el, category, () => refreshHistory(el)); 
 }
 
 /* --------------------- */
@@ -64,68 +123,27 @@ function updateUnits(el) {
 /* --------------------- */
 
 function attachListeners(el) {
+    // Standard callback for any UI interaction that triggers a conversion
+    const conversionCallback = () => {
+        // Passing refreshHistory as the onComplete callback to convertValue
+        convertValue(el, el.category.value, () => refreshHistory(el));
+    };
+
+    // Apply debounce (300ms) only to the quick-fire text input
+    const debouncedConversionCallback = debounce(conversionCallback, 300);
+
     el.category.addEventListener("change", () => {
         updateUnits(el);
-        refreshHistory(el);
     });
 
-    el.fromValue.addEventListener("input", () => {
-        convertValue(el, el.category.value);
-        refreshHistory(el);
-    });
+    // Use the debounced handler for value input
+    el.fromValue.addEventListener("input", debouncedConversionCallback);
 
-    el.fromUnit.addEventListener("change", () => {
-        convertValue(el, el.category.value);
-        refreshHistory(el);
-    });
-
-    el.toUnit.addEventListener("change", () => {
-        convertValue(el, el.category.value);
-        refreshHistory(el);
-    });
+    // Use the immediate handler for unit selections and swap button
+    el.fromUnit.addEventListener("change", conversionCallback);
+    el.toUnit.addEventListener("change", conversionCallback);
 
     el.swapButton.addEventListener("click", () => {
-        swapUnits(el, () => convertValue(el, el.category.value));
-        refreshHistory(el);
+        swapUnits(el, conversionCallback);
     });
-}
-
-/* --------------------- */
-/* HISTORY UI            */
-/* --------------------- */
-
-async function refreshHistory(el) {
-    const list = el.historyList;
-    const history = await getHistory();
-
-    list.innerHTML = "";
-
-    history.slice(0, 15).forEach(entry => {
-        const item = document.createElement("div");
-        item.className =
-            "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
-
-        item.innerHTML = `
-            <div class="flex justify-between text-sm text-gray-700">
-                <span class="font-semibold text-emerald-700">${entry.category}</span>
-                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
-            </div>
-
-            <div class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
-            </div>
-        `;
-
-        list.appendChild(item);
-    });
-}
-
-function formatTime(timestamp) {
-    const diff = (Date.now() - timestamp) / 1000;
-
-    if (diff < 60) return "just now";
-    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
-    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
-
-    return new Date(timestamp).toLocaleDateString();
 }
