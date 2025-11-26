@@ -1,46 +1,34 @@
 // scripts/ui.js
-import { convertValue, swapUnits } from
-"./converter.js";
-import { getHistory, clearHistory as firestoreClearHistory }
-from "./firestore.js";
-import { conversionData, updateCurrencyUnits } from
-"./units.js"; // IMPORTED updateCurrencyUnits
-import { fetchCurrencyRates } from
-"./currency.js";
-
+// FIX: The unnecessary import of 'convertValue' is removed.
+import { convert, swapUnits } from "./converter.js"; 
+// FIX: saveHistory is imported explicitly
+import { getHistory, clearHistory as firestoreClearHistory, saveHistory } from "./firestore.js"; 
+import { conversionData, updateCurrencyUnits } from "./units.js"; 
+import { fetchCurrencyRates } from "./currency.js";
+ 
 // -----------------
 // Utils
 // -----------------
 function debounce(func, delay) {
     let timeoutId;
-    return function
-(...args) {
+    return function (...args) {
         clearTimeout(timeoutId);
-        timeoutId =
-setTimeout(() => func.apply(this, args), delay);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
     };
 }
-
+ 
 function formatTime(timestamp) {
-    const diff =
-(Date.now() - timestamp) / 1000;
-    if (diff < 60)
-return "just now";
-    if (diff <
-3600) return Math.floor(diff / 60) + " min ago";
-    if (diff <
-86400) return Math.floor(diff / 3600) + " h ago";
-    return new
-Date(timestamp).toLocaleDateString();
+    const diff = (Date.now() - timestamp) / 1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
+    return new Date(timestamp).toLocaleDateString();
 }
-
+ 
 function handleClearHistory(el) {
-    if
-(confirm("Are you sure you want to clear your conversion history?"))
-{
+    if (confirm("Are you sure you want to clear your conversion history?")) {
         firestoreClearHistory()
-            .then(()
-=> {
+            .then(() => {
                 el.historyList.innerHTML = '<p class="text-sm text-gray-500">History cleared.</p>';
             })
             .catch(error => {
@@ -49,67 +37,51 @@ function handleClearHistory(el) {
             });
     }
 }
-
+ 
 // -----------------
 // Elements init
 // -----------------
 export function initializeElements() {
     return {
-        category:
-document.getElementById("category-select"),
-        fromValue:
-document.getElementById("from-value"),
-        toValue:
-document.getElementById("to-value"),
-        fromUnit:
-document.getElementById("from-unit"),
-        toUnit:
-document.getElementById("to-unit"),
-        swapButton:
-document.getElementById("swap-button"),
-        historyList:
-document.getElementById("history-list"),
-        loadingInfo:
-document.getElementById("loading-info"),
-        clearHistoryButton:
-document.getElementById("clear-history-button"),
-        categoryIcon:
-document.querySelector("#category-select + i")
+        category: document.getElementById("category-select"),
+        fromValue: document.getElementById("from-value"),
+        toValue: document.getElementById("to-value"),
+        fromUnit: document.getElementById("from-unit"),
+        toUnit: document.getElementById("to-unit"),
+        swapButton: document.getElementById("swap-button"),
+        historyList: document.getElementById("history-list"),
+        loadingInfo: document.getElementById("loading-info"),
+        clearHistoryButton: document.getElementById("clear-history-button"),
+        categoryIcon: document.querySelector("#category-select + i")
     };
 }
-
+ 
 // -----------------
 // App init
 // -----------------
 export async function initApp(el) {
     el.loadingInfo.textContent = "Loading currency rates...";
-    let liveRates =
-{};
-
+    let liveRates = {};
+ 
     try {
-        liveRates =
-await fetchCurrencyRates();
-        localStorage.setItem("cachedCurrencyRates",
-JSON.stringify(liveRates));
+        liveRates = await fetchCurrencyRates();
+        localStorage.setItem("cachedCurrencyRates", JSON.stringify(liveRates));
         el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies`;
     } catch (error) {
-        const cached =
-localStorage.getItem("cachedCurrencyRates");
+        const cached = localStorage.getItem("cachedCurrencyRates");
         if (cached) {
-            liveRates
-= JSON.parse(cached);
+            liveRates = JSON.parse(cached);
             el.loadingInfo.textContent = `Using cached ${Object.keys(liveRates).length} currencies`;
         } else {
             el.loadingInfo.textContent = `Currency rates unavailable`;
         }
     }
-
-    if (liveRates
-&& Object.keys(liveRates).length) {
+ 
+    if (liveRates && Object.keys(liveRates).length) {
         // CODE QUALITY IMPROVEMENT: Use the dedicated function from units.js
         updateCurrencyUnits(liveRates);
     }
-
+ 
     populateCategories(el);
     updateUnits(el);
     attachListeners(el);
@@ -118,132 +90,111 @@ localStorage.getItem("cachedCurrencyRates");
     // UX IMPROVEMENT: Focus on the input field when the app loads
     el.fromValue.focus(); 
 }
-
+ 
 // -----------------
 // Categories & Units
 // -----------------
 function populateCategories(el) {
     el.category.innerHTML = "";
     Object.keys(conversionData).forEach(cat => {
-        const option =
-document.createElement("option");
-        option.value =
-cat;
+        const option = document.createElement("option");
+        option.value = cat;
         option.textContent = cat;
         el.category.appendChild(option);
     });
     updateCategoryIcon(el);
 }
-
+ 
 function updateCategoryIcon(el) {
-    if
-(!el.categoryIcon) return;
-    const cat =
-el.category.value;
+    if (!el.categoryIcon) return;
+    const cat = el.category.value;
     el.categoryIcon.className = conversionData[cat]?.icon || "fas fa-question";
 }
-
+ 
 function updateUnits(el) {
-    const category =
-el.category.value;
-    const units =
-conversionData[category].units;
+    const category = el.category.value;
+    const units = conversionData[category].units;
 
     el.fromUnit.innerHTML = "";
     el.toUnit.innerHTML = "";
 
     Object.keys(units).forEach(key => {
-        const opt1 =
-document.createElement("option");
-        const opt2 =
-document.createElement("option");
-        opt1.value =
-opt2.value = key;
-        opt1.textContent = opt2.textContent = units[key].name;
+        const unitDetails = units[key];
+        // FIX: Display Name with Symbol in parenthesis
+        const displayText = `${unitDetails.name} (${unitDetails.symbol})`;
+        
+        const opt1 = document.createElement("option");
+        const opt2 = document.createElement("option");
+        opt1.value = opt2.value = key;
+        opt1.textContent = opt2.textContent = displayText;
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
-
-    if (category ===
-"Currency") {
+ 
+    if (category === "Currency") {
         el.fromUnit.value = "GBP";
         el.toUnit.value = "USD";
     } else {
         el.fromUnit.selectedIndex = 0;
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
-
-    convertValue(el, category, () =>
-refreshHistory(el), false);
+ 
+    // Pass the category value to convertValue
+    convertValue(el, category, () => refreshHistory(el), false);
     updateCategoryIcon(el);
 }
-
+ 
 // -----------------
 // Listeners
 // -----------------
 function attachListeners(el) {
-    const
-conversionCallback = () => convertValue(el, el.category.value, () =>
-refreshHistory(el));
-    const
-debouncedConversion = debounce(conversionCallback, 300);
-
-    el.category.addEventListener("change", () =>
-updateUnits(el));
+    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
+    const debouncedConversion = debounce(conversionCallback, 300);
+ 
+    el.category.addEventListener("change", () => updateUnits(el));
     el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
-    el.swapButton.addEventListener("click", () => swapUnits(el,
-conversionCallback));
-    el.clearHistoryButton.addEventListener("click", () =>
-handleClearHistory(el));
+    el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
+    el.clearHistoryButton.addEventListener("click", () => handleClearHistory(el));
 }
-
+ 
 // -----------------
 // History
 // -----------------
 export async function refreshHistory(el) {
-    const history =
-await getHistory();
-    const list =
-el.historyList;
-    list.innerHTML =
-"";
-
-    if
-(!history.length) {
-        list.innerHTML
-= '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
+    const history = await getHistory();
+    const list = el.historyList;
+    list.innerHTML = "";
+ 
+    if (!history.length) {
+        list.innerHTML = '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
         return;
     }
-
-    history.slice(0,
-10).forEach(entry => {
-        const item =
-document.createElement("div");
-        item.className
-= "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
-        item.innerHTML
-= `
-            <div
-class="flex justify-between text-sm text-gray-700">
-                <span class="font-semibold
-text-emerald-700">${entry.category}</span>
-                <span
-class="text-gray-500">${formatTime(entry.timestamp)}</span>
+ 
+    history.slice(0, 10).forEach(entry => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
+        // IMPROVEMENT: Look up the symbol for better history readability
+        const fromSymbol = conversionData[entry.category]?.units[entry.fromUnit]?.symbol || entry.fromUnit;
+        const toSymbol = conversionData[entry.category]?.units[entry.toUnit]?.symbol || entry.toUnit;
+        
+        item.innerHTML = `
+            <div class="flex justify-between text-sm text-gray-700">
+                <span class="font-semibold text-emerald-700">${entry.category}</span>
+                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
             </div>
-            <div
-class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} → <span
-class="font-semibold">${entry.output}</span>
+            <div class="mt-1 text-gray-800">
+                ${entry.input} ${fromSymbol} → <span class="font-semibold">${entry.output} ${toSymbol}</span>
             </div>
         `;
         list.appendChild(item);
     });
 }
-
-
-// -----------------
+ 
+ 
+//
+-----------------
 // MODIFIED convertValue function
 // -----------------
 /**
@@ -258,6 +209,7 @@ export async function convertValue(el, category, callback, saveHistory = true) {
         }
 
         const input = Number(el.fromValue.value);
+        // Using the imported 'convert' function
         const output = convert(category, el.fromUnit.value, el.toUnit.value, input);
 
         // Check if the core convert function returned NaN (invalid input/conversion error)
@@ -269,9 +221,8 @@ export async function convertValue(el, category, callback, saveHistory = true) {
         el.toValue.value = output;
 
         if (saveHistory) {
-            const { saveHistory: save } = await import("./firestore.js");
-            // CODE QUALITY IMPROVEMENT: Do not await history saving to avoid blocking UI/UX.
-            save({
+            // CODE QUALITY IMPROVEMENT: saveHistory is imported directly and un-awaited.
+            saveHistory({
                 category,
                 input,
                 fromUnit: el.fromUnit.value,
