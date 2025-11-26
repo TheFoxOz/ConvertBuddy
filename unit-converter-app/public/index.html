@@ -14,7 +14,6 @@
 
 <!-- Manifest -->
 <link rel="manifest" href="/manifest.json">
-
 <meta name="theme-color" content="#10b981">
 </head>
 
@@ -89,7 +88,30 @@
         }
     </script>
 
-    <!-- Corrected Import Path -->
+    <!-- Firebase + Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import { initFirestore } from "./scripts/firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzVq-WhSd4w5oYp3S0LgJm4u2qxLqf-9Q",
+            authDomain: "covertbuddy-c8b99.firebaseapp.com",
+            projectId: "covertbuddy-c8b99",
+            storageBucket: "covertbuddy-c8b99.firebasestorage.app",
+            messagingSenderId: "826662486676",
+            appId: "1:826662486676:web:988294692da3836d73aa81",
+            measurementId: "G-1GXL1GWBL5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firestore available globally
+        initFirestore(db);
+    </script>
+
+    <!-- Main App -->
     <script type="module">
         import { initializeElements, initApp } from "./scripts/ui.js";
 
