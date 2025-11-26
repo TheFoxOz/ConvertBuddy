@@ -115,6 +115,9 @@ localStorage.getItem("cachedCurrencyRates");
     updateUnits(el);
     attachListeners(el);
     refreshHistory(el);
+    
+    // UX IMPROVEMENT: Focus on the input field when the app loads
+    el.fromValue.focus(); 
 }
 
 // -----------------
@@ -257,8 +260,7 @@ export async function convertValue(el, category, callback, saveHistory = true) {
         const input = Number(el.fromValue.value);
         const output = convert(category, el.fromUnit.value, el.toUnit.value, input);
 
-        // ADDED CHECK: If the core convert function returns NaN (due to internal error or bad input),
-        // display "---" and stop processing.
+        // Check if the core convert function returned NaN (invalid input/conversion error)
         if (isNaN(output)) {
             el.toValue.value = "---";
             return;
@@ -268,13 +270,16 @@ export async function convertValue(el, category, callback, saveHistory = true) {
 
         if (saveHistory) {
             const { saveHistory: save } = await import("./firestore.js");
-            await save({
+            // CODE QUALITY IMPROVEMENT: Do not await history saving to avoid blocking UI/UX.
+            save({
                 category,
                 input,
                 fromUnit: el.fromUnit.value,
                 output,
                 toUnit: el.toUnit.value,
                 timestamp: Date.now()
+            }).catch(error => {
+                console.warn("Background history save failed:", error);
             });
         }
 
