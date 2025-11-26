@@ -1,9 +1,6 @@
 {
   "rewrites": [
-    {
-      "source": "/((?!sw.js|icons|manifest.json|privacy.html|.*\\.png|.*\\.js|.*\\.css).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
@@ -15,13 +12,5 @@
         }
       ]
     }
-  ],
-  "build": {
-    "env": {
-      "VERCEL_PROJECT_ID": "unit-converter-app"
-    }
-  },
-  "installCommand": "echo 'No install needed for static project'",
-  "buildCommand": "echo 'No build command needed for static project'",
-  "outputDirectory": "."
+  ]
 }
