@@ -2,64 +2,7 @@
 import { convertValue, swapUnits } from "./converter.js";
 import { getHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
-
-/**
- * Utility function to debounce a function call.
- * @param {function} func The function to debounce.
- * @param {number} delay The delay in milliseconds.
- * @returns {function} The debounced function.
- */
-function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
-    };
-}
-
-/**
- * Utility function to format timestamp into human-readable time difference.
- */
-function formatTime(timestamp) {
-    const diff = (Date.now() - timestamp) / 1000;
-
-    if (diff < 60) return "just now";
-    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
-    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
-
-    return new Date(timestamp).toLocaleDateString();
-}
-
-/**
- * HISTORY UI: Fetches and displays the history list.
- */
-export async function refreshHistory(el) {
-    const list = el.historyList;
-    const history = await getHistory(); // Fetches from Firestore with local fallback
-
-    list.innerHTML = "";
-
-    history.slice(0, 15).forEach(entry => {
-        const item = document.createElement("div");
-        item.className =
-            "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
-
-        item.innerHTML = `
-            <div class="flex justify-between text-sm text-gray-700">
-                <span class="font-semibold text-emerald-700">${entry.category}</span>
-                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
-            </div>
-
-            <div class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
-            </div>
-        `;
-
-        list.appendChild(item);
-    });
-}
+import { fetchCurrencyRates } from "./currency.js"; // Make sure currency.js exports this
 
 export function initializeElements() {
     return {
@@ -73,7 +16,10 @@ export function initializeElements() {
     };
 }
 
-export function initApp(el) {
+export async function initApp(el) {
+    // Ensure currency rates are fetched before populating dropdowns
+    await fetchCurrencyRates(el); // Pass 'el' for loading state/info updates
+
     populateCategories(el);
     updateUnits(el);
     attachListeners(el);
@@ -114,8 +60,8 @@ function updateUnits(el) {
         el.toUnit.appendChild(opt2);
     });
 
-    // Run initial conversion and refresh history
-    convertValue(el, category, () => refreshHistory(el)); 
+    // Run initial conversion safely
+    convertValue(el, category, () => refreshHistory(el));
 }
 
 /* --------------------- */
@@ -123,27 +69,55 @@ function updateUnits(el) {
 /* --------------------- */
 
 function attachListeners(el) {
-    // Standard callback for any UI interaction that triggers a conversion
-    const conversionCallback = () => {
-        // Passing refreshHistory as the onComplete callback to convertValue
-        convertValue(el, el.category.value, () => refreshHistory(el));
-    };
+    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
 
-    // Apply debounce (300ms) only to the quick-fire text input
-    const debouncedConversionCallback = debounce(conversionCallback, 300);
+    // Debounce text input to prevent excessive conversions
+    const debouncedConversion = debounce(conversionCallback, 300);
 
-    el.category.addEventListener("change", () => {
-        updateUnits(el);
-    });
-
-    // Use the debounced handler for value input
-    el.fromValue.addEventListener("input", debouncedConversionCallback);
-
-    // Use the immediate handler for unit selections and swap button
+    el.category.addEventListener("change", () => updateUnits(el));
+    el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
+    el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
+}
 
-    el.swapButton.addEventListener("click", () => {
-        swapUnits(el, conversionCallback);
+/* --------------------- */
+/* UTILS                 */
+/* --------------------- */
+
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function formatTime(timestamp) {
+    const diff = (Date.now() - timestamp) / 1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
+    return new Date(timestamp).toLocaleDateString();
+}
+
+export async function refreshHistory(el) {
+    const list = el.historyList;
+    const history = await getHistory();
+
+    list.innerHTML = "";
+    history.slice(0, 15).forEach(entry => {
+        const item = document.createElement("div");
+        item.className = "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
+        item.innerHTML = `
+            <div class="flex justify-between text-sm text-gray-700">
+                <span class="font-semibold text-emerald-700">${entry.category}</span>
+                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
+            </div>
+            <div class="mt-1 text-gray-800">
+                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
+            </div>
+        `;
+        list.appendChild(item);
     });
 }
