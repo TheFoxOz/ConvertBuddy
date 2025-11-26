@@ -1,6 +1,7 @@
 // scripts/ui.js
 import { convertValue, swapUnits } from "./converter.js";
-import { getHistory } from "./firestore.js";
+// FIX: Import clearHistory as well, and rename to avoid conflict if needed
+import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.js"; 
 import { conversionData } from "./units.js";
 import { fetchCurrencyRates } from "./currency.js";
 
@@ -24,6 +25,20 @@ function formatTime(timestamp) {
     return new Date(timestamp).toLocaleDateString();
 }
 
+// NEW: Handler for the Clear History button
+function handleClearHistory(el) {
+    if (confirm("Are you sure you want to clear your entire conversion history (local and cloud)?")) {
+        // Use the imported function
+        firestoreClearHistory().then(() => {
+            el.historyList.innerHTML = '<p class="text-sm text-gray-500">History cleared. Start converting!</p>';
+            console.log("History cleared from all sources.");
+        }).catch(error => {
+            console.error("Error clearing history:", error);
+            alert("Could not clear history due to an error.");
+        });
+    }
+}
+
 /* --------------------- */
 /* ELEMENTS INIT         */
 /* --------------------- */
@@ -36,7 +51,10 @@ export function initializeElements() {
         fromUnit: document.getElementById("from-unit"),
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
-        historyList: document.getElementById("history-list")
+        historyList: document.getElementById("history-list"),
+        // FIX: Add loading-info and clear-history-button
+        loadingInfo: document.getElementById("loading-info"),
+        clearHistoryButton: document.getElementById("clear-history-button") 
     };
 }
 
@@ -45,9 +63,17 @@ export function initializeElements() {
 /* --------------------- */
 
 export async function initApp(el) {
-    await fetchCurrencyRates(); // ensure currency units are loaded
+    // FIX: Set initial loading status
+    el.loadingInfo.textContent = "Loading live currency rates...";
+
+    await fetchCurrencyRates(); 
+    
+    // FIX: Set final status and count
+    const currencyCount = Object.keys(conversionData.Currency.units).length;
+    el.loadingInfo.textContent = `Successfully loaded ${currencyCount} currency rates.`;
+
     populateCategories(el);
-    updateUnits(el); // sets default GBP -> USD for Currency
+    updateUnits(el);
     attachListeners(el);
     refreshHistory(el);
 }
@@ -57,7 +83,7 @@ export async function initApp(el) {
 /* --------------------- */
 
 function populateCategories(el) {
-    el.category.innerHTML = ""; // clear duplicates
+    el.category.innerHTML = "";
     Object.keys(conversionData).forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
@@ -96,7 +122,7 @@ function updateUnits(el) {
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
-    // Run conversion but DO NOT save history on init
+    // Run conversion but DO NOT save history on init/category switch
     convertValue(el, category, () => refreshHistory(el), false);
 }
 
@@ -113,6 +139,9 @@ function attachListeners(el) {
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
     el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
+    
+    // NEW: Attach listener for clear history button
+    el.clearHistoryButton.addEventListener("click", () => handleClearHistory(el));
 }
 
 /* --------------------- */
@@ -124,7 +153,8 @@ export async function refreshHistory(el) {
     const history = await getHistory();
 
     list.innerHTML = "";
-    history.slice(0, 15).forEach(entry => {
+    // FIX: Limit history to 10 entries as requested
+    history.slice(0, 10).forEach(entry => { 
         const item = document.createElement("div");
         item.className = "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
         item.innerHTML = `
@@ -138,4 +168,9 @@ export async function refreshHistory(el) {
         `;
         list.appendChild(item);
     });
+    
+    // Hide history list if empty
+    if (history.length === 0) {
+        list.innerHTML = '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
+    }
 }
