@@ -1,6 +1,5 @@
 // scripts/currency.js
 import { conversionData } from "./units.js";
-
 /**
  * Fetches currency rates and populates conversionData.Currency.units
  * Provides full list from API and fallback if API fails.
@@ -12,6 +11,7 @@ export async function fetchCurrencyRates() {
 
         const data = await res.json();
 
+        // FIX: The full list is assigned here
         conversionData.Currency.units = Object.fromEntries(
             Object.entries(data.rates).map(([code, rate]) => [
                 code,
@@ -23,6 +23,7 @@ export async function fetchCurrencyRates() {
     } catch (e) {
         console.warn("Currency API failed, using fallback:", e.message);
 
+        // Fallback remains the small set
         conversionData.Currency.units = {
             USD: { name: "US Dollar", toBase: 1, symbol: "$" },
             EUR: { name: "Euro", toBase: 1.1, symbol: "€" },
