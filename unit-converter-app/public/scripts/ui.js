@@ -1,4 +1,3 @@
-// scripts/ui.js
 import { convertValue, swapUnits } from "./converter.js";
 import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
@@ -64,16 +63,30 @@ export function initializeElements() {
 export async function initApp(el) {
     el.loadingInfo.textContent = "Loading live currency rates...";
 
-    // OPTION A — Always fetch all currencies using ExchangeRate-API
-    const liveRates = await fetchCurrencyRates();
+    // Try to load from API
+    let liveRates = {};
+    try {
+        liveRates = await fetchCurrencyRates();
+        // Cache in localStorage for offline use
+        localStorage.setItem("cachedCurrencyRates", JSON.stringify(liveRates));
+        el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies from exchangerate-api.com`;
+    } catch (error) {
+        console.warn("Could not fetch live currency rates, using cached data if available.", error);
 
-    // Replace the Currency.units dynamically
-    conversionData.Currency.units = {};
-    Object.keys(liveRates).forEach((code) => {
-        conversionData.Currency.units[code] = { name: `${code}`, rate: liveRates[code] };
-    });
+        // Use cached rates if available
+        const cached = localStorage.getItem("cachedCurrencyRates");
+        if (cached) {
+            liveRates = JSON.parse(cached);
+            el.loadingInfo.textContent = `Using cached ${Object.keys(liveRates).length} currencies`;
+        } else {
+            el.loadingInfo.textContent = `Currency rates unavailable. Offline conversion limited.`;
+        }
+    }
 
-    el.loadingInfo.textContent = `Loaded ${Object.keys(liveRates).length} currencies from exchangerate-api.com`;
+    // Populate Currency.units only if we have rates
+    if (liveRates && Object.keys(liveRates).length) {
+        conversionData.Currency.units = liveRates;
+    }
 
     populateCategories(el);
     updateUnits(el);
