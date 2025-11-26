@@ -1,13 +1,8 @@
 // scripts/ui.js
 import { convertValue, swapUnits } from "./converter.js";
-// FIX: Import clearHistory as well, and rename to avoid conflict if needed
 import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.js"; 
 import { conversionData } from "./units.js";
 import { fetchCurrencyRates } from "./currency.js";
-
-/* --------------------- */
-/* UTILS                 */
-/* --------------------- */
 
 function debounce(func, delay) {
     let timeoutId;
@@ -25,23 +20,16 @@ function formatTime(timestamp) {
     return new Date(timestamp).toLocaleDateString();
 }
 
-// NEW: Handler for the Clear History button
 function handleClearHistory(el) {
     if (confirm("Are you sure you want to clear your entire conversion history (local and cloud)?")) {
-        // Use the imported function
         firestoreClearHistory().then(() => {
             el.historyList.innerHTML = '<p class="text-sm text-gray-500">History cleared. Start converting!</p>';
-            console.log("History cleared from all sources.");
         }).catch(error => {
             console.error("Error clearing history:", error);
             alert("Could not clear history due to an error.");
         });
     }
 }
-
-/* --------------------- */
-/* ELEMENTS INIT         */
-/* --------------------- */
 
 export function initializeElements() {
     return {
@@ -52,35 +40,23 @@ export function initializeElements() {
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
         historyList: document.getElementById("history-list"),
-        // FIX: Add loading-info and clear-history-button
         loadingInfo: document.getElementById("loading-info"),
-        clearHistoryButton: document.getElementById("clear-history-button") 
+        clearHistoryButton: document.getElementById("clear-history-button")
     };
 }
 
-/* --------------------- */
-/* APP INIT              */
-/* --------------------- */
-
 export async function initApp(el) {
-    // FIX: Set initial loading status
     el.loadingInfo.textContent = "Loading live currency rates...";
-
-    await fetchCurrencyRates(); 
-    
-    // FIX: Set final status and count
+    await fetchCurrencyRates();
     const currencyCount = Object.keys(conversionData.Currency.units).length;
     el.loadingInfo.textContent = `Successfully loaded ${currencyCount} currency rates.`;
 
     populateCategories(el);
     updateUnits(el);
+    updateCategoryIcon(el);
     attachListeners(el);
     refreshHistory(el);
 }
-
-/* --------------------- */
-/* CATEGORY + UNITS      */
-/* --------------------- */
 
 function populateCategories(el) {
     el.category.innerHTML = "";
@@ -103,57 +79,44 @@ function updateUnits(el) {
         const opt1 = document.createElement("option");
         const opt2 = document.createElement("option");
 
-        opt1.value = u;
-        opt1.textContent = units[u].name;
-
-        opt2.value = u;
-        opt2.textContent = units[u].name;
+        opt1.value = u; opt1.textContent = units[u].name;
+        opt2.value = u; opt2.textContent = units[u].name;
 
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
 
-    // Set default units
     if (category === 'Currency') {
-        el.fromUnit.value = 'GBP';
-        el.toUnit.value = 'USD';
+        const keys = Object.keys(units);
+        el.fromUnit.value = keys.includes('GBP') ? 'GBP' : keys[0];
+        el.toUnit.value = keys.includes('USD') ? 'USD' : keys[1] || keys[0];
     } else {
         el.fromUnit.selectedIndex = 0;
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
-    // Run conversion but DO NOT save history on init/category switch
     convertValue(el, category, () => refreshHistory(el), false);
 }
-
-/* --------------------- */
-/* LISTENERS             */
-/* --------------------- */
 
 function attachListeners(el) {
     const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
     const debouncedConversion = debounce(conversionCallback, 300);
 
-    el.category.addEventListener("change", () => updateUnits(el));
+    el.category.addEventListener("change", () => {
+        updateUnits(el);
+        updateCategoryIcon(el);
+    });
     el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
     el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
-    
-    // NEW: Attach listener for clear history button
     el.clearHistoryButton.addEventListener("click", () => handleClearHistory(el));
 }
-
-/* --------------------- */
-/* HISTORY               */
-/* --------------------- */
 
 export async function refreshHistory(el) {
     const list = el.historyList;
     const history = await getHistory();
-
     list.innerHTML = "";
-    // FIX: Limit history to 10 entries as requested
     history.slice(0, 10).forEach(entry => { 
         const item = document.createElement("div");
         item.className = "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
@@ -168,9 +131,14 @@ export async function refreshHistory(el) {
         `;
         list.appendChild(item);
     });
-    
-    // Hide history list if empty
     if (history.length === 0) {
         list.innerHTML = '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
     }
+}
+
+function updateCategoryIcon(el) {
+    const iconEl = el.category.previousElementSibling;
+    const category = el.category.value;
+    const iconClass = conversionData[category].icon || 'fas fa-question';
+    iconEl.className = iconClass + ' text-gray-400 p-3';
 }
