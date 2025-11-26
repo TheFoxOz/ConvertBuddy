@@ -3,7 +3,8 @@ import { convertValue, swapUnits } from
 "./converter.js";
 import { getHistory, clearHistory as firestoreClearHistory }
 from "./firestore.js";
-import { conversionData } from "./units.js";
+import { conversionData, updateCurrencyUnits } from
+"./units.js"; // IMPORTED updateCurrencyUnits
 import { fetchCurrencyRates } from
 "./currency.js";
 
@@ -105,10 +106,8 @@ localStorage.getItem("cachedCurrencyRates");
 
     if (liveRates
 && Object.keys(liveRates).length) {
-        conversionData.Currency.units = Object.fromEntries(
-            Object.entries(liveRates).map(([k, v]) => [k, { name: k, toBase: v
-}])
-        );
+        // CODE QUALITY IMPROVEMENT: Use the dedicated function from units.js
+        updateCurrencyUnits(liveRates);
     }
 
     populateCategories(el);
@@ -252,7 +251,8 @@ class="font-semibold">${entry.output}</span>
  */
 export async function convertValue(el, category, callback, saveHistory = true) {
     try {
-        if (!el.fromValue.value || isNaN(Number(el.fromValue.value))) {
+        // If the input is empty (handled here) or invalid (handled by convert), show "---"
+        if (!el.fromValue.value) {
             el.toValue.value = "---";
             return;
         }
