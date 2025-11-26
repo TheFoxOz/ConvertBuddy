@@ -3,624 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unit & Currency Converter (Optimized)</title>
-    <!-- 🧹 BUNDLE SIZE REDUCTION NOTE: In production, we'd replace this CDN link 
-         with a locally built, minified tailwind.css file as suggested. -->
+    <title>ConvertBuddy Universal Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Global Font */
-        :root { font-family: 'Inter', sans-serif; }
+        /* Custom Tailwind Configuration and Styles to Match ConvertBuddy Aesthetic */
+        :root {
+            /* Define a custom primary color based on the design (a friendly teal/green) */
+            --color-primary-green: #10b981; /* Emerald-500/600 equivalent */
+            --color-bg-mint: #f0fff0;
+            --color-text-green: #059669; /* Darker green for text */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg-mint);
+        }
+        .card {
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1), 0 0 20px -5px rgba(0, 0, 0, 0.05);
+        }
+        select, input[type="number"], input[type="text"] {
+            /* Reset browser styles */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-color: #d1d5db; /* Default light gray border */
+        }
+        
+        /* Style for the focus state using the primary green */
+        .input-focus-green:focus {
+            outline: none;
+            border-color: var(--color-primary-green) !important;
+            box-shadow: 0 0 0 1px var(--color-primary-green) !important;
+            z-index: 10; /* Ensure focus ring is on top of neighbors */
+        }
+        
+        /* FIX: Remove border-left on the unit selects to eliminate double borders */
+        .unit-select {
+            border-left-width: 0 !important;
+        }
 
-        /* Custom Scrollbar Fix for iOS (Layout Fix 9) */
-        #history-area {
-            -webkit-overflow-scrolling: touch;
-        }
-        @supports (-webkit-touch-callout: none) {
-            #history-area::-webkit-scrollbar {
-                display: none;
-            }
-        }
-
-        /* Layout Fix 8: Prevent result box from collapsing on long numbers */
-        #result-display {
-            overflow-wrap: anywhere;
-        }
-
-        /* Custom Styles for aesthetic touch */
-        .icon-button {
-            transition: all 0.15s ease-in-out;
-        }
-        .icon-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        /* Styling the highlighted result field */
+        #to-value-wrapper {
+            background-color: #ecfdf5; /* Light green background for result */
+            border-color: var(--color-primary-green);
+            border-width: 1px;
+            box-shadow: 0 1px 3px 0 rgba(16, 185, 129, 0.2); /* Subtle green shadow */
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-start justify-center p-4 sm:p-8">
+<body class="p-4 flex flex-col items-center justify-center min-h-screen">
 
-    <div class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="text-center mb-6">
+        <h1 class="text-4xl font-extrabold" style="color: var(--color-text-green);">
+            ConvertBuddy
+        </h1>
+        <p class="text-gray-600 mt-2 text-sm max-w-sm">
+            Your friendly unit converter with 10 categories, including <span class="font-bold">Live Currencies</span>.
+        </p>
+    </div>
+
+    <div id="app" class="w-full max-w-lg card bg-white p-6 md:p-8 rounded-xl">
         
-        <!-- Main Converter Area -->
-        <div class="lg:col-span-2 bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
-            <h1 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-                Universal Converter
-            </h1>
-
-            <!-- Category Selector (BUG FIX 2: Icon Spacing via pl-12) -->
-            <div class="mb-6">
-                <label for="category-select" class="block text-sm font-medium text-gray-700 mb-2">Select Category</label>
-                <div class="relative">
-                    <span id="category-icon" class="absolute left-3 top-1/2 -translate-y-1/2 text-2xl text-blue-500 pointer-events-none transition-transform duration-300 ease-out">
-                        <!-- Initial Icon Placeholder -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </span>
-                    <select id="category-select" class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-base">
+        <!-- Category Selector -->
+        <div id="category-wrapper" class="w-full relative flex items-center mb-6 rounded-lg border input-focus-green" style="border-color: var(--color-primary-green);">
+            <!-- Dynamic Icon (FIX: Retains correct spacing) -->
+            <span id="category-icon" class="absolute left-3 text-2xl pr-2 flex items-center" style="color: var(--color-primary-green);">
+                <i class="fas fa-money-bill-wave"></i>
+            </span>
+            <select id="category-select" class="block w-full py-3 pl-12 pr-4 text-lg text-gray-700 bg-transparent rounded-lg cursor-pointer transition duration-150 ease-in-out">
+                <!-- Options populated by JS -->
+            </select>
+            <!-- Dropdown Arrow Icon -->
+            <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                <i class="fas fa-chevron-down text-sm"></i>
+            </div>
+        </div>
+        
+        <!-- Input Fields Container -->
+        <div class="space-y-4">
+            <!-- FROM Input Group -->
+            <div class="flex flex-col space-y-2">
+                <label for="from-value" class="text-sm font-medium text-gray-600">From Value</label>
+                <div class="flex">
+                    <!-- Value Input -->
+                    <input type="number" id="from-value" value="1.0" min="0" class="flex-grow p-3 border rounded-l-lg text-lg text-gray-800 input-focus-green transition duration-150 ease-in-out appearance-none" placeholder="Enter value">
+                    <!-- Unit Select -->
+                    <select id="from-unit" class="unit-select w-28 md:w-36 p-3 border rounded-r-lg bg-gray-50 text-lg font-semibold text-gray-700 cursor-pointer input-focus-green transition duration-150 ease-in-out">
+                        <!-- Options populated by JS -->
                     </select>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <!-- From Unit -->
-                <div>
-                    <label for="from-unit" class="block text-sm font-medium text-gray-700 mb-2">From Unit</label>
-                    <select id="from-unit" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-base"></select>
-                </div>
-
-                <!-- To Unit -->
-                <div>
-                    <label for="to-unit" class="block text-sm font-medium text-gray-700 mb-2">To Unit</label>
-                    <select id="to-unit" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-base"></select>
-                </div>
-            </div>
-
-            <!-- Input and Swap -->
-            <div class="flex space-x-3 mb-6">
-                <div class="flex-grow">
-                    <label for="input-value" class="block text-sm font-medium text-gray-700 mb-2">Input Value</label>
-                    <input type="number" id="input-value" value="1" min="0" step="any" class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-150 text-lg font-mono">
-                </div>
-                
-                <button id="swap-units" class="mt-7 p-3 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 active:bg-blue-700 icon-button flex items-center justify-center h-[52px] w-[52px]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="17" y1="12" x2="7" y2="12"></line>
-                        <polyline points="10 17 7 12 10 7"></polyline>
-                        <polyline points="14 7 17 12 14 17"></polyline>
-                    </svg>
+            <!-- Conversion Arrow Button -->
+            <div class="flex justify-center my-4">
+                <button id="swap-button" class="bg-white text-white p-4 rounded-full shadow-xl transform active:scale-95 transition duration-150 ease-in-out hover:shadow-2xl" aria-label="Swap units" style="background-color: var(--color-primary-green);">
+                    <i class="fas fa-arrows-left-right text-lg"></i>
                 </button>
             </div>
 
-            <!-- Result Display (Layout Fix 8: style="overflow-wrap: anywhere;") -->
-            <div class="bg-blue-50 p-4 rounded-xl shadow-inner border border-blue-200">
-                <h3 class="text-sm font-medium text-blue-700 mb-1">Result</h3>
-                <div id="result-display" class="text-2xl font-mono text-gray-800 break-words" style="overflow-wrap: anywhere;">1.000</div>
-            </div>
-            
-            <div id="currency-info" class="mt-4 text-xs text-gray-500">Loading exchange rates...</div>
-            <div id="loading" class="mt-2 text-sm text-blue-500 hidden">Fetching live rates...</div>
-            
-        </div>
-
-        <!-- History Sidebar -->
-        <div class="lg:col-span-1 bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100 h-full">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-between">
-                Conversion History
-                <button id="clear-history" class="text-sm text-red-500 hover:text-red-700 transition duration-150 icon-button p-1 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                </button>
-            </h2>
-
-            <!-- History Area (Layout Fix 9: -webkit-overflow-scrolling: touch via CSS) -->
-            <div id="history-area" class="h-96 overflow-y-auto pr-2">
-                <ul id="history-list" class="space-y-3">
-                    <li id="history-placeholder" class="text-gray-500 italic text-sm text-center p-4">History is currently empty.</li>
-                </ul>
-                <div id="auth-status" class="text-xs text-center text-gray-400 mt-4">Offline Mode (Firebase not loaded)</div>
+            <!-- TO Input Group (Output) -->
+            <div class="flex flex-col space-y-2">
+                <label for="to-value" class="text-sm font-medium text-gray-600">Converted Result</label>
+                <!-- FIX: Merged duplicate class attributes and added rounded-lg -->
+                <div id="to-value-wrapper" class="flex rounded-lg">
+                    <!-- Value Output - Highlighted -->
+                    <input type="text" id="to-value" readonly class="flex-grow p-3 text-lg text-gray-800 bg-transparent cursor-not-allowed font-mono border-none focus:ring-0">
+                    <!-- Unit Select -->
+                    <select id="to-unit" class="unit-select w-28 md:w-36 p-3 border rounded-r-lg bg-gray-50 text-lg font-semibold text-gray-700 cursor-pointer input-focus-green transition duration-150 ease-in-out">
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
             </div>
         </div>
+        
+        <!-- Info Footer -->
+        <div class="mt-6 pt-4 border-t border-gray-200 text-sm text-center">
+            <p id="currency-info" class="text-gray-500 min-h-[1.25rem]">
+                <!-- Currency data source info -->
+            </p>
+            <div id="loading-spinner" class="hidden flex justify-center items-center mt-2">
+                <i class="fas fa-spinner fa-spin text-xl" style="color: var(--color-primary-green);"></i>
+                <span class="ml-2 font-semibold" style="color: var(--color-primary-green);">Loading live rates...</span>
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-400 mt-4 text-center">
+            All conversions are based on a fixed base unit (USD, Meter, Celsius, etc.).
+        </p>
     </div>
 
-    <!-- ⚡ PERFORMANCE IMPROVEMENT 5: Firebase is now Lazy-Loaded -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, addDoc, onSnapshot, collection, query, orderBy, deleteDoc, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global Firebase variables
-        let app = null;
-        let db = null;
-        let auth = null;
-        let userId = null;
-        let isAuthReady = false;
-
-        // Firebase Configuration (MUST be used for Canvas environment)
+        // Global variables for Firebase access (required by the environment)
+        // Kept for environmental compatibility, though not used for local storage logic
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // --- Core Converter Logic and Data ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initialAuthToken : null;
         
-        const CURRENCY_STORAGE_KEY = "unitConverterRates";
-        let currencyRates = {
-            "USD": 1,
-            "EUR": 0.92,
-            "GBP": 0.78,
-            "JPY": 150.0
-        };
+        // Constants for Currency API and Local Storage
+        const CURRENCY_API_KEY = "b55c79e2ac77eeb4091f0253";
+        const CURRENCY_API_BASE_URL = "https://v6.exchangerate-api.com/v6/";
+        const CURRENCY_STORAGE_KEY = "universalConverterRates";
 
-        const conversionData = {
+        // Global State Variables
+        const el = {};
+        let currencyRates = {}; 
+        let currentCategory = "Currency";
+
+        // FIX: Expanded list of currency symbols
+        const currencySymbols = {
+            USD: "$", EUR: "€", GBP: "£", JPY: "¥", CNY: "¥", INR: "₹",
+            KRW: "₩", CHF: "Fr", AUD: "$", CAD: "$", NZD: "$", RUB: "₽",
+            MXN: "$", SGD: "$", HKD: "$", BRL: "R$", IDR: "Rp", ZAR: "R"
+        };
+        
+        let conversionData = {
+            Currency: {
+                icon: 'fas fa-money-bill-wave',
+                units: {} 
+            },
             Length: {
-                icon: '📏',
+                icon: 'fas fa-ruler',
                 units: {
-                    m: { name: "Meter", toBase: 1, symbol: "m" },
-                    km: { name: "Kilometer", toBase: 1000, symbol: "km" },
-                    mi: { name: "Mile", toBase: 1609.34, symbol: "mi" },
-                    ft: { name: "Foot", toBase: 0.3048, symbol: "ft" },
-                    in: { name: "Inch", toBase: 0.0254, symbol: "in" },
+                    Meter: { symbol: "m", toBase: 1 },
+                    Kilometer: { symbol: "km", toBase: 1000 },
+                    Centimeter: { symbol: "cm", toBase: 0.01 },
+                    Millimeter: { symbol: "mm", toBase: 0.001 },
+                    Mile: { symbol: "mi", toBase: 1609.34 },
+                    Yard: { symbol: "yd", toBase: 0.9144 },
+                    Foot: { symbol: "ft", toBase: 0.3048 },
+                    Inch: { symbol: "in", toBase: 0.0254 }
                 }
             },
-            Mass: {
-                icon: '⚖️',
+            Weight: {
+                icon: 'fas fa-weight-hanging',
                 units: {
-                    kg: { name: "Kilogram", toBase: 1, symbol: "kg" },
-                    g: { name: "Gram", toBase: 0.001, symbol: "g" },
-                    lb: { name: "Pound", toBase: 0.453592, symbol: "lb" },
-                    oz: { name: "Ounce", toBase: 0.0283495, symbol: "oz" },
+                    Kilogram: { symbol: "kg", toBase: 1 },
+                    Gram: { symbol: "g", toBase: 0.001 },
+                    Milligram: { symbol: "mg", toBase: 0.000001 },
+                    Tonne: { symbol: "t", toBase: 1000 },
+                    Pound: { symbol: "lb", toBase: 0.453592 },
+                    Ounce: { symbol: "oz", toBase: 0.0283495 }
+                }
+            },
+            Temperature: {
+                icon: 'fas fa-temperature-half',
+                units: {
+                    // Temperature conversion functions (base = Celsius)
+                    Celsius:   { symbol: "°C", toBase: v => v,               fromBase: v => v },
+                    Fahrenheit:{ symbol: "°F", toBase: v => (v - 32) * 5/9,  fromBase: v => v * 9/5 + 32 },
+                    Kelvin:    { symbol: "K",  toBase: v => v - 273.15,      fromBase: v => v + 273.15 }
                 }
             },
             Volume: {
-                icon: '💧',
+                icon: 'fas fa-glass-whiskey',
                 units: {
-                    m3: { name: "Cubic Meter", toBase: 1, symbol: "m³" },
-                    l: { name: "Liter", toBase: 0.001, symbol: "L" },
-                    gal: { name: "US Gallon", toBase: 0.00378541, symbol: "gal" },
-                    tbsp: { name: "Tablespoon (US)", toBase: 0.0000147868, symbol: "tbsp" },
+                    Liter: { symbol: "L", toBase: 0.001 }, // Base: CubicMeter
+                    Milliliter: { symbol: "mL", toBase: 0.000001 },
+                    CubicMeter: { symbol: "m³", toBase: 1 },
+                    Gallon: { symbol: "gal", toBase: 0.00378541 },
+                    Quart: { symbol: "qt", toBase: 0.000946353 },
+                    Cup: { symbol: "cup", toBase: 0.000236588 },
+                    Tablespoon: { symbol: "tbsp", toBase: 0.0000147868 },
+                    Teaspoon: { symbol: "tsp", toBase: 0.00000492892 }
                 }
             },
-            Currency: {
-                icon: '💰',
-                units: {} // Populated dynamically
+            Area: {
+                icon: 'fas fa-vector-square',
+                units: {
+                    SquareMeter: { symbol: "m²", toBase: 1 },
+                    SquareKilometer: { symbol: "km²", toBase: 1_000_000 },
+                    SquareFoot: { symbol: "ft²", toBase: 0.092903 },
+                    SquareInch: { symbol: "in²", toBase: 0.00064516 },
+                    Hectare: { symbol: "ha", toBase: 10_000 },
+                    Acre: { symbol: "acre", toBase: 4046.86 }
+                }
+            },
+            Speed: {
+                icon: 'fas fa-tachometer-alt',
+                units: { // Base: Meter/Second (1)
+                    "Meter/Second": { symbol: "m/s", toBase: 1 },
+                    "Kilometer/Hour": { symbol: "km/h", toBase: 0.277778 },
+                    "Mile/Hour": { symbol: "mph", toBase: 0.44704 },
+                    "Foot/Second": { symbol: "ft/s", toBase: 0.3048 }
+                }
+            },
+            Time: {
+                icon: 'fas fa-clock',
+                units: { // Base: Second (1)
+                    Second: { symbol: "s", toBase: 1 },
+                    Minute: { symbol: "min", toBase: 60 },
+                    Hour: { symbol: "h", toBase: 3600 },
+                    Day: { symbol: "d", toBase: 86400 }
+                }
+            },
+            Storage: {
+                icon: 'fas fa-database',
+                units: { // Base: Byte (1)
+                    Byte: { symbol: "B", toBase: 1 },
+                    Kilobyte: { symbol: "KB", toBase: 1024 },
+                    Megabyte: { symbol: "MB", toBase: 1024**2 },
+                    Gigabyte: { symbol: "GB", toBase: 1024**3 },
+                    Terabyte: { symbol: "TB", toBase: 1024**4 }
+                }
+            },
+            Energy: {
+                icon: 'fas fa-bolt',
+                units: { // Base: Joule (1)
+                    Joule: { symbol: "J", toBase: 1 },
+                    Kilojoule: { symbol: "kJ", toBase: 1000 },
+                    Calorie: { symbol: "cal", toBase: 4.184 },
+                    Kilocalorie: { symbol: "kcal", toBase: 4184 },
+                    WattHour: { symbol: "Wh", toBase: 3600 },
+                    KilowattHour: { symbol: "kWh", toBase: 3_600_000 }
+                }
             }
         };
-
-        const el = {
-            categorySelect: document.getElementById('category-select'),
-            categoryIcon: document.getElementById('category-icon'),
-            fromUnit: document.getElementById('from-unit'),
-            toUnit: document.getElementById('to-unit'),
-            inputValue: document.getElementById('input-value'),
-            resultDisplay: document.getElementById('result-display'),
-            swapUnits: document.getElementById('swap-units'),
-            historyList: document.getElementById('history-list'),
-            clearHistory: document.getElementById('clear-history'),
-            currencyInfo: document.getElementById('currency-info'),
-            loading: document.getElementById('loading'),
-            authStatus: document.getElementById('auth-status'),
-            historyPlaceholder: document.getElementById('history-placeholder')
-        };
-        
-        // --- Utility Functions ---
-
-        function formatResult(value) {
-            if (typeof value !== 'number' || isNaN(value)) return 'Error';
-            if (value === 0) return '0';
-
-            const precision = 8;
-            
-            // Scientific notation for very large or very small numbers
-            if (Math.abs(value) > 1e10 || Math.abs(value) < 1e-6) {
-                return value.toExponential(precision);
-            }
-
-            // Fixed decimal for typical numbers
-            return value.toLocaleString('en-US', { maximumFractionDigits: precision });
-        }
-
-        // --- Firebase/History Functions ---
-
-        /** * ⚡ PERFORMANCE IMPROVEMENT 5: Lazy-loads Firebase SDK. 
-         * This function is now the only way to load Firebase, significantly 
-         * reducing the initial script size and load time.
-         */
-        async function loadFirebase() {
-            if (window.firebaseAppLoaded) return;
-            
-            // Since we are inside a module, the imports are already at the top.
-            // We just need to check if the app is initialized.
-            if (!app) {
-                try {
-                    setLogLevel('error'); // Keep console clean unless error
-                    app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    window.firebaseAppLoaded = true;
-                } catch (e) {
-                    console.error("Firebase initialization failed:", e);
-                    el.authStatus.textContent = "Error loading Firebase.";
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function initFirebaseAndHistory() {
-             if (!app) return; // Wait for loadFirebase to succeed
-
-            onAuthStateChanged(auth, async (user) => {
-                isAuthReady = true;
-                if (user) {
-                    userId = user.uid;
-                    el.authStatus.textContent = `History Sync: Active (User ID: ${userId.substring(0, 8)}...)`;
-                    el.historyPlaceholder.classList.add('hidden');
-                    listenForHistory(userId);
-                } else {
-                    // Sign in anonymously if no user (or use custom token)
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Firebase Authentication failed:", error);
-                        el.authStatus.textContent = "History Sync: Failed to authenticate.";
-                        userId = crypto.randomUUID(); // Fallback for userId
-                    }
-                }
-            });
-        }
-        
-        // The collection path is for private user data: /artifacts/{appId}/users/{userId}/history
-        function getHistoryCollectionRef(currentUserId) {
-            return collection(db, `artifacts/${appId}/users/${currentUserId}/history`);
-        }
-
-        function listenForHistory(currentUserId) {
-            const q = query(getHistoryCollectionRef(currentUserId), { limit: 50 }); // Fetch up to 50
-            
-            onSnapshot(q, (snapshot) => {
-                let historyItems = [];
-                snapshot.forEach(doc => {
-                    historyItems.push({ id: doc.id, ...doc.data() });
-                });
-                // Sort client-side since orderBy is restricted
-                historyItems.sort((a, b) => b.timestamp - a.timestamp); 
-                renderHistory(historyItems);
-            }, (error) => {
-                console.error("Error listening to history:", error);
-                el.authStatus.textContent = "History Sync: Error loading data.";
-            });
-        }
-
-        async function saveConversionToHistory(fromValue, fromUnit, toValue, toUnit, category) {
-            if (!isAuthReady || !db || !userId) {
-                console.warn("History save deferred: Firebase not ready or user not authenticated.");
-                return;
-            }
-            
-            const historyItem = {
-                fromValue,
-                fromUnit,
-                toValue,
-                toUnit,
-                category,
-                timestamp: Date.now()
-            };
-
-            try {
-                await addDoc(getHistoryCollectionRef(userId), historyItem);
-            } catch (error) {
-                console.error("Failed to save history:", error);
-            }
-        }
-
-        async function clearAllHistory() {
-            if (!db || !userId) return;
-
-            // Simple Confirmation (Non-alert)
-            const confirmation = document.createElement('div');
-            confirmation.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            confirmation.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
-                    <h3 class="text-xl font-bold mb-3">Clear History?</h3>
-                    <p class="text-gray-600 mb-6">Are you sure you want to delete all conversion history?</p>
-                    <div class="flex justify-end space-x-3">
-                        <button id="cancel-clear" class="px-4 py-2 text-gray-700 border rounded-lg hover:bg-gray-100">Cancel</button>
-                        <button id="confirm-clear" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">Clear All</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(confirmation);
-
-            document.getElementById('cancel-clear').onclick = () => confirmation.remove();
-            document.getElementById('confirm-clear').onclick = async () => {
-                confirmation.remove();
-                el.historyList.replaceChildren(); // Clear UI immediately
-
-                try {
-                    const q = query(getHistoryCollectionRef(userId));
-                    const snapshot = await getDocs(q);
-                    
-                    if (snapshot.docs.length > 0) {
-                        for (const doc of snapshot.docs) {
-                            await deleteDoc(doc.ref);
-                        }
-                    }
-                    el.historyList.appendChild(el.historyPlaceholder);
-                    el.historyPlaceholder.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error("Error clearing history:", error);
-                    // Re-render to show the error state or previous history
-                }
-            };
-        }
-
-        function renderHistoryItem(item) {
-            const li = document.createElement('li');
-            li.className = "p-3 bg-gray-50 hover:bg-gray-100 rounded-lg shadow-sm transition duration-150 flex justify-between items-start text-sm cursor-pointer";
-            li.title = `Click to re-run: ${item.fromValue} ${item.fromUnit} -> ${item.toUnit}`;
-            li.onclick = () => {
-                const category = Object.keys(conversionData).find(key => conversionData[key].units.hasOwnProperty(item.fromUnit));
-                if (category) {
-                    el.categorySelect.value = category;
-                    populateUnits();
-                    el.fromUnit.value = item.fromUnit;
-                    el.toUnit.value = item.toUnit;
-                    el.inputValue.value = item.fromValue;
-                    convertValue();
-                }
-            };
-            
-            const fromUnitDetails = conversionData[item.category]?.units[item.fromUnit];
-            const toUnitDetails = conversionData[item.category]?.units[item.toUnit];
-            
-            const fromSymbol = fromUnitDetails ? fromUnitDetails.symbol : item.fromUnit;
-            const toSymbol = toUnitDetails ? toUnitDetails.symbol : item.toUnit;
-
-            li.innerHTML = `
-                <div>
-                    <span class="font-medium text-blue-600">${formatResult(item.fromValue)} ${fromSymbol}</span>
-                    <span class="text-gray-400 mx-1">→</span>
-                    <span class="font-bold text-gray-800">${formatResult(item.toValue)} ${toSymbol}</span>
-                </div>
-                <div class="text-xs text-gray-500">${new Date(item.timestamp).toLocaleTimeString()}</div>
-            `;
-            
-            return li;
-        }
-
-        /** * ⚡ PERFORMANCE IMPROVEMENT 6: Uses DocumentFragment for efficient DOM updates. 
-         */
-        function renderHistory(items) {
-            el.historyList.innerHTML = '';
-            
-            if (items.length === 0) {
-                el.historyList.appendChild(el.historyPlaceholder);
-                el.historyPlaceholder.classList.remove('hidden');
-                return;
-            }
-
-            el.historyPlaceholder.classList.add('hidden');
-            
-            // Use DocumentFragment to minimize reflows
-            const fragment = document.createDocumentFragment();
-            items.forEach(item => fragment.appendChild(renderHistoryItem(item)));
-            el.historyList.appendChild(fragment);
-        }
-
-        // --- Conversion Functions ---
 
         /**
-         * ✅ BUG FIX 1: Corrected API URL and logic to use live currency data.
+         * Selects all necessary DOM elements and stores them in the global 'el' object.
+         */
+        function initializeElements() {
+            el.categorySelect = document.getElementById('category-select');
+            el.categoryIcon = document.getElementById('category-icon');
+            el.fromValue = document.getElementById('from-value');
+            el.fromUnit = document.getElementById('from-unit');
+            el.toValue = document.getElementById('to-value');
+            el.toUnit = document.getElementById('to-unit');
+            el.swapButton = document.getElementById('swap-button');
+            el.currencyInfo = document.getElementById('currency-info');
+            el.loading = document.getElementById('loading-spinner');
+            
+            // Run DOM manipulation once (Improvement B)
+            document.querySelectorAll('.input-focus-green').forEach(element => {
+                element.classList.add('p-3', 'border', 'rounded-lg');
+            });
+            document.getElementById('to-value').classList.remove('rounded-l-lg'); 
+        }
+
+        /**
+         * Populates the category dropdown and initializes the category state.
+         */
+        function populateCategories() {
+            const categories = Object.keys(conversionData);
+            el.categorySelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            currentCategory = el.categorySelect.value;
+            updateCategoryIcon();
+        }
+
+        /**
+         * Updates the icon next to the category dropdown.
+         */
+        function updateCategoryIcon() {
+            const iconClass = conversionData[currentCategory].icon;
+            el.categoryIcon.innerHTML = `<i class="${iconClass}"></i>`;
+        }
+
+        /**
+         * Populates the 'from' and 'to' unit dropdowns based on the current category.
+         */
+        function populateUnits() {
+            const units = conversionData[currentCategory].units;
+            const unitNames = Object.keys(units);
+            
+            const options = unitNames.map(name => {
+                const symbol = units[name].symbol ? ` (${units[name].symbol})` : '';
+                return `<option value="${name}">${name}${symbol}</option>`;
+            }).join('');
+            
+            el.fromUnit.innerHTML = options;
+            el.toUnit.innerHTML = options;
+
+            // Set default selected units, ensuring they are different if possible
+            el.fromUnit.value = unitNames[0];
+            el.toUnit.value = unitNames.length > 1 ? unitNames[1] : unitNames[0];
+
+            convertValue();
+        }
+
+        // ⭐ 5. IMPROVED convertValue() FIXED VERSION
+        function convertValue() {
+            const category = conversionData[currentCategory];
+            const fromUnit = el.fromUnit.value;
+            const toUnit = el.toUnit.value;
+            const input = parseFloat(el.fromValue.value);
+
+            if (isNaN(input)) {
+                el.toValue.value = "Invalid Input";
+                return;
+            }
+
+            const from = category.units[fromUnit];
+            const to = category.units[toUnit];
+
+            let converted;
+
+            if (currentCategory === "Temperature") {
+                // To Base (Celsius) -> From Base (Target)
+                converted = to.fromBase(from.toBase(input));
+            } else {
+                // Standard linear conversion
+                converted = input * from.toBase / to.toBase;
+            }
+
+            // FIX: Uses toPrecision(12) for high accuracy, then toString() to remove scientific notation if possible
+            const formatted =
+                currentCategory === "Temperature"
+                    ? converted.toFixed(2)
+                    : Number(converted.toPrecision(12)).toString();
+
+            // FIX: Symbol logic applied to ALL categories, showing symbol + space if available (Bug 3 fixed)
+            const symbol = to.symbol ? `${to.symbol} ` : ""; 
+
+            el.toValue.value = `${symbol}${formatted}`;
+        }
+
+
+        /**
+         * Swaps the 'from' and 'to' units and re-runs the conversion.
+         */
+        function swapUnits() {
+            // Swap units
+            const tempUnit = el.fromUnit.value;
+            el.fromUnit.value = el.toUnit.value;
+            el.toUnit.value = tempUnit;
+            
+            // FIX: Extract numeric value only for swap to prevent corruption (Bug 2 fixed)
+            const numericToVal = parseFloat(el.toValue.value.replace(/[^\d.-]/g, ""));
+            el.fromValue.value = isNaN(numericToVal) ? "" : numericToVal;
+            
+            convertValue();
+        }
+
+        /**
+         * Fetches live currency rates from Exchangerate-API v6.
          */
         async function fetchCurrencyRates() {
             el.loading.classList.remove("hidden");
+
             const storedRates = localStorage.getItem(CURRENCY_STORAGE_KEY);
-            let ratesSource = "Offline cached data (Mock/Default).";
+            let ratesSource = "Offline cached rates.";
 
             if (storedRates) {
-                currencyRates = JSON.parse(storedRates);
-            }
-
-            try {
-                // Corrected API URL (exchangerate.host/latest does not require access_key)
-                const response = await fetch(
-                    "https://api.exchangerate.host/latest?base=USD&symbols=USD,EUR,GBP,JPY"
-                );
-
-                const data = await response.json();
-
-                // Check for successful response and rates object
-                if (data && data.rates) {
-                    currencyRates = data.rates;
-                    localStorage.setItem(CURRENCY_STORAGE_KEY, JSON.stringify(currencyRates));
-                    ratesSource = `Live data (Date: ${data.date || 'unknown'})`;
+                try {
+                    currencyRates = JSON.parse(storedRates);
+                } catch (e) {
+                    console.error("Error parsing cached rates.", e);
                 }
-            } catch (err) {
-                console.warn("Falling back to cached rates", err);
             }
 
-            // Rebuild conversionData.Currency based on fetched rates
-            conversionData.Currency.units = Object.fromEntries(
-                Object.entries(currencyRates).map(([code, rate]) => {
-                    let symbol = code;
-                    if (code === 'EUR') symbol = '€';
-                    if (code === 'GBP') symbol = '£';
-                    if (code === 'JPY') symbol = '¥';
+            // OPTIMIZED: Shorter exponential backoff (500ms -> 1s -> 2s)
+            const maxRetries = 3;
+            let currentRetry = 0;
+            let success = false;
 
-                    return [
-                        code,
-                        { 
-                            name: code, 
-                            // toBase is the multiplier to convert this currency TO the base (USD)
-                            toBase: 1 / rate, 
-                            symbol: symbol 
-                        }
-                    ];
-                })
-            );
+            while (currentRetry < maxRetries && !success) {
+                try {
+                    const response = await fetch(
+                        `${CURRENCY_API_BASE_URL}${CURRENCY_API_KEY}/latest/USD`
+                    );
 
+                    const data = await response.json();
+
+                    if (data.result === "success" && data.conversion_rates) {
+                        currencyRates = data.conversion_rates;
+                        localStorage.setItem(CURRENCY_STORAGE_KEY, JSON.stringify(currencyRates));
+                        ratesSource = `Live data (Updated: ${data.time_last_update_utc.split(' ').slice(0, 4).join(' ')})`;
+                        success = true;
+                    } else {
+                        console.error("API error:", data);
+                        break; 
+                    }
+                } catch (err) {
+                    currentRetry++;
+                    if (currentRetry < maxRetries) {
+                        // 500ms, 1000ms, 2000ms
+                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, currentRetry - 1) * 500));
+                    } else {
+                        console.warn("Currency API failed after multiple retries. Using cached data.", err);
+                    }
+                }
+            }
+            
+            if (!success && storedRates) { ratesSource = "API failed — using cached data."; }
+            
+            // Build Currency Units (if rates exist)
+            if (Object.keys(currencyRates).length > 0) {
+                conversionData.Currency.units = Object.fromEntries(
+                    Object.entries(currencyRates).map(([code, rate]) => {
+                        // FIX: Use centralized currencySymbols map
+                        const symbol = currencySymbols[code] ?? code;
+
+                        return [
+                            code,
+                            {
+                                name: code,
+                                // toBase: 1 unit = X USD
+                                toBase: 1 / rate, 
+                                symbol: symbol
+                            }
+                        ];
+                    })
+                );
+            }
+            
             el.currencyInfo.textContent = ratesSource;
             el.loading.classList.add("hidden");
 
-            populateUnits();
+            if (currentCategory === 'Currency') {
+                populateUnits();
+            }
         }
 
-        function getSelectedUnits() {
-            const category = el.categorySelect.value;
-            const fromCode = el.fromUnit.value;
-            const toCode = el.toUnit.value;
-
-            const units = conversionData[category]?.units;
-
-            if (!units || !units[fromCode] || !units[toCode]) {
-                console.error("Invalid unit selection.");
-                return null;
-            }
-
-            return {
-                category,
-                fromUnit: units[fromCode],
-                toUnit: units[toCode],
-            };
-        }
-
-        function convertValue() {
-            const value = parseFloat(el.inputValue.value);
-            const units = getSelectedUnits();
-
-            if (!units || isNaN(value)) {
-                el.resultDisplay.textContent = 'Invalid Input';
-                return;
-            }
-            
-            const { category, fromUnit, toUnit } = units;
-            
-            let result;
-            
-            try {
-                // Convert the input value to the category's base unit
-                const valueInBase = value * fromUnit.toBase; 
-                
-                // Convert from the base unit to the target unit
-                // Division by toUnit.toBase is equivalent to multiplication by toUnit.toBase's rate (1/toBase)
-                result = valueInBase / toUnit.toBase;
-            } catch (e) {
-                console.error("Conversion error:", e);
-                result = NaN;
-            }
-
-            const formattedResult = formatResult(result);
-            el.resultDisplay.textContent = formattedResult;
-            
-            // Auto-save to history on successful conversion (after a slight delay for better UX)
-            setTimeout(() => {
-                // Only save if Firebase is active
-                if (isAuthReady && db && userId) {
-                    saveConversionToHistory(
-                        value,
-                        el.fromUnit.value,
-                        result,
-                        el.toUnit.value,
-                        category
-                    );
-                }
-            }, 100);
-        }
 
         /**
-         * ✅ BUG FIX 4: Removed incorrect restoration of input value.
+         * Handles initialization and event listeners after the DOM is loaded.
          */
-        function swapUnits() {
-            const temp = el.fromUnit.value;
-            el.fromUnit.value = el.toUnit.value;
-            el.toUnit.value = temp;
+        window.onload = async () => {
+            initializeElements();
+            populateCategories();
             
-            convertValue();
-            // BUG FIX 4: Do NOT restore el.inputValue.value here.
-            // The purpose of swap is to immediately show the new conversion result.
-        }
+            // 1. Fetch currency rates and populate the 'Currency' units
+            await fetchCurrencyRates();
 
-        // --- UI Population ---
+            // 2. Set event listeners
+            el.categorySelect.addEventListener('change', () => {
+                currentCategory = el.categorySelect.value;
+                updateCategoryIcon();
+                populateUnits(); // calls convertValue() internally
+            });
 
-        function populateCategories() {
-            const categories = Object.keys(conversionData);
-            el.categorySelect.innerHTML = categories
-                .map(cat => `<option value="${cat}">${cat}</option>`)
-                .join('');
-            
-            // Set initial icon and populate units
-            el.categorySelect.value = 'Length';
-            populateUnits();
-        }
-
-        function populateUnits() {
-            const category = el.categorySelect.value;
-            const { units, icon } = conversionData[category];
-            const unitCodes = Object.keys(units);
-
-            el.categoryIcon.innerHTML = icon;
-
-            const optionsHTML = unitCodes
-                .map(code => `<option value="${code}">${units[code].name} (${units[code].symbol})</option>`)
-                .join('');
-
-            const selectedFrom = el.fromUnit.value;
-            const selectedTo = el.toUnit.value;
-
-            el.fromUnit.innerHTML = optionsHTML;
-            el.toUnit.innerHTML = optionsHTML;
-
-            // Retain selected values if possible, otherwise default to first two
-            if (unitCodes.includes(selectedFrom)) {
-                el.fromUnit.value = selectedFrom;
-            } else {
-                el.fromUnit.value = unitCodes[0];
-            }
-
-            if (unitCodes.includes(selectedTo)) {
-                el.toUnit.value = selectedTo;
-            } else {
-                el.toUnit.value = unitCodes[1] || unitCodes[0];
-            }
-
-            convertValue();
-        }
-        
-        // --- Event Listeners ---
-
-        function setupListeners() {
-            el.categorySelect.addEventListener('change', populateUnits);
+            el.fromValue.addEventListener('input', convertValue);
             el.fromUnit.addEventListener('change', convertValue);
             el.toUnit.addEventListener('change', convertValue);
-            el.inputValue.addEventListener('input', convertValue);
-            el.swapUnits.addEventListener('click', swapUnits);
-            el.clearHistory.addEventListener('click', clearAllHistory);
 
-            // ⚡ PERFORMANCE IMPROVEMENT 5: Lazy-load Firebase only when history is explicitly accessed
-            el.historyList.parentElement.addEventListener('mouseenter', async () => {
-                if (!window.firebaseAppLoaded) {
-                    const loaded = await loadFirebase();
-                    if (loaded && !isAuthReady) {
-                        initFirebaseAndHistory();
-                    }
-                }
-            }, { once: true });
-        }
-        
-        // --- Initialization ---
+            el.swapButton.addEventListener('click', swapUnits);
 
-        function init() {
-            // Start the currency fetch immediately, as it's a core feature
-            fetchCurrencyRates(); 
-            populateCategories();
-            setupListeners();
-        }
-
-        window.onload = init;
+            // Initial population of units for the default category (Currency)
+            populateUnits(); 
+        };
     </script>
 </body>
 </html>
