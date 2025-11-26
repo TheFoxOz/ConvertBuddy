@@ -1,71 +1,86 @@
-import { conversionData } from "./units.js";
+// scripts/ui.js
 import { convertValue, swapUnits } from "./converter.js";
-import { fetchCurrencyRates } from "./currency.js";
+import { getHistory } from "./firestore.js";
+import { conversionData } from "./units.js";
 
 export function initializeElements() {
     return {
-        categorySelect: document.getElementById("category-select"),
-        categoryIcon: document.getElementById("category-icon"),
+        category: document.getElementById("category-select"),
         fromValue: document.getElementById("from-value"),
-        fromUnit: document.getElementById("from-unit"),
         toValue: document.getElementById("to-value"),
+        fromUnit: document.getElementById("from-unit"),
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
+        categoryIcon: document.getElementById("category-icon"),
         currencyInfo: document.getElementById("currency-info"),
-        loading: document.getElementById("loading-spinner")
+        historySection: null
     };
 }
 
-export function populateCategories(el) {
-    const categories = Object.keys(conversionData);
-    el.categorySelect.innerHTML = categories
-        .map(c => `<option value="${c}">${c}</option>`)
-        .join("");
-    return el.categorySelect.value;
+export function initApp(el) {
+    populateCategories(el);
+    updateUnits(el);
+    attachListeners(el);
+    loadHistory();
 }
 
-export function populateUnits(el, category) {
+function populateCategories(el) {
+    Object.keys(conversionData).forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat;
+        option.textContent = cat;
+        el.category.appendChild(option);
+    });
+}
+
+function updateUnits(el) {
+    const category = el.category.value;
     const units = conversionData[category].units;
-    const opts = Object.keys(units).map(
-        name => `<option value="${name}">${name}${units[name].symbol ? ` (${units[name].symbol})` : ""}</option>`
-    );
 
-    el.fromUnit.innerHTML = opts.join("");
-    el.toUnit.innerHTML = opts.join("");
+    el.fromUnit.innerHTML = "";
+    el.toUnit.innerHTML = "";
 
-    el.fromUnit.value = Object.keys(units)[0];
-    el.toUnit.value = Object.keys(units)[1] || Object.keys(units)[0];
-}
+    Object.keys(units).forEach(u => {
+        const opt1 = document.createElement("option");
+        const opt2 = document.createElement("option");
 
-export function setupEventListeners(el, state) {
+        opt1.value = u;
+        opt1.textContent = units[u].name;
 
-    el.categorySelect.addEventListener("change", () => {
-        state.category = el.categorySelect.value;
-        el.categoryIcon.innerHTML = `<i class="${conversionData[state.category].icon}"></i>`;
-        populateUnits(el, state.category);
-        convertValue(el, state.category);
+        opt2.value = u;
+        opt2.textContent = units[u].name;
+
+        el.fromUnit.appendChild(opt1);
+        el.toUnit.appendChild(opt2);
     });
 
-    el.fromValue.addEventListener("input", () => convertValue(el, state.category));
-    el.fromUnit.addEventListener("change", () => convertValue(el, state.category));
-    el.toUnit.addEventListener("change", () => convertValue(el, state.category));
-
-    el.swapButton.addEventListener("click", () =>
-        swapUnits(el, () => convertValue(el, state.category))
-    );
+    convertValue(el, category);
 }
 
-export async function initApp(el) {
-    const state = { category: populateCategories(el) };
+function attachListeners(el) {
+    el.category.addEventListener("change", () => {
+        updateUnits(el);
+    });
 
-    populateUnits(el, state.category);
-    setupEventListeners(el, state);
+    el.fromValue.addEventListener("input", () => {
+        convertValue(el, el.category.value);
+    });
 
-    await fetchCurrencyRates(
-        "b55c79e2ac77eeb4091f0253",
-        "https://v6.exchangerate-api.com/v6/",
-        el
-    );
+    el.fromUnit.addEventListener("change", () => {
+        convertValue(el, el.category.value);
+    });
 
-    convertValue(el, state.category);
+    el.toUnit.addEventListener("change", () => {
+        convertValue(el, el.category.value);
+    });
+
+    el.swapButton.addEventListener("click", () => {
+        swapUnits(el, () => convertValue(el, el.category.value));
+    });
+}
+
+async function loadHistory() {
+    const history = await getHistory();
+
+    console.log("User history:", history);
 }
