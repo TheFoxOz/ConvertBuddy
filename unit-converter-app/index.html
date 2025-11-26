@@ -102,7 +102,7 @@
 
             <!-- Currency Source Info -->
             <p id="currency-source-info" class="hidden text-xs text-gray-500 mt-4 text-center italic">
-                Currency rates are based on the latest available data.
+                Currency rates are based on mock data.
             </p>
         </div>
 
@@ -144,6 +144,7 @@
         let auth;
         let userId = null;
         let isAuthReady = false;
+        let isFirebaseAvailable = false; // New flag for Firebase availability
 
         const el = {
             categorySelect: document.getElementById('category-select'),
@@ -192,6 +193,19 @@
         // --- Firebase Initialization and Auth ---
 
         async function initFirebase() {
+            // FIX: Check for required projectId before initialization
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                console.error("Firebase Initialization Skipped: Configuration is missing 'projectId'. History will not be saved.");
+                el.userIdDisplay.textContent = " (History disabled - Config Error)";
+                el.noHistoryMessage.textContent = "History feature is disabled due to missing Firebase configuration.";
+                isAuthReady = true;
+                isFirebaseAvailable = false;
+                fetchCurrencyRates();
+                return;
+            }
+            
+            isFirebaseAvailable = true;
+
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -209,94 +223,32 @@
                     if (user) {
                         userId = user.uid;
                         el.userIdDisplay.textContent = ` (User ID: ${userId})`;
-                        isAuthReady = true;
-                        // Start real-time history listener only after auth is ready
-                        setupHistoryListener();
                     } else {
-                        // This case might happen if anonymous sign-in fails or user signs out
-                        userId = crypto.randomUUID(); // Fallback ID for local logic
+                        // Fallback ID if auth fails (shouldn't happen with anonymous)
+                        userId = crypto.randomUUID(); 
                         el.userIdDisplay.textContent = ` (Anon ID: ${userId.substring(0, 8)}...)`;
-                        isAuthReady = true;
-                        console.error("User is not authenticated. Using random UUID for ID.");
-                        setupHistoryListener();
                     }
+                    isAuthReady = true;
+                    // Start real-time history listener only after auth is ready
+                    setupHistoryListener();
                 });
 
                 // Fetch currency rates immediately
                 fetchCurrencyRates();
                 
             } catch (error) {
-                console.error("Error initializing Firebase or signing in:", error);
-                el.loading.textContent = "Error loading application. Check console for details.";
+                // If initialization fails despite the config check
+                console.error("Critical Error initializing Firebase or signing in:", error);
+                el.loading.textContent = "Error loading history. Check console for details.";
                 el.loading.classList.remove('hidden');
+                isAuthReady = true;
+                isFirebaseAvailable = false;
+                fetchCurrencyRates();
             }
         }
 
-        // --- Currency Rate Fetching (Mocked API Call) ---
+        // --- Currency Rate Fetching (Mocked) ---
 
-        // IMPORTANT: The actual Gemini API call logic for external data retrieval 
-        // must be implemented if the currency conversion is meant to be real-time/grounded.
-        // For this static app, we'll use a mocked fetch, but the structure for the
-        // real API call would look like this:
-        /*
-        async function fetchCurrencyRates() {
-            el.loading.classList.remove('hidden');
-            el.currencyInfo.classList.add('hidden');
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const systemPrompt = "You are a data provider. Your task is to provide the latest exchange rate for USD against EUR, GBP, and JPY in a single JSON object. Only output the JSON.";
-            const userQuery = "Provide the current exchange rates for EUR, GBP, and JPY relative to 1 USD. Respond only with JSON: {\"EUR\": 0.93, \"GBP\": 0.81, \"JPY\": 155.0}";
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                tools: [{ "google_search": {} }], // Use Google Search for real-time data
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: { 
-                        type: "OBJECT", 
-                        properties: {
-                            "EUR": { "type": "NUMBER" },
-                            "GBP": { "type": "NUMBER" },
-                            "JPY": { "type": "NUMBER" }
-                        }
-                    }
-                }
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (jsonText) {
-                    const rates = JSON.parse(jsonText);
-                    currentRates = { USD: 1, ...rates };
-                    // Update the conversionData structure
-                    Object.keys(currentRates).forEach(code => {
-                        if (conversionData.Currency[code]) {
-                             conversionData.Currency[code].toBase = 1 / currentRates[code];
-                        }
-                    });
-                    populateUnits();
-                    el.currencyInfo.textContent = 'Currency rates are grounded via Google Search and updated in real-time.';
-                    el.currencyInfo.classList.remove('hidden');
-                } else {
-                    console.warn("Could not fetch or parse real-time rates. Using mock data.");
-                }
-            } catch (e) {
-                console.error("Gemini API call failed, using mock data:", e);
-            } finally {
-                el.loading.classList.add('hidden');
-            }
-        }
-        */
-
-        // Mocked function for this environment
         function fetchCurrencyRates() {
             el.loading.classList.add('hidden');
             el.currencyInfo.classList.remove('hidden');
@@ -345,7 +297,11 @@
             el.resultDisplay.textContent = result.toLocaleString(undefined, { maximumFractionDigits: 6 });
 
             // Automatically save conversion to history
-            saveConversion(value, fromCode, toCode, category, result);
+            if(isFirebaseAvailable) {
+                saveConversion(value, fromCode, toCode, category, result);
+            } else {
+                // Optionally show a message that history isn't saved
+            }
         }
 
         // --- UI Population and Setup ---
@@ -393,10 +349,7 @@
         // --- Firestore History Management ---
 
         function getHistoryCollectionRef() {
-            // FIX: Simplified the Firestore path to ensure it works with standard rules
-            // NOTE: The security rules must allow this path. A safer, private path is:
-            // return collection(db, `artifacts/${appId}/users/${userId}/conversion_history`);
-            // But based on the provided fix, we use a simple private path structure:
+            // Using the simple private path structure
             if (!db || !userId) {
                 console.error("Firestore DB or userId not initialized.");
                 return null;
@@ -405,12 +358,12 @@
         }
 
         function saveConversion(value, from, to, category, result) {
-            if (!isAuthReady || !db || !userId) return; // Wait for authentication
+            if (!isAuthReady || !db || !userId || !isFirebaseAvailable) return; // Wait for authentication and availability
 
             const historyRef = getHistoryCollectionRef();
             if (!historyRef) return;
 
-            // Only save if the value is not NaN and is not a duplicated conversion
+            // Only save if the value is not NaN
             if (isNaN(value)) return;
 
             addDoc(historyRef, {
@@ -426,16 +379,14 @@
         }
 
         function setupHistoryListener() {
-            if (!isAuthReady || !db || !userId) {
-                console.warn("Skipping history listener setup: Auth not ready or DB/userId missing.");
+            if (!isAuthReady || !db || !userId || !isFirebaseAvailable) {
+                console.warn("Skipping history listener setup: Firebase not available or Auth not ready.");
                 return;
             }
             
             const historyRef = getHistoryCollectionRef();
             if (!historyRef) return;
             
-            // Query to fetch up to 10 most recent conversions (sorted client-side if needed, but Firestore query is better)
-            // Using query() with orderBy() can require an index. We use onSnapshot for real-time updates.
             const q = query(historyRef, orderBy("timestamp", "desc"));
 
             onSnapshot(q, (snapshot) => {
@@ -487,6 +438,7 @@
         window.onload = function() {
             // Register service worker
             if ('serviceWorker' in navigator) {
+                // The Vercel rewrite fix should now allow this to succeed
                 navigator.serviceWorker.register('/service-worker.js')
                 .then(reg => console.log('SW Registered', reg))
                 .catch(err => console.error('SW Registration Failed', err));
