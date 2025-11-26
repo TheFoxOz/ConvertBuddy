@@ -83,7 +83,7 @@ export async function initApp(el) {
     populateCategories(el);
     updateUnits(el);
     attachListeners(el);
-    refreshHistory(el);
+    await refreshHistory(el);
 }
 
 // -----------------
@@ -138,7 +138,7 @@ function updateUnits(el) {
 // Listeners
 // -----------------
 function attachListeners(el) {
-    const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
+    const conversionCallback = async () => await convertValue(el, el.category.value, () => refreshHistory(el));
     const debouncedConversion = debounce(conversionCallback, 300);
 
     el.category.addEventListener("change", () => updateUnits(el));
@@ -171,7 +171,7 @@ export async function refreshHistory(el) {
                 <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
             </div>
             <div class="mt-1 text-gray-800">
-                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
+                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span> ${entry.toUnit}
             </div>
         `;
         list.appendChild(item);
