@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Privacy Policy - ConvertBuddy</title>
-    <!-- Load Tailwind CSS -->
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#10b981">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -13,6 +20,7 @@
         }
     </style>
 </head>
+
 <body class="bg-emerald-50 text-gray-800 p-4 sm:p-8">
 
     <div class="max-w-3xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-2xl">
@@ -38,13 +46,16 @@
             <h2 class="text-2xl font-bold text-emerald-600 mb-4">2. Data We Collect</h2>
             <ul class="list-disc list-inside space-y-3 pl-4">
                 <li>
-                    <strong class="font-semibold">Conversion History:</strong> We store your conversion inputs (value, units, category) and results in our database (Firestore) to provide a persistent "Conversion History" feature. This data is associated with a unique user ID.
+                    <strong class="font-semibold">Conversion History:</strong>
+                    We store your conversion inputs (value, units, category) and results in our database (Firestore) to provide a persistent "Conversion History" feature. This data is associated with a unique user ID.
                 </li>
                 <li>
-                    <strong class="font-semibold">Unique User ID:</strong> When you use ConvertBuddy, we automatically assign you a unique ID via Firebase Authentication (either an anonymous ID or a temporary custom ID). This ID is used exclusively to link your conversion history to your session. We do not link this ID to your real-world identity or other external accounts.
+                    <strong class="font-semibold">Unique User ID:</strong>
+                    When you use ConvertBuddy, we automatically assign you a unique ID via Firebase Authentication (either an anonymous ID or a temporary custom ID). This ID is used exclusively to link your conversion history to your session. We do not link this ID to your real-world identity or external accounts.
                 </li>
                 <li>
-                    <strong class="font-semibold">Usage Data:</strong> We may collect non-identifiable usage data to monitor the performance of the app, such as which unit categories are most popular.
+                    <strong class="font-semibold">Usage Data:</strong>
+                    We may collect non-identifiable usage data to monitor the performance of the app, such as which unit categories are most popular.
                 </li>
             </ul>
         </section>
@@ -56,13 +67,16 @@
             </p>
             <ul class="list-disc list-inside space-y-3 pl-4">
                 <li>
-                    <strong class="font-semibold">Provide the Service:</strong> To perform unit and currency conversions and display your saved history.
+                    <strong class="font-semibold">Provide the Service:</strong>
+                    To perform unit and currency conversions and display your saved history.
                 </li>
                 <li>
-                    <strong class="font-semibold">Maintain Security:</strong> To ensure the database functions correctly and securely.
+                    <strong class="font-semibold">Maintain Security:</strong>
+                    To ensure the database functions correctly and securely.
                 </li>
                 <li>
-                    <strong class="font-semibold">Improve the App:</strong> To understand usage patterns and enhance app features.
+                    <strong class="font-semibold">Improve the App:</strong>
+                    To understand usage patterns and enhance app features.
                 </li>
             </ul>
         </section>
@@ -89,13 +103,21 @@
         </section>
 
         <div class="mt-8 pt-4 border-t border-gray-200">
-            <a href="/" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 transition-colors font-medium">
+            <a href="/index.html" class="inline-flex items-center text-emerald-600 hover:text-emerald-800 transition-colors font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                 </svg>
                 Back to Converter
             </a>
         </div>
+
     </div>
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js");
+        }
+    </script>
+
 </body>
 </html>
