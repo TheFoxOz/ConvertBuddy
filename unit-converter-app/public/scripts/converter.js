@@ -1,6 +1,6 @@
 // scripts/converter.js
 import { conversionData } from "./units.js";
-
+ 
 /**
  * Convert a value from one unit to another
  */
@@ -14,12 +14,13 @@ export function convert(category, fromUnit, toUnit, value) {
         throw new Error(`Units "${fromUnit}" or "${toUnit}" not found in "${category}"`);
 
     value = Number(value);
-    // Returning NaN on invalid numeric input/error (from previous step)
+    // Returning NaN on invalid numeric input/error
     if (isNaN(value))
         return NaN;
 
     let base;
     try {
+        // Step 1: Convert input value to the category's base unit
         base = typeof from.toBase === "function" ? from.toBase(value) : value * from.toBase;
     } catch (e) {
         console.warn(`Error converting from ${fromUnit} to base:`, e);
@@ -28,22 +29,35 @@ export function convert(category, fromUnit, toUnit, value) {
 
     let result;
     try {
+        // Step 2: Convert base value to the target unit
         result = typeof to.fromBase === "function" ? to.fromBase(base) : base / to.toBase;
     } catch (e) {
         console.warn(`Error converting base to ${toUnit}:`, e);
         return NaN;
     }
 
-    return Math.round(result * 1e6) / 1e6;
+    // Step 3: Apply configurable precision (defaulting to 6 if missing)
+    const precision = cat.precision ?? 6;
+    const factor = 10 ** precision;
+    
+    return Math.round(result * factor) / factor;
 }
-
+ 
 /**
- * List all units for a category
+ * List all unit details (key, name, symbol) for a category
  */
 export function listUnits(category) {
-    return Object.keys(conversionData[category]?.units || []);
+    const units = conversionData[category]?.units;
+    if (!units) return [];
+    
+    // Return an array of objects containing key, name, and symbol
+    return Object.keys(units).map(key => ({
+        key,
+        name: units[key].name,
+        symbol: units[key].symbol || units[key].name // Fallback to name if symbol is missing
+    }));
 }
-
+ 
 /**
  * Swap from/to units and values in UI
  */
@@ -61,8 +75,3 @@ export function swapUnits(el, callback) {
 
     callback();
 }
-
-/**
- * Convert value and optionally save history
- */
-// This function is now defined in ui.js to allow for the non-blocking change (see ui.js)
