@@ -1,24 +1,13 @@
-// scripts/converter.js
 import { conversionData } from "./units.js";
 import { saveHistory } from "./firestore.js";
 
-/**
- * Performs the unit conversion and optionally saves the history entry.
- * @param {object} el - DOM elements object
- * @param {string} category - Current conversion category
- * @param {function} onComplete - Callback to refresh UI history
- * @param {boolean} saveHistoryFlag - Whether to save this conversion to history
- */
 export function convertValue(el, category, onComplete, saveHistoryFlag = true) {
     const data = conversionData[category];
     const from = data.units[el.fromUnit.value];
     const to = data.units[el.toUnit.value];
     const input = parseFloat(el.fromValue.value);
 
-    if (isNaN(input)) {
-        el.toValue.value = "";
-        return;
-    }
+    if (isNaN(input)) { el.toValue.value = ""; return; }
 
     let converted;
     if (category === "Temperature") {
@@ -47,16 +36,13 @@ export function convertValue(el, category, onComplete, saveHistoryFlag = true) {
     if (onComplete) onComplete();
 }
 
-/**
- * Swap 'from' and 'to' units and values safely
- */
 export function swapUnits(el, callback) {
     const tempUnit = el.fromUnit.value;
     el.fromUnit.value = el.toUnit.value;
     el.toUnit.value = tempUnit;
 
-    const numeric = parseFloat(el.toValue.value.replace(/[^\d.-]/g, ''));
-    el.fromValue.value = isNaN(numeric) ? "" : numeric;
+    const numeric = parseFloat(el.toValue.value.replace(/[^\d.-]/g, '')) || 0;
+    el.fromValue.value = numeric;
 
     if (callback) callback();
 }
