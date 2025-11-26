@@ -10,6 +10,9 @@ const FILES_TO_CACHE = [
   '/scripts/converter.js',
   '/scripts/currency.js',
   '/scripts/units.js',
+  // External CDN assets used by index.html (optional but good for offline)
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css',
   '/icons/Icon-192.png',
   '/icons/Icon-512.png',
   '/icons/Icon-maskable.png'
@@ -19,13 +22,14 @@ const FILES_TO_CACHE = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      for (const file of FILES_TO_CACHE) {
+      // Use Promise.all for faster parallel caching
+      await Promise.all(FILES_TO_CACHE.map(async file => {
         try {
           await cache.add(file);
         } catch (err) {
           console.warn('Failed to cache:', file, err);
         }
-      }
+      }));
     })
   );
   self.skipWaiting();
@@ -51,8 +55,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Handle currency API separately
-  if (url.href.includes("exchangerate-api.com")) {
+  // Handle currency API separately (Cache, then Network fallback)
+  if (url.href.includes("open.er-api.com")) {
     event.respondWith(
       caches.open(DATA_CACHE).then(cache => {
         return fetch(event.request)
@@ -65,13 +69,14 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-
-  // Cache-first for app shell
+  
+  // Cache-first for app shell assets and local files
   event.respondWith(
     caches.match(event.request).then(cached => {
       return (
         cached ||
         fetch(event.request).catch(() => {
+          // Serve the offline fallback for navigation requests
           if (event.request.mode === 'navigate') {
             return caches.match('/index.html');
           }
