@@ -2,7 +2,23 @@
 import { convertValue, swapUnits } from "./converter.js";
 import { getHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
-import { fetchCurrencyRates } from "./currency.js"; // Make sure currency.js exports this
+import { fetchCurrencyRates } from "./currency.js";
+
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function formatTime(timestamp) {
+    const diff = (Date.now() - timestamp) / 1000;
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
+    return new Date(timestamp).toLocaleDateString();
+}
 
 export function initializeElements() {
     return {
@@ -17,18 +33,16 @@ export function initializeElements() {
 }
 
 export async function initApp(el) {
-    // Ensure currency rates are fetched before populating dropdowns
-    await fetchCurrencyRates(el); // Pass 'el' for loading state/info updates
-
+    await fetchCurrencyRates();
     populateCategories(el);
     updateUnits(el);
     attachListeners(el);
     refreshHistory(el);
-}
 
-/* --------------------- */
-/* CATEGORY + UNITS      */
-/* --------------------- */
+    el.category.value = "Currency";
+    if (!el.fromValue.value || isNaN(el.fromValue.value)) el.fromValue.value = 1;
+    convertValue(el, "Currency", () => refreshHistory(el));
+}
 
 function populateCategories(el) {
     Object.keys(conversionData).forEach(cat => {
@@ -49,29 +63,27 @@ function updateUnits(el) {
     Object.keys(units).forEach(u => {
         const opt1 = document.createElement("option");
         const opt2 = document.createElement("option");
-
-        opt1.value = u;
-        opt1.textContent = units[u].name;
-
-        opt2.value = u;
-        opt2.textContent = units[u].name;
-
+        opt1.value = u; opt1.textContent = units[u].name;
+        opt2.value = u; opt2.textContent = units[u].name;
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
 
-    // Run initial conversion safely
+    if (category === 'Currency') {
+        el.fromUnit.value = 'GBP';
+        el.toUnit.value = 'USD';
+    } else {
+        el.fromUnit.selectedIndex = 0;
+        el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
+    }
+
+    if (!el.fromValue.value || isNaN(el.fromValue.value)) el.fromValue.value = 1;
+
     convertValue(el, category, () => refreshHistory(el));
 }
 
-/* --------------------- */
-/* LISTENERS             */
-/* --------------------- */
-
 function attachListeners(el) {
     const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
-
-    // Debounce text input to prevent excessive conversions
     const debouncedConversion = debounce(conversionCallback, 300);
 
     el.category.addEventListener("change", () => updateUnits(el));
@@ -79,26 +91,6 @@ function attachListeners(el) {
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
     el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
-}
-
-/* --------------------- */
-/* UTILS                 */
-/* --------------------- */
-
-function debounce(func, delay) {
-    let timeoutId;
-    return function(...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
-}
-
-function formatTime(timestamp) {
-    const diff = (Date.now() - timestamp) / 1000;
-    if (diff < 60) return "just now";
-    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
-    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
-    return new Date(timestamp).toLocaleDateString();
 }
 
 export async function refreshHistory(el) {
