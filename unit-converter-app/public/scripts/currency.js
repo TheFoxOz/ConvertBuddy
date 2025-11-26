@@ -1,29 +1,21 @@
 // scripts/currency.js
-import { conversionData } from "./units.js";
+
+const API_KEY = "YOUR_EXCHANGERATE_API_KEY"; // <-- replace with your real key
+const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/GBP`;
 
 export async function fetchCurrencyRates() {
     try {
-        const res = await fetch("https://api.exchangerate.host/latest?base=USD");
-        if (!res.ok) throw new Error("API call failed: " + res.status);
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Failed to fetch currency rates");
 
         const data = await res.json();
+        if (!data.conversion_rates) throw new Error("Malformed API response");
 
-        conversionData.Currency.units = Object.fromEntries(
-            Object.entries(data.rates).map(([code, rate]) => [
-                code,
-                { name: `${code} (${code})`, toBase: rate, symbol: code }
-            ])
-        );
+        return data.conversion_rates; // { USD: 1.26, EUR: 1.15, ... }
 
-        console.log("Currency rates loaded:", Object.keys(conversionData.Currency.units).length);
-
-    } catch (e) {
-        console.warn("Currency API failed, using fallback:", e.message);
-
-        conversionData.Currency.units = {
-            USD: { name: "USD ($)", toBase: 1, symbol: "$" },
-            EUR: { name: "EUR (€)", toBase: 1.1, symbol: "€" },
-            GBP: { name: "GBP (£)", toBase: 1.3, symbol: "£" }
-        };
+    } catch (err) {
+        console.error("Currency API error:", err);
+        alert("Could not load live currency rates. Try again later.");
+        return {};
     }
 }
