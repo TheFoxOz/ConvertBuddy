@@ -15,7 +15,12 @@ export async function fetchCurrencyRates() {
         conversionData.Currency.units = Object.fromEntries(
             Object.entries(data.rates).map(([code, rate]) => [
                 code,
-                { name: code, toBase: rate, symbol: code }
+                {
+                    // FIX: Use a descriptive name for the UI, e.g., AED (AED)
+                    name: `${code} (${code})`, 
+                    toBase: rate, 
+                    symbol: code 
+                }
             ])
         );
         console.log("Currency rates loaded:", Object.keys(conversionData.Currency.units).length);
@@ -23,10 +28,11 @@ export async function fetchCurrencyRates() {
     } catch (e) {
         console.warn("Currency API failed, using fallback:", e.message);
 
+        // Fallback: Use standard symbols and names for a better user experience
         conversionData.Currency.units = {
-            USD: { name: "US Dollar", toBase: 1, symbol: "$" },
-            EUR: { name: "Euro", toBase: 1.1, symbol: "€" },
-            GBP: { name: "British Pound", toBase: 1.3, symbol: "£" }
+            USD: { name: "USD ($)", toBase: 1, symbol: "$" },
+            EUR: { name: "EUR (€)", toBase: 1.1, symbol: "€" },
+            GBP: { name: "GBP (£)", toBase: 1.3, symbol: "£" }
         };
     }
 }
