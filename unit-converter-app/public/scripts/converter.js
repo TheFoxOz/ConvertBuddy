@@ -14,17 +14,16 @@ export function convert(category, fromUnit, toUnit, value) {
         throw new Error(`Units "${fromUnit}" or "${toUnit}" not found in "${category}"`);
 
     value = Number(value);
-    // CHANGE 1: Return NaN for invalid numeric input
+    // Returning NaN on invalid numeric input/error (from previous step)
     if (isNaN(value))
-        return NaN; // Changed from 0
+        return NaN;
 
     let base;
     try {
         base = typeof from.toBase === "function" ? from.toBase(value) : value * from.toBase;
     } catch (e) {
         console.warn(`Error converting from ${fromUnit} to base:`, e);
-        // CHANGE 2: Return NaN on conversion error
-        return NaN; // Changed from 0
+        return NaN;
     }
 
     let result;
@@ -32,11 +31,38 @@ export function convert(category, fromUnit, toUnit, value) {
         result = typeof to.fromBase === "function" ? to.fromBase(base) : base / to.toBase;
     } catch (e) {
         console.warn(`Error converting base to ${toUnit}:`, e);
-        // CHANGE 3: Return NaN on conversion error
-        return NaN; // Changed from 0
+        return NaN;
     }
 
     return Math.round(result * 1e6) / 1e6;
 }
 
-// ... (listUnits, swapUnits, convertValue remain unchanged in this file)
+/**
+ * List all units for a category
+ */
+export function listUnits(category) {
+    return Object.keys(conversionData[category]?.units || []);
+}
+
+/**
+ * Swap from/to units and values in UI
+ */
+export function swapUnits(el, callback) {
+    const tmpUnit = el.fromUnit.value;
+    el.fromUnit.value = el.toUnit.value;
+    el.toUnit.value = tmpUnit;
+
+    const tmpValue = el.fromValue.value;
+    el.fromValue.value = el.toValue.value;
+    el.toValue.value = tmpValue;
+
+    // UX IMPROVEMENT: Focus the input field after swapping
+    el.fromValue.focus();
+
+    callback();
+}
+
+/**
+ * Convert value and optionally save history
+ */
+// This function is now defined in ui.js to allow for the non-blocking change (see ui.js)
