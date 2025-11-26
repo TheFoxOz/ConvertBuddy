@@ -1,21 +1,34 @@
 // scripts/currency.js
 
-const API_KEY = "YOUR_EXCHANGERATE_API_KEY"; // <-- replace with your real key
-const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/GBP`;
+import { conversionData } from "./units.js";
+
+const API_KEY = "YOUR_API_KEY"; // replace with your exchangerate-api or similar
+const BASE = "USD";
 
 export async function fetchCurrencyRates() {
     try {
-        const res = await fetch(API_URL);
+        const res = await fetch(`https://open.er-api.com/v6/latest/${BASE}`);
         if (!res.ok) throw new Error("Failed to fetch currency rates");
-
         const data = await res.json();
-        if (!data.conversion_rates) throw new Error("Malformed API response");
 
-        return data.conversion_rates; // { USD: 1.26, EUR: 1.15, ... }
+        if (data.result !== "success") throw new Error("API error");
 
-    } catch (err) {
-        console.error("Currency API error:", err);
-        alert("Could not load live currency rates. Try again later.");
+        const rates = data.rates;
+
+        // Fill Currency units dynamically
+        conversionData.Currency.units = {};
+        for (const currency in rates) {
+            conversionData.Currency.units[currency] = {
+                name: `${currency} (${currency})`,
+                toBase: v => v / rates[currency],
+                fromBase: v => v * rates[currency]
+            };
+        }
+
+        console.log("Currency rates loaded:", Object.keys(conversionData.Currency.units).length);
+        return conversionData.Currency.units;
+    } catch (error) {
+        console.error("Error fetching currency rates:", error);
         return {};
     }
 }
