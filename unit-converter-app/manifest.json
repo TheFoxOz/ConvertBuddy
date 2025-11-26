@@ -1,7 +1,7 @@
 {
   "name": "ConvertBuddy",
   "short_name": "Converter",
-  "description": "Universal Unit Converter for everyday use.",
+  "description": "Universal Unit Converter.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f0fdf4",
