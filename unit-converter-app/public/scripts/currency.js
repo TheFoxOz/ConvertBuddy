@@ -6,9 +6,16 @@ const CACHE_KEY = "currencyRates";
 const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function fetchCurrencyRates() {
-    // Try localStorage first
-    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    let cached = {};
     const now = Date.now();
+
+    // CHANGE: Added try/catch around JSON.parse for defensive programming
+    try {
+        cached = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    } catch (e) {
+        console.warn("Error parsing cached currency rates, forcing live fetch.", e);
+        // We will proceed with an empty cache object
+    }
 
     if (cached.timestamp && (now - cached.timestamp < CACHE_EXPIRY) && cached.rates) {
         console.log("Using cached currency rates");
@@ -18,6 +25,7 @@ export async function fetchCurrencyRates() {
     // Fetch live rates
     try {
         const res = await fetch(API_URL);
+        // ... (rest of the successful fetch logic is unchanged)
         if (!res.ok) throw new Error("Failed to fetch currency rates");
         const data = await res.json();
         if (data.result !== "success") throw new Error("API returned error");
