@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
         body {
-            background-color: #e5f5e5;
+            background-color: #e5f5e5; /* Light green background */
         }
         .app-container {
             max-width: 500px;
@@ -16,16 +16,23 @@
         }
         /* Custom class for the main stacked box design */
         .conversion-box {
+            /* Using Tailwind classes where possible, otherwise custom CSS */
             border: 2px solid #34D399; /* Emerald 400 border */
             border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
+            padding: 1.5rem; /* Slightly more padding */
             background-color: #F0FFF4; /* Light green background */
         }
-        /* Style adjustments for inputs inside the box */
+        /* Refinements for inputs/selects */
         .conversion-box input, .conversion-box select {
-            border: 1px solid #D1D5DB; /* Lighter border inside the box */
+            border: 1px solid #D1D5DB; 
             box-shadow: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: white; /* Make inputs white to stand out */
+        }
+        /* Focus state based on Tailwind emerald-500 */
+        .conversion-box input:focus, .conversion-box select:focus {
+            border-color: #10B981; 
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
     </style>
 </head>
@@ -34,7 +41,7 @@
     <div class="app-container p-6 bg-white rounded-xl shadow-2xl">
 
         <h1 class="text-3xl font-bold text-center text-emerald-600 mb-2">ConvertBuddy</h1>
-        <p class="text-center text-gray-500 mb-6">Your universal unit converter – Length, Weight, Temperature, Currency & more.</p>
+        <p class="text-center text-gray-500 mb-6">Your universal unit converter.</p>
 
         <label for="category-select" class="block text-sm font-medium text-gray-700 mb-1">Conversion Category</label>
         <div class="flex items-center mb-6 border rounded-lg overflow-hidden bg-gray-50">
@@ -46,6 +53,8 @@
 
         <div id="conversion-form" class="space-y-6">
 
+            <p id="loading-info" class="text-sm text-gray-500 text-center mb-2">Loading currencies...</p>
+
             <div class="conversion-box">
                 <label class="block text-lg font-semibold text-gray-800 mb-2">FROM</label>
                 
@@ -55,20 +64,23 @@
                     step="any" 
                     value="1" 
                     placeholder="Enter value" 
-                    class="w-full p-3 border rounded-md mb-3 focus:ring-emerald-500 focus:border-emerald-500"
+                    class="w-full p-3 border rounded-md mb-3"
                 >
                 
-                <select id="from-unit" class="w-full p-3 border rounded-md focus:ring-emerald-500 focus:border-emerald-500">
+                <select id="from-unit" class="w-full p-3 border rounded-md">
                     </select>
             </div>
 
-            <div class="flex justify-center -my-2">
-                <button id="swap-button" class="px-6 py-3 bg-emerald-500 text-white font-semibold rounded-full hover:bg-emerald-600 transition duration-150 shadow-lg z-10">
-                    <i class="fas fa-arrows-alt-h mr-2"></i> Swap
+            <div class="relative flex justify-center -mt-12 mb-0">
+                <button 
+                    id="swap-button" 
+                    class="w-12 h-12 flex items-center justify-center bg-emerald-500 text-white rounded-full shadow-xl hover:bg-emerald-600 transition duration-200 z-10"
+                >
+                    <i class="fas fa-arrows-alt-h"></i>
                 </button>
             </div>
 
-            <div class="conversion-box">
+            <div class="conversion-box mt-0 pt-6">
                 <label class="block text-lg font-semibold text-gray-800 mb-2">TO (Result)</label>
                 
                 <input 
@@ -79,13 +91,12 @@
                     class="w-full p-3 border rounded-md mb-3 bg-gray-100 text-gray-800 font-bold"
                 >
                 
-                <select id="to-unit" class="w-full p-3 border rounded-md focus:ring-emerald-500 focus:border-emerald-500">
+                <select id="to-unit" class="w-full p-3 border rounded-md">
                     </select>
             </div>
 
-            <div class="flex flex-col items-center pt-4">
-                <p id="loading-info" class="text-sm text-gray-500"></p>
-                <a href="#" class="mt-1 text-sm text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
+            <div class="flex justify-center pt-4">
+                <a href="#" class="text-sm text-emerald-600 hover:text-emerald-700">Privacy Policy</a>
             </div>
         </div>
 
