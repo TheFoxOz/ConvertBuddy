@@ -7,7 +7,7 @@ import { saveHistory } from "./firestore.js";
  * @param {object} el - DOM elements object
  * @param {string} category - Current conversion category
  * @param {function} onComplete - Callback to refresh UI history
- * @param {boolean} saveHistoryFlag - Whether to save this conversion to history (Default: true)
+ * @param {boolean} saveHistoryFlag - Whether to save this conversion to history
  */
 export function convertValue(el, category, onComplete, saveHistoryFlag = true) {
     const data = conversionData[category];
@@ -33,7 +33,7 @@ export function convertValue(el, category, onComplete, saveHistoryFlag = true) {
 
     el.toValue.value = (to.symbol ? to.symbol + " " : "") + formatted;
 
-    if (saveHistoryFlag) { // Check flag before saving
+    if (saveHistoryFlag) {
         saveHistory({
             category,
             fromUnit: el.fromUnit.value,
