@@ -11,9 +11,7 @@ export function initializeElements() {
         fromUnit: document.getElementById("from-unit"),
         toUnit: document.getElementById("to-unit"),
         swapButton: document.getElementById("swap-button"),
-        categoryIcon: document.getElementById("category-icon"),
-        currencyInfo: document.getElementById("currency-info"),
-        historySection: null
+        historyList: document.getElementById("history-list")
     };
 }
 
@@ -21,8 +19,12 @@ export function initApp(el) {
     populateCategories(el);
     updateUnits(el);
     attachListeners(el);
-    loadHistory();
+    refreshHistory(el);
 }
+
+/* --------------------- */
+/* CATEGORY + UNITS      */
+/* --------------------- */
 
 function populateCategories(el) {
     Object.keys(conversionData).forEach(cat => {
@@ -57,30 +59,73 @@ function updateUnits(el) {
     convertValue(el, category);
 }
 
+/* --------------------- */
+/* LISTENERS             */
+/* --------------------- */
+
 function attachListeners(el) {
     el.category.addEventListener("change", () => {
         updateUnits(el);
+        refreshHistory(el);
     });
 
     el.fromValue.addEventListener("input", () => {
         convertValue(el, el.category.value);
+        refreshHistory(el);
     });
 
     el.fromUnit.addEventListener("change", () => {
         convertValue(el, el.category.value);
+        refreshHistory(el);
     });
 
     el.toUnit.addEventListener("change", () => {
         convertValue(el, el.category.value);
+        refreshHistory(el);
     });
 
     el.swapButton.addEventListener("click", () => {
         swapUnits(el, () => convertValue(el, el.category.value));
+        refreshHistory(el);
     });
 }
 
-async function loadHistory() {
+/* --------------------- */
+/* HISTORY UI            */
+/* --------------------- */
+
+async function refreshHistory(el) {
+    const list = el.historyList;
     const history = await getHistory();
 
-    console.log("User history:", history);
+    list.innerHTML = "";
+
+    history.slice(0, 15).forEach(entry => {
+        const item = document.createElement("div");
+        item.className =
+            "p-3 bg-gray-50 rounded-lg shadow border border-gray-200";
+
+        item.innerHTML = `
+            <div class="flex justify-between text-sm text-gray-700">
+                <span class="font-semibold text-emerald-700">${entry.category}</span>
+                <span class="text-gray-500">${formatTime(entry.timestamp)}</span>
+            </div>
+
+            <div class="mt-1 text-gray-800">
+                ${entry.input} ${entry.fromUnit} → <span class="font-semibold">${entry.output}</span>
+            </div>
+        `;
+
+        list.appendChild(item);
+    });
+}
+
+function formatTime(timestamp) {
+    const diff = (Date.now() - timestamp) / 1000;
+
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + " min ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + " h ago";
+
+    return new Date(timestamp).toLocaleDateString();
 }
