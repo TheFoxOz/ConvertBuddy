@@ -137,8 +137,28 @@
 
         // Global variables provided by the environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        
+        // --- START: CUSTOM FIREBASE CONFIGURATION ---
+        // REPLACE THE VALUES BELOW with the config object from your Firebase project settings.
+        const YOUR_FIREBASE_CONFIG_HERE = {
+            apiKey: "AIzaSyAzVq-WhSd4w5oYp3S0LgJm4u2qxLqf-9Q",
+            authDomain: "covertbuddy-c8b99.firebaseapp.com",
+            projectId: "covertbuddy-c8b99", // IMPORTANT: This must be present and correct
+            storageBucket: "covertbuddy-c8b99.firebasestorage.app",
+            messagingSenderId: "826662486676",
+            appId: "1:826662486676:web:988294692da3836d73aa81",
+            measurementId: "G-1GXL1GWBL5"
+        };
+        // Use the custom config. We still parse the environment variable as a fallback/check,
+        // but prefer the hardcoded one if provided.
+        const environmentConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const firebaseConfig = YOUR_FIREBASE_CONFIG_HERE.projectId !== "YOUR_PROJECT_ID" 
+            ? YOUR_FIREBASE_CONFIG_HERE 
+            : environmentConfig;
+        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // --- END: CUSTOM FIREBASE CONFIGURATION ---
+
 
         let db;
         let auth;
@@ -222,7 +242,8 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
-                        el.userIdDisplay.textContent = ` (User ID: ${userId})`;
+                        // Use the correct path for private data
+                        el.userIdDisplay.textContent = ` (History Path: /artifacts/${appId}/users/${userId}/conversion_history)`;
                     } else {
                         // Fallback ID if auth fails (shouldn't happen with anonymous)
                         userId = crypto.randomUUID(); 
@@ -349,12 +370,12 @@
         // --- Firestore History Management ---
 
         function getHistoryCollectionRef() {
-            // Using the simple private path structure
+            // Using the simple private path structure: artifacts/{appId}/users/{userId}/conversion_history
             if (!db || !userId) {
                 console.error("Firestore DB or userId not initialized.");
                 return null;
             }
-            return collection(db, `users/${userId}/conversion_history`);
+            return collection(db, `artifacts/${appId}/users/${userId}/conversion_history`);
         }
 
         function saveConversion(value, from, to, category, result) {
@@ -387,12 +408,21 @@
             const historyRef = getHistoryCollectionRef();
             if (!historyRef) return;
             
-            const q = query(historyRef, orderBy("timestamp", "desc"));
+            // NOTE: We rely on client-side sorting instead of orderBy("timestamp", "desc") 
+            // to avoid requiring a composite index, which can cause runtime errors.
+            const q = query(historyRef);
 
             onSnapshot(q, (snapshot) => {
                 const historyItems = [];
                 snapshot.forEach(doc => {
                     historyItems.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Sort client-side by timestamp (latest first)
+                historyItems.sort((a, b) => {
+                    const timeA = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+                    const timeB = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+                    return timeB - timeA;
                 });
                 
                 renderHistory(historyItems);
