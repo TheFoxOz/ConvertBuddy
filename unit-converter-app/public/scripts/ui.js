@@ -1,8 +1,12 @@
 // scripts/ui.js
 import { convertValue, swapUnits } from "./converter.js";
-import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.js"; 
+import { getHistory, clearHistory as firestoreClearHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
 import { fetchCurrencyRates } from "./currency.js";
+
+/* --------------------- */
+/* UTILS                 */
+/* --------------------- */
 
 function debounce(func, delay) {
     let timeoutId;
@@ -31,6 +35,10 @@ function handleClearHistory(el) {
     }
 }
 
+/* --------------------- */
+/* ELEMENTS INIT         */
+/* --------------------- */
+
 export function initializeElements() {
     return {
         category: document.getElementById("category-select"),
@@ -41,9 +49,14 @@ export function initializeElements() {
         swapButton: document.getElementById("swap-button"),
         historyList: document.getElementById("history-list"),
         loadingInfo: document.getElementById("loading-info"),
-        clearHistoryButton: document.getElementById("clear-history-button")
+        clearHistoryButton: document.getElementById("clear-history-button"),
+        categoryIcon: document.querySelector("#category-select + i")
     };
 }
+
+/* --------------------- */
+/* APP INIT              */
+/* --------------------- */
 
 export async function initApp(el) {
     el.loadingInfo.textContent = "Loading live currency rates...";
@@ -53,10 +66,13 @@ export async function initApp(el) {
 
     populateCategories(el);
     updateUnits(el);
-    updateCategoryIcon(el);
     attachListeners(el);
     refreshHistory(el);
 }
+
+/* --------------------- */
+/* CATEGORY + UNITS      */
+/* --------------------- */
 
 function populateCategories(el) {
     el.category.innerHTML = "";
@@ -66,6 +82,13 @@ function populateCategories(el) {
         option.textContent = cat;
         el.category.appendChild(option);
     });
+    updateCategoryIcon(el);
+}
+
+function updateCategoryIcon(el) {
+    if (el.categoryIcon) {
+        el.categoryIcon.className = conversionData[el.category.value]?.icon || "fas fa-question";
+    }
 }
 
 function updateUnits(el) {
@@ -79,33 +102,38 @@ function updateUnits(el) {
         const opt1 = document.createElement("option");
         const opt2 = document.createElement("option");
 
-        opt1.value = u; opt1.textContent = units[u].name;
-        opt2.value = u; opt2.textContent = units[u].name;
+        opt1.value = u;
+        opt1.textContent = units[u].name;
+
+        opt2.value = u;
+        opt2.textContent = units[u].name;
 
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
 
+    // Default units
     if (category === 'Currency') {
-        const keys = Object.keys(units);
-        el.fromUnit.value = keys.includes('GBP') ? 'GBP' : keys[0];
-        el.toUnit.value = keys.includes('USD') ? 'USD' : keys[1] || keys[0];
+        el.fromUnit.value = 'GBP';
+        el.toUnit.value = 'USD';
     } else {
         el.fromUnit.selectedIndex = 0;
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
     convertValue(el, category, () => refreshHistory(el), false);
+    updateCategoryIcon(el);
 }
+
+/* --------------------- */
+/* LISTENERS             */
+/* --------------------- */
 
 function attachListeners(el) {
     const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
     const debouncedConversion = debounce(conversionCallback, 300);
 
-    el.category.addEventListener("change", () => {
-        updateUnits(el);
-        updateCategoryIcon(el);
-    });
+    el.category.addEventListener("change", () => updateUnits(el));
     el.fromValue.addEventListener("input", debouncedConversion);
     el.fromUnit.addEventListener("change", conversionCallback);
     el.toUnit.addEventListener("change", conversionCallback);
@@ -113,9 +141,14 @@ function attachListeners(el) {
     el.clearHistoryButton.addEventListener("click", () => handleClearHistory(el));
 }
 
+/* --------------------- */
+/* HISTORY               */
+/* --------------------- */
+
 export async function refreshHistory(el) {
     const list = el.historyList;
     const history = await getHistory();
+
     list.innerHTML = "";
     history.slice(0, 10).forEach(entry => { 
         const item = document.createElement("div");
@@ -131,14 +164,9 @@ export async function refreshHistory(el) {
         `;
         list.appendChild(item);
     });
-    if (history.length === 0) {
+
+    if (!history.length) {
         list.innerHTML = '<p class="text-sm text-gray-500">Your recent conversions will appear here.</p>';
     }
 }
 
-function updateCategoryIcon(el) {
-    const iconEl = el.category.previousElementSibling;
-    const category = el.category.value;
-    const iconClass = conversionData[category].icon || 'fas fa-question';
-    iconEl.className = iconClass + ' text-gray-400 p-3';
-}
