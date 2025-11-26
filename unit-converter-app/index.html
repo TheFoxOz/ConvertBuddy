@@ -1,399 +1,500 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ConvertBuddy – Convertisseur d'Unités Universel</title>
-    
-    <!-- Vercel Analytics Script Installation (Added) -->
-    <script src="/_vercel/insights/script.js"></script>
-
-    <!-- PWA Essentials (Links corrected to root scope) -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    <meta name="theme-color" content="#10b981">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ConvertBuddy">
-    <meta name="application-name" content="ConvertBuddy">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Google AdSense Main Script: YOUR PUBLISHER ID IS CORRECTLY INSERTED BELOW -->
-    <script
-    async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9771422699626133"
-      crossorigin="anonymous"></script>
-
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: linear-gradient(to bottom, #f0fdf4, #dcfce7); 
-            min-height: 100vh; 
-        }
-        * { -webkit-tap-highlight-color: transparent; }
-        .converter-card { 
-            background: white; 
-            border-radius: 1.5rem; 
-            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); 
-        }
-        .btn-swap { 
-            background: #10b981; 
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
-        }
-        .btn-swap:hover { 
-            background: #059669; 
-        }
-        select, input { 
-            border: 2px solid #86efac; 
-            transition: border-color 0.2s;
-            /* Ensure inputs and selects have rounded corners */
-            border-radius: 0.75rem; 
-        }
-        select:focus, input:focus { 
-            border-color: #10b981; 
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-        }
-        #outputValue { 
-            background: #ecfdf5; 
-            color: #065f46; 
-            border: 2px solid #34d399;
-            border-radius: 0.75rem; 
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvertBuddy – Convertisseur d'Unités Universel</title>
+    
+    <!-- Vercel Analytics Script Installation (Added) -->
+    <script src="/_vercel/insights/script.js"></script>
+ 
+    <!-- PWA Essentials (Links corrected to root scope) -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="ConvertBuddy">
+    <meta name="application-name" content="ConvertBuddy">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google AdSense Main Script: YOUR PUBLISHER ID IS CORRECTLY INSERTED BELOW -->
+    <script
+    async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9771422699626133"
+      crossorigin="anonymous"></script>
+ 
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(to bottom, #f0fdf4, #dcfce7); 
+            min-height: 100vh; 
+        }
+        * { -webkit-tap-highlight-color: transparent; }
+        .converter-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15); 
+        }
+        .btn-swap { 
+            background: #10b981; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
+        }
+        .btn-swap:hover { 
+            background: #059669; 
+        }
+        select, input { 
+            border: 2px solid #86efac; 
+            transition: border-color 0.2s;
+            /* Ensure inputs and selects have rounded corners */
+            border-radius: 0.75rem; 
+        }
+        select:focus, input:focus { 
+            border-color: #10b981; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+        #outputValue {
+            background: #ecfdf5; 
+            color: #065f46; 
+            border: 2px solid #34d399;
+            border-radius: 0.75rem; 
+        }
+        .history-entry {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
-
-    <!-- AD 1: Desktop/Tablet Top Banner (Hidden on small screens) -->
-    <!-- !!! IMPORTANT: REPLACE '1234567890' with your actual Desktop Ad Slot ID !!! -->
-    <div class="w-full max-w-lg mb-4 hidden sm:block">
-        <ins class="adsbygoogle"
-        style="display:block" 
-        data-ad-client="ca-pub-9771422699626133"
-        data-ad-slot="1234567890" 
-        data-ad-format="auto" 
-        data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-    
-    <!-- AD 2: Mobile Top Banner (Hidden on desktop) -->
-    <!-- !!! IMPORTANT: REPLACE '1122334455' with your actual Mobile Ad Slot ID !!! -->
-    <div class="w-full max-w-lg mb-4 sm:hidden">
-        <ins class="adsbygoogle"
-        style="display:block" 
-        data-ad-client="ca-pub-9771422699626133"
-        data-ad-slot="1122334455" 
-        data-ad-format="auto" 
-        data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <div id="app" class="converter-card w-full max-w-lg p-8 space-y-6">
-        <h1 class="text-4xl font-bold text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            ConvertBuddy
-        </h1>
-        <p class="text-center text-gray-600">Votre convertisseur hors ligne amical — Longueur, Poids, Température, Vitesse, Volume, Aire, et **Devises**.</p>
-
-        <!-- Category -->
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Catégorie</label>
-            <select id="category" onchange="loadUnits()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
-        </div>
-
-        <!-- Input -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div class="md:col-span-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Valeur</label>
-                <input
-                    type="number" 
-                    id="inputValue" 
-                    value="1" 
-                    min="0" 
-                    oninput="convert()" 
-                    class="w-full p-4 text-lg focus:ring-emerald-500" 
-                    placeholder="Entrez la valeur"
-                >
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">De</label>
-                <select id="fromUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
-            </div>
-        </div>
-
-        <!-- Swap Button -->
-        <div class="flex justify-center">
-            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition transform hover:scale-105" aria-label="Échanger les unités">
-                <!-- Dedicated Swap Icon -->
-                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Output -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div class="md:col-span-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Résultat</label>
-                <output 
-                    id="outputValue" 
-                    class="block w-full p-4 text-2xl font-bold min-h-[68px] flex items-center"
-                ></output>
-                <p id="currency-source-info" class="text-xs text-gray-500 mt-1 hidden"></p>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">À</label>
-                <select id="toUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
-            </div>
-        </div>
-
-        <div id="error-message" class="text-red-500 text-center h-6"></div>
-        <div id="loading-indicator" class="text-center h-6 text-emerald-600 hidden">
-            Chargement des taux...
-        </div>
-
-        <!-- AD 3: Bottom Rectangle Ad (Shown on both) -->
-        <!-- !!! IMPORTANT: REPLACE '9876543210' with your actual Bottom Ad Slot ID !!! -->
-        <div class="my-6 text-center">
-            <ins class="adsbygoogle"
-            style="display:block" 
-            data-ad-client="ca-pub-9771422699626133"
-            data-ad-slot="9876543210" 
-            data-ad-format="auto" 
-            data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
-
-        <!-- History -->
-        <div class="border-t pt-6 border-gray-100">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-xl font-bold text-gray-800">Conversions Récentes</h2>
-                <button onclick="clearHistory()" class="text-sm text-red-600 hover:text-red-800 transition">Effacer tout</button>
-            </div>
-            <ul id="historyList" class="space-y-2 max-h-48 overflow-y-auto text-sm">
-                <li class="text-gray-400 italic">Aucune conversion récente</li>
-            </ul>
-        </div>
-        
-        <!-- Footer with Legal Links (New Addition) -->
-        <footer class="mt-6 pt-4 border-t border-gray-100 text-center text-xs text-gray-500">
-            &copy; 2025 ConvertBuddy. Tous droits réservés. | 
-            <a href="privacy.html" class="text-emerald-600 hover:text-emerald-700 font-medium">Politique de Confidentialité</a>
-        </footer>
-    </div>
-
-    <script>
-        const API_URL = 'https://api.exchangerate-api.com/v4/latest/USD';
-        const HISTORY_KEY = 'convertBuddyHistory'; 
-        let history = [];
-        const el = {};
-        let currencyRates = null; 
-
-        const unitData = {
-            length: {name:"Longueur",icon:"📏",baseUnit:"meter",units:{meter:{label:"Mètre (m)",factor:1},kilometer:{label:"Kilomètre (km)",factor:1000},mile:{label:"Mile (mi)",factor:1609.34},foot:{label:"Pied (ft)",factor:0.3048},centimeter:{label:"Centimètre (cm)",factor:0.01},inch:{label:"Pouce (in)",factor:0.0254}}},
-            volume: {name:"Volume",icon:"🧪",baseUnit:"liter",units:{liter:{label:"Litre (L)",factor:1},dl:{label:"Décilitre (dl)",factor:0.1},cl:{label:"Centilitre (cl)",factor:0.01},ml:{label:"Millilitre (ml)",factor:0.001},cup:{label:"Tasse (US)",factor:0.236588},floz:{label:"Once liquide (fl oz)",factor:0.0295735},teaspoon:{label:"Cuillère à café (tsp)",factor:0.00492892},tablespoon:{label:"Cuillère à soupe (Tbsp)",factor:0.0147868}}},
-            mass: {name:"Masse",icon:"⚖️",baseUnit:"kilogram",units:{kilogram:{label:"Kilogramme (kg)",factor:1},stone:{label:"Stone (st)",factor:6.35029},pound:{label:"Livre (lb)",factor:0.453592},gram:{label:"Gramme (g)",factor:0.001},ounce:{label:"Once (oz)",factor:0.0283495}}},
-            temperature: {name:"Température",icon:"🌡️",baseUnit:"celsius",conversionType:"temperature",units:{celsius:{label:"Celsius (°C)",toBase:v=>v,fromBase:v=>v},fahrenheit:{label:"Fahrenheit (°F)",toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},kelvin:{label:"Kelvin (K)",toBase:v=>v-273.15,fromBase:v=>v+273.15}}},
-            speed: {name:"Vitesse",icon:"🏎️",baseUnit:"mps",units:{mps:{label:"Mètre/Seconde (m/s)",factor:1},kph:{label:"Kilomètre/Heure (km/h)",factor:1/3.6},mph:{label:"Mile/Heure (mph)",factor:0.44704},knots:{label:"Nœud (kn)",factor:0.514444}}},
-            area: {name:"Aire",icon:"🖼️",baseUnit:"sq_meter",units:{sq_meter:{label:"Mètre Carré (m²)",factor:1},sq_foot:{label:"Pied Carré (ft²)",factor:0.092903},sq_mile:{label:"Mile Carré (mi²)",factor:2589988.11},hectare:{label:"Hectare (ha)",factor:10000},acre:{label:"Acre (ac)",factor:4046.86}}},
-            currency: {name:"Devise",icon:"💵",baseUnit:"USD",conversionType:"currency",units: {
-                USD: { label: "US Dollar ($)", factor: 1 }, EUR: { label: "Euro (€)", factor: 1 }, GBP: { label: "Livre Sterling (£)", factor: 1 },
-                CAD: { label: "Dollar Canadien ($)", factor: 1 }, AUD: { label: "Dollar Australien ($)", factor: 1 }, JPY: { label: "Yen Japonais (¥)", factor: 1 },
-                CHF: { label: "Franc Suisse (Fr)", factor: 1 }, INR: { label: "Roupie Indienne (₹)", factor: 1 }, ZAR: { label: "Rand Sud-Africain (R)", factor: 1 }
-            }}
-        };
-
-        function fmt(n) { 
-            if (!isFinite(n)) return 'Erreur';
-            return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:6, useGrouping: true}).format(n); 
-        }
-
-        function loadHistory() {
-            try {
-                const storedHistory = localStorage.getItem(HISTORY_KEY);
-                if (storedHistory) {
-                    history = JSON.parse(storedHistory);
-                }
-            } catch (e) {
-                console.error("Erreur lors du chargement de l'historique:", e);
-                history = [];
-            }
-        }
-        
-        function saveHistory() {
-            try {
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            } catch (e) {
-                console.error("Erreur lors de la sauvegarde de l'historique:", e);
-            }
-        }
-
-        function addHistory(result, from, to, val) {
-            if (!isFinite(result)) return;
-
-            history.unshift({
-                val: fmt(val),
-                res: fmt(result),
-                from: from.split(' (')[0], 
-                to: to.split(' (')[0], 
-                time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
-            });
-            if(history.length>10) history.pop();
-            renderHistory();
-            saveHistory();
-        }
-        
-        function renderHistory() {
-            const list = document.getElementById('historyList');
-            list.innerHTML = history.length===0
-                ? '<li class="text-gray-400 italic">Aucune conversion récente</li>' 
-                : history.map(h=>`<li class="bg-emerald-50 p-3 rounded-xl flex justify-between items-center hover:bg-emerald-100 transition duration-150">
-                    <span class="truncate pr-2">${h.val} ${h.from} <span class="text-teal-600 font-bold">→</span> ${h.res} ${h.to}</span>
-                    <span class="text-xs text-gray-500 flex-shrink-0">${h.time}</span>
-                </li>`).join('');
-        }
-        
-        function clearHistory() { 
-            history=[]; 
-            renderHistory(); 
-            saveHistory();
-        }
-        
-        async function fetchCurrencyRatesWithRetry(retries = 3) {
-            el.loading.classList.remove('hidden');
-            el.currencyInfo.classList.add('hidden');
-            el.err.textContent = '';
-            
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(API_URL);
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const data = await response.json();
-                    
-                    if (data.rates && data.base === 'USD') {
-                        currencyRates = data.rates;
-                        el.loading.classList.add('hidden');
-                        el.currencyInfo.textContent = `Taux mis à jour: ${new Date().toLocaleTimeString('fr-FR')}`;
-                        el.currencyInfo.classList.remove('hidden');
-                        return true;
-                    }
-                } catch (error) {
-                    console.warn(`Attempt ${i + 1} failed. Retrying...`);
-                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
-                }
-            }
-            el.loading.classList.add('hidden');
-            el.err.textContent = "Échec du chargement des taux de devise après plusieurs tentatives.";
-            currencyRates = null;
-            return false;
-        }
-
-        async function loadUnits(){
-            const catKey = el.cat.value;
-            const units = unitData[catKey].units;
-            
-            if (catKey === 'currency') {
-                el.currencyInfo.classList.remove('hidden');
-                if (!currencyRates) {
-                    await fetchCurrencyRatesWithRetry();
-                }
-            } else {
-                el.currencyInfo.classList.add('hidden');
-                el.loading.classList.add('hidden');
-            }
-
-            [el.from, el.to].forEach(s=>{
-                s.innerHTML=''; 
-                Object.keys(units).forEach(k=>{ 
-                    const o=new Option(units[k].label,k);
-                    s.add(o); 
-                }); 
-            });
-            
-            if (el.from.options.length > 0) {
-                el.to.selectedIndex = el.from.selectedIndex === 0 ? 1 : 0;
-            }
-            convert();
-        }
-        
-        function convert(){
-            el.err.textContent='';
-            const v = parseFloat(el.input.value);
-            const cat = unitData[el.cat.value];
-            
-            if(isNaN(v) || v < 0) {
-                 el.output.textContent = '0';
-                 if (el.input.value !== '') {
-                    el.err.textContent='Veuillez entrer une valeur valide.';
-                 }
-                 return;
-            }
-
-            const fromKey = el.from.value;
-            const toKey = el.to.value;
-            
-            if (!cat || !cat.units[fromKey] || !cat.units[toKey]) {
-                el.err.textContent = 'Unités de conversion introuvables.';
-                return;
-            }
-
-            const from = cat.units[fromKey];
-            const to = cat.units[toKey];
-            let result;
-
-            if(cat.conversionType==='temperature'){
-                result = to.fromBase(from.toBase(v));
-            } else if (cat.conversionType === 'currency') {
-                if (!currencyRates) {
-                    el.err.textContent = "Les taux de devise ne sont pas disponibles. Réessayez ou changez de catégorie.";
-                    el.output.textContent = '...';
-                    return;
-                }
-                const valueInBase = v / currencyRates[fromKey];
-                result = valueInBase * currencyRates[toKey];
-            } else {
-                result = (v * from.factor) / to.factor;
-            }
-
-            el.output.textContent = fmt(result);
-            addHistory(result, from.label, to.label, v);
-        }
-        
-        function swapUnits(){
-            const temp=el.from.value;
-            el.from.value=el.to.value; 
-            el.to.value=temp;
-            convert();
-        }
-
-        document.addEventListener('DOMContentLoaded',()=>{
-            el.cat = document.getElementById('category');
-            el.from = document.getElementById('fromUnit');
-            el.to = document.getElementById('toUnit');
-            el.input = document.getElementById('inputValue');
-            el.output = document.getElementById('outputValue');
-            el.err = document.getElementById('error-message');
-            el.loading = document.getElementById('loading-indicator');
-            el.currencyInfo = document.getElementById('currency-source-info');
-
-            loadHistory(); 
-
-            Object.keys(unitData).forEach(k=>{
-                const o=document.createElement('option'); 
-                o.value=k; 
-                o.text=`${unitData[k].icon} ${unitData[k].name}`;
-                el.cat.appendChild(o);
-            });
-            loadUnits();
-            renderHistory();
-        });
-
-        if('serviceWorker' in navigator){
-            window.addEventListener('load',()=>{
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then(reg => console.log('SW Enregistré:', reg.scope))
-                    .catch(err => console.error('Échec de l\'enregistrement SW:', err));
-            });
-        }
-    </script>
+ 
+    <!-- AD 1: Desktop/Tablet Top Banner (Hidden on small screens) -->
+    <!-- !!! IMPORTANT: REPLACE '1234567890' with your actual Desktop Ad Slot ID !!! -->
+    <div class="w-full max-w-lg mb-4 hidden sm:block">
+        <ins class="adsbygoogle"
+        style="display:block" 
+        data-ad-client="ca-pub-9771422699626133"
+        data-ad-slot="1234567890" 
+        data-ad-format="auto" 
+        data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <!-- AD 2: Mobile Top Banner (Hidden on desktop) -->
+    <!-- !!! IMPORTANT: REPLACE '1122334455' with your actual Mobile Ad Slot ID !!! -->
+    <div class="w-full max-w-lg mb-4 sm:hidden">
+        <ins class="adsbygoogle"
+        style="display:block" 
+        data-ad-client="ca-pub-9771422699626133"
+        data-ad-slot="1122334455" 
+        data-ad-format="auto" 
+        data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+ 
+    <div id="app" class="converter-card w-full max-w-lg p-8 space-y-6">
+        <h1 class="text-4xl font-bold text-center bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            ConvertBuddy
+        </h1>
+        <p class="text-center text-gray-600">Votre convertisseur hors ligne amical — Longueur, Poids, Température, Vitesse, Volume, Aire, et **Devises**.</p>
+ 
+        <!-- Category -->
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Catégorie</label>
+            <select id="category" onchange="loadUnits()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
+        </div>
+ 
+        <!-- Input -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="md:col-span-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Valeur</label>
+                <input
+                    type="number" 
+                    id="inputValue" 
+                    value="1" 
+                    min="0" 
+                    oninput="convert()" 
+                    class="w-full p-4 text-lg focus:ring-emerald-500" 
+                    placeholder="Entrez la valeur"
+                >
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">De</label>
+                <select id="fromUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
+            </div>
+        </div>
+ 
+        <!-- Swap Button -->
+        <div class="flex justify-center">
+            <button onclick="swapUnits()" class="p-4 rounded-full btn-swap text-white shadow-lg hover:shadow-xl transition transform hover:scale-105" aria-label="Échanger les unités">
+                <!-- Dedicated Swap Icon -->
+                <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+            </button>
+        </div>
+ 
+        <!-- Output -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="md:col-span-3">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Résultat</label>
+                <output 
+                    id="outputValue" 
+                    class="block w-full p-4 text-2xl font-bold min-h-[68px] flex items-center"
+                ></output>
+                <p id="currency-source-info" class="text-xs text-gray-500 mt-1 hidden"></p>
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">À</label>
+                <select id="toUnit" onchange="convert()" class="w-full p-4 text-lg focus:ring-emerald-500"></select>
+            </div>
+        </div>
+ 
+        <div id="error-message" class="text-red-500 text-center h-6"></div>
+        <div id="loading-indicator" class="text-center h-6 text-emerald-600 hidden">
+            Chargement des taux...
+        </div>
+        <div id="firebase-status" class="text-center text-xs text-gray-400">Initialisation...</div>
+ 
+        <!-- AD 3: Bottom Rectangle Ad (Shown on both) -->
+        <!-- !!! IMPORTANT: REPLACE '9876543210' with your actual Bottom Ad Slot ID !!! -->
+        <div class="my-6 text-center">
+            <ins class="adsbygoogle"
+            style="display:block" 
+            data-ad-client="ca-pub-9771422699626133"
+            data-ad-slot="9876543210" 
+            data-ad-format="auto" 
+            data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+ 
+        <!-- History -->
+        <div class="border-t pt-6 border-gray-100">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-bold text-gray-800">Conversions Récentes</h2>
+                <button onclick="clearHistory()" class="text-sm text-red-600 hover:text-red-800 transition">Effacer tout</button>
+            </div>
+            <ul id="historyList" class="space-y-2 max-h-48 overflow-y-auto text-sm">
+                <li class="text-gray-400 italic">Chargement de l'historique...</li>
+            </ul>
+        </div>
+        
+        <!-- Footer with Legal Links (New Addition) -->
+        <footer class="mt-6 pt-4 border-t border-gray-100 text-center text-xs text-gray-500">
+            &copy; 2025 ConvertBuddy. Tous droits réservés. | 
+            <a href="privacy.html" class="text-emerald-600 hover:text-emerald-700 font-medium">Politique de Confidentialité</a>
+        </footer>
+    </div>
+ 
+    <script type="module">
+        // FIREBASE IMPORTS
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, orderBy, deleteDoc, writeBatch, where, getDocs, limit, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // GLOBAL CONFIGURATION
+        setLogLevel('Debug');
+        const API_URL = 'https://api.exchangerate-api.com/v4/latest/USD';
+        let currencyRates = null; 
+        
+        // FIREBASE VARIABLES (Initialized below)
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let isAuthReady = false;
+        const el = {};
+ 
+        const unitData = {
+            length: {name:"Longueur",icon:"📏",baseUnit:"meter",units:{meter:{label:"Mètre (m)",factor:1},kilometer:{label:"Kilomètre (km)",factor:1000},mile:{label:"Mile (mi)",factor:1609.34},foot:{label:"Pied (ft)",factor:0.3048},centimeter:{label:"Centimètre (cm)",factor:0.01},inch:{label:"Pouce (in)",factor:0.0254}}},
+            volume: {name:"Volume",icon:"🧪",baseUnit:"liter",units:{liter:{label:"Litre (L)",factor:1},dl:{label:"Décilitre (dl)",factor:0.1},cl:{label:"Centilitre (cl)",factor:0.01},ml:{label:"Millilitre (ml)",factor:0.001},cup:{label:"Tasse (US)",factor:0.236588},floz:{label:"Once liquide (fl oz)",factor:0.0295735},teaspoon:{label:"Cuillère à café (tsp)",factor:0.00492892},tablespoon:{label:"Cuillère à soupe (Tbsp)",factor:0.0147868}}},
+            mass: {name:"Masse",icon:"⚖️",baseUnit:"kilogram",units:{kilogram:{label:"Kilogramme (kg)",factor:1},stone:{label:"Stone (st)",factor:6.35029},pound:{label:"Livre (lb)",factor:0.453592},gram:{label:"Gramme (g)",factor:0.001},ounce:{label:"Once (oz)",factor:0.0283495}}},
+            temperature: {name:"Température",icon:"🌡️",baseUnit:"celsius",conversionType:"temperature",units:{celsius:{label:"Celsius (°C)",toBase:v=>v,fromBase:v=>v},fahrenheit:{label:"Fahrenheit (°F)",toBase:v=>(v-32)*5/9,fromBase:v=>v*9/5+32},kelvin:{label:"Kelvin (K)",toBase:v=>v-273.15,fromBase:v=>v+273.15}}},
+            speed: {name:"Vitesse",icon:"🏎️",baseUnit:"mps",units:{mps:{label:"Mètre/Seconde (m/s)",factor:1},kph:{label:"Kilomètre/Heure (km/h)",factor:1/3.6},mph:{label:"Mile/Heure (mph)",factor:0.44704},knots:{label:"Nœud (kn)",factor:0.514444}}},
+            area: {name:"Aire",icon:"🖼️",baseUnit:"sq_meter",units:{sq_meter:{label:"Mètre Carré (m²)",factor:1},sq_foot:{label:"Pied Carré (ft²)",factor:0.092903},sq_mile:{label:"Mile Carré (mi²)",factor:2589988.11},hectare:{label:"Hectare (ha)",factor:10000},acre:{label:"Acre (ac)",factor:4046.86}}},
+            currency: {name:"Devise",icon:"💵",baseUnit:"USD",conversionType:"currency",units:
+            {
+                USD: { label: "US Dollar ($)", factor: 1 }, EUR: { label: "Euro (€)", factor: 1 }, GBP: { label: "Livre Sterling (£)", factor: 1 },
+                CAD: { label: "Dollar Canadien ($)", factor: 1 }, AUD: { label: "Dollar Australien ($)", factor: 1 }, JPY: { label: "Yen Japonais (¥)", factor: 1 },
+                CHF: { label: "Franc Suisse (Fr)", factor: 1 }, INR: { label: "Roupie Indienne (₹)", factor: 1 }, ZAR: { label: "Rand Sud-Africain (R)", factor: 1 }
+            }}
+        };
+ 
+        function fmt(n) { 
+            if (!isFinite(n)) return 'Erreur';
+            return new Intl.NumberFormat('fr-FR',{maximumFractionDigits:6, useGrouping: true}).format(n); 
+        }
+ 
+        // --- FIREBASE UTILITIES ---
+        
+        // Get the correct history collection path
+        function getHistoryCollectionRef() {
+            if (!db || !userId) return null;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            // Private data path for conversion history
+            return collection(db, `artifacts/${appId}/users/${userId}/conversion_history`);
+        }
+ 
+        // Real-time listener for history
+        function loadHistory() {
+            if (!isAuthReady || !userId) return;
+            
+            const historyColRef = getHistoryCollectionRef();
+            if (!historyColRef) {
+                console.error("Firestore not ready for history loading.");
+                return;
+            }
+ 
+            // Query to get the 10 most recent entries (by timestamp, descending)
+            const q = query(historyColRef, orderBy("timestamp", "desc"), limit(10));
+ 
+            onSnapshot(q, (snapshot) => {
+                const history = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                renderHistory(history);
+            }, (error) => {
+                console.error("Error listening to history:", error);
+                el.historyList.innerHTML = '<li class="text-red-500 italic">Erreur de chargement de l\'historique.</li>';
+            });
+        }
+        
+        // Saves a new conversion to Firestore
+        async function addHistory(result, fromLabel, toLabel, val) {
+            if (!isFinite(result) || !isAuthReady || !userId) return;
+            
+            const historyColRef = getHistoryCollectionRef();
+            if (!historyColRef) return;
+ 
+            try {
+                await setDoc(doc(historyColRef), {
+                    val: fmt(val),
+                    res: fmt(result),
+                    from: fromLabel.split(' (')[0], 
+                    to: toLabel.split(' (')[0], 
+                    timestamp: Date.now() 
+                });
+            } catch (e) {
+                console.error("Error adding document: ", e);
+            }
+        }
+ 
+        // Clears the history for the current user
+        async function clearHistory() { 
+            if (!isAuthReady || !userId) return;
+            
+            const historyColRef = getHistoryCollectionRef();
+            if (!historyColRef) return;
+ 
+            try {
+                // Fetch all documents to delete them (Firestore limitations)
+                const snapshot = await getDocs(historyColRef);
+                const batch = writeBatch(db);
+ 
+                snapshot.docs.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+ 
+                await batch.commit();
+                console.log("History cleared successfully.");
+            } catch (e) {
+                console.error("Error clearing history:", e);
+            }
+        }
+        
+        // Renders history from Firestore data
+        function renderHistory(history) {
+            el.historyList.innerHTML = history.length === 0
+                ? '<li class="text-gray-400 italic">Aucune conversion récente</li>' 
+                : history.map(h => {
+                    const time = new Date(h.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                    return `<li class="history-entry bg-emerald-50 p-3 rounded-xl flex justify-between items-center hover:bg-emerald-100 transition duration-150">
+                        <span class="truncate pr-2">${h.val} ${h.from} <span class="text-teal-600 font-bold">→</span> ${h.res} ${h.to}</span>
+                        <span class="text-xs text-gray-500 flex-shrink-0">${time}</span>
+                    </li>`;
+                }).join('');
+        }
+        
+        // --- CORE APP LOGIC (UNCHANGED) ---
+        
+        async function fetchCurrencyRatesWithRetry(retries = 3) {
+            el.loading.classList.remove('hidden');
+            el.currencyInfo.classList.add('hidden');
+            el.err.textContent = '';
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    if (data.rates && data.base === 'USD') {
+                        currencyRates = data.rates;
+                        el.loading.classList.add('hidden');
+                        el.currencyInfo.textContent = `Taux mis à jour: ${new Date().toLocaleTimeString('fr-FR')}`;
+                        el.currencyInfo.classList.remove('hidden');
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn(`Attempt ${i + 1} failed. Retrying...`);
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                }
+            }
+            el.loading.classList.add('hidden');
+            el.err.textContent = "Échec du chargement des taux de devise après plusieurs tentatives.";
+            currencyRates = null;
+            return false;
+        }
+ 
+        async function loadUnits(){
+            const catKey = el.cat.value;
+            const units = unitData[catKey].units;
+            
+            if (catKey === 'currency') {
+                el.currencyInfo.classList.remove('hidden');
+                if (!currencyRates) {
+                    await fetchCurrencyRatesWithRetry();
+                }
+            } else {
+                el.currencyInfo.classList.add('hidden');
+                el.loading.classList.add('hidden');
+            }
+ 
+            [el.from, el.to].forEach(s=>{
+                s.innerHTML=''; 
+                Object.keys(units).forEach(k=>{ 
+                    const o=new Option(units[k].label,k);
+                    s.add(o); 
+                }); 
+            });
+            
+            if (el.from.options.length > 0) {
+                el.to.selectedIndex = el.from.selectedIndex === 0 ? 1 : 0;
+            }
+            convert();
+        }
+        
+        function convert(){
+            el.err.textContent='';
+            const v = parseFloat(el.input.value);
+            const cat = unitData[el.cat.value];
+            
+            if(isNaN(v) || v < 0) {
+                el.output.textContent = '0';
+                if (el.input.value !== '') {
+                    el.err.textContent='Veuillez entrer une valeur valide.';
+                }
+                return;
+            }
+ 
+            const fromKey = el.from.value;
+            const toKey = el.to.value;
+            
+            if (!cat || !cat.units[fromKey] || !cat.units[toKey]) {
+                el.err.textContent = 'Unités de conversion introuvables.';
+                return;
+            }
+ 
+            const from = cat.units[fromKey];
+            const to = cat.units[toKey];
+            let result;
+ 
+            if(cat.conversionType==='temperature'){
+                result = to.fromBase(from.toBase(v));
+            } else if (cat.conversionType === 'currency') {
+                if (!currencyRates) {
+                    el.err.textContent = "Les taux de devise ne sont pas disponibles. Réessayez ou changez de catégorie.";
+                    el.output.textContent = '...';
+                    return;
+                }
+                const valueInBase = v / currencyRates[fromKey];
+                result = valueInBase * currencyRates[toKey];
+            } else {
+                result = (v * from.factor) / to.factor;
+            }
+ 
+            el.output.textContent = fmt(result);
+            addHistory(result, from.label, to.label, v);
+        }
+        
+        function swapUnits(){
+            const temp=el.from.value;
+            el.from.value=el.to.value; 
+            el.to.value=temp;
+            convert();
+        }
+        
+        // --- INITIALIZATION ---
+        
+        async function initializeFirebase() {
+            try {
+                const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                if (!firebaseConfig || !firebaseConfig.projectId) throw new Error("Firebase config is missing.");
+                
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                el.status.textContent = "Authentification en cours...";
+ 
+                // Authenticate the user
+                const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        el.status.textContent = `Connecté (ID: ${userId})`;
+                        loadHistory(); // Start real-time history listener after auth
+                    } else {
+                        // If no user is logged in, use anonymous sign-in or custom token
+                        if (token) {
+                            signInWithCustomToken(auth, token).catch(e => {
+                                console.error("Custom token sign-in failed:", e);
+                                signInAnonymously(auth); // Fallback to anonymous
+                            });
+                        } else {
+                            signInAnonymously(auth);
+                        }
+                    }
+                });
+ 
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                el.status.textContent = "Erreur de connexion (Voir console).";
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            el.cat = document.getElementById('category');
+            el.from = document.getElementById('fromUnit');
+            el.to = document.getElementById('toUnit');
+            el.input = document.getElementById('inputValue');
+            el.output = document.getElementById('outputValue');
+            el.err = document.getElementById('error-message');
+            el.loading = document.getElementById('loading-indicator');
+            el.currencyInfo = document.getElementById('currency-source-info');
+            el.historyList = document.getElementById('historyList');
+            el.status = document.getElementById('firebase-status');
+ 
+            // Populate category select
+            Object.keys(unitData).forEach(k => {
+                const o = document.createElement('option'); 
+                o.value = k; 
+                o.text = `${unitData[k].icon} ${unitData[k].name}`;
+                el.cat.appendChild(o);
+            });
+ 
+            // Initialize Firebase and load units
+            await initializeFirebase();
+            loadUnits();
+        });
+ 
+        if('serviceWorker' in navigator){
+            window.addEventListener('load',()=>{
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(reg => console.log('SW Enregistré:', reg.scope))
+                    .catch(err => console.error('Échec de l\'enregistrement SW:', err));
+            });
+        }
+    </script>
 </body>
