@@ -107,8 +107,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Make Firestore available globally
+        // Firestore now available globally
         initFirestore(db);
+        window.db = db;
     </script>
 
     <!-- Main App -->
