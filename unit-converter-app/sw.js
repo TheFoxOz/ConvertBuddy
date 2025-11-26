@@ -1,57 +1,51 @@
-const CACHE = 'convertbuddy-v2'; // <--- BUMPED CACHE VERSION
- 
-// CRITICAL FIX: Ensure the paths match your deployment structure.
-const FILES = [
-    '/',
-    '/index.html',
-    '/privacy.html', // <--- ADDED PRIVACY PAGE
-    '/manifest.json',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
-    '/icons/apple-touch-icon.png'
-    // Note: External resources (like Tailwind and Google Fonts) are not cached here
-    // as they are loaded from a CDN, but the core app will work offline.
+// V7 - Corrected icon paths and added essential files
+const CACHE_NAME = 'convertbuddy-v7';
+
+// IMPORTANT FIX: Corrected icon filenames to match manifest
+const FILES_TO_CACHE = [
+'/',
+'/index.html',
+'/privacy.html',
+'/manifest.json',
+'/icons/icon-192x192.png',
+'/icons/icon-512x512.png',
+'/icons/apple-touch-icon.png' // Standard Apple touch icon added for completeness
 ];
- 
-self.addEventListener('install', e => {
-    console.log('Service Worker: Installing...');
-    // Skip waiting forces the new service worker to take control immediately
-    self.skipWaiting();
-    e.waitUntil(
-        caches.open(CACHE).then(cache => {
-            console.log('Service Worker: Caching App Shell');
-            // Using addAll to cache all necessary files
-            return cache.addAll(FILES).catch(err => {
-                console.error('Service Worker: Failed to cache files', err);
-                // We proceed even if some icons fail to load
-            });
-        })
-    );
+
+self.addEventListener('install', (event) => {
+event.waitUntil(
+caches.open(CACHE_NAME)
+.then((cache) => {
+console.log('Opened cache and cached essential files');
+return cache.addAll(FILES_TO_CACHE);
+})
+);
 });
- 
-self.addEventListener('activate', e => {
-    console.log('Service Worker: Activating and Cleaning Old Caches...');
-    e.waitUntil(
-        // Get all cache names
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                // Filter out all cache names that are not the current CACHE version
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE) {
-                        console.log('Service Worker: Deleting old cache', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
- 
-self.addEventListener('fetch', e => {
-    // Respond with cached asset first, then fallback to network
-    e.respondWith(
-        caches.match(e.request).then(response => {
-            return response || fetch(e.request);
-        })
-    );
+
+self.addEventListener('fetch', (event) => {
+// Only handle GET requests and exclude Google Analytics or external API calls if necessary
+if (event.request.method !== 'GET') {
+return;
+}
+
+event.respondWith(
+    caches.match(event.request)
+        .then((response) => {
+            // Cache hit - return response
+            if (response) {
+                return response;
+            }
+            
+            // Fallback to network
+            return fetch(event.request).catch(() => {
+                // If network fails, and it's a navigation request, serve the main HTML page
+                if (event.request.mode === 'navigate' || 
+                    (event.request.headers.get('accept').includes('text/html'))) {
+                    return caches.match('/index.html');
+                }
+            });
+        })
+);
+
+
 });
