@@ -4,6 +4,10 @@ import { getHistory } from "./firestore.js";
 import { conversionData } from "./units.js";
 import { fetchCurrencyRates } from "./currency.js";
 
+/* --------------------- */
+/* UTILS                 */
+/* --------------------- */
+
 function debounce(func, delay) {
     let timeoutId;
     return function(...args) {
@@ -20,6 +24,10 @@ function formatTime(timestamp) {
     return new Date(timestamp).toLocaleDateString();
 }
 
+/* --------------------- */
+/* ELEMENTS INIT         */
+/* --------------------- */
+
 export function initializeElements() {
     return {
         category: document.getElementById("category-select"),
@@ -32,19 +40,24 @@ export function initializeElements() {
     };
 }
 
+/* --------------------- */
+/* APP INIT              */
+/* --------------------- */
+
 export async function initApp(el) {
-    await fetchCurrencyRates();
+    await fetchCurrencyRates(); // ensure currency units are loaded
     populateCategories(el);
-    updateUnits(el);
+    updateUnits(el); // sets default GBP -> USD for Currency
     attachListeners(el);
     refreshHistory(el);
-
-    el.category.value = "Currency";
-    if (!el.fromValue.value || isNaN(el.fromValue.value)) el.fromValue.value = 1;
-    convertValue(el, "Currency", () => refreshHistory(el));
 }
 
+/* --------------------- */
+/* CATEGORY + UNITS      */
+/* --------------------- */
+
 function populateCategories(el) {
+    el.category.innerHTML = ""; // clear duplicates
     Object.keys(conversionData).forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
@@ -63,12 +76,18 @@ function updateUnits(el) {
     Object.keys(units).forEach(u => {
         const opt1 = document.createElement("option");
         const opt2 = document.createElement("option");
-        opt1.value = u; opt1.textContent = units[u].name;
-        opt2.value = u; opt2.textContent = units[u].name;
+
+        opt1.value = u;
+        opt1.textContent = units[u].name;
+
+        opt2.value = u;
+        opt2.textContent = units[u].name;
+
         el.fromUnit.appendChild(opt1);
         el.toUnit.appendChild(opt2);
     });
 
+    // Set default units
     if (category === 'Currency') {
         el.fromUnit.value = 'GBP';
         el.toUnit.value = 'USD';
@@ -77,10 +96,13 @@ function updateUnits(el) {
         el.toUnit.selectedIndex = Object.keys(units).length > 1 ? 1 : 0;
     }
 
-    if (!el.fromValue.value || isNaN(el.fromValue.value)) el.fromValue.value = 1;
-
-    convertValue(el, category, () => refreshHistory(el));
+    // Run conversion but DO NOT save history on init
+    convertValue(el, category, () => refreshHistory(el), false);
 }
+
+/* --------------------- */
+/* LISTENERS             */
+/* --------------------- */
 
 function attachListeners(el) {
     const conversionCallback = () => convertValue(el, el.category.value, () => refreshHistory(el));
@@ -92,6 +114,10 @@ function attachListeners(el) {
     el.toUnit.addEventListener("change", conversionCallback);
     el.swapButton.addEventListener("click", () => swapUnits(el, conversionCallback));
 }
+
+/* --------------------- */
+/* HISTORY               */
+/* --------------------- */
 
 export async function refreshHistory(el) {
     const list = el.historyList;
