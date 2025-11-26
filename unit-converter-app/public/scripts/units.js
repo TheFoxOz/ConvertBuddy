@@ -1,9 +1,10 @@
 // scripts/units.js
 export const conversionData = {
     Currency: {
-        icon: "fas fa-dollar-sign", // default currency icon
-        units: {} // filled dynamically from API
+        icon: "fas fa-dollar-sign",
+        units: {} // auto-filled dynamically
     },
+
     Length: {
         icon: "fas fa-ruler",
         units: {
@@ -17,6 +18,7 @@ export const conversionData = {
             Inch: { name: "Inch (in)", toBase: 0.0254 }
         }
     },
+
     Weight: {
         icon: "fas fa-weight-scale",
         units: {
@@ -26,9 +28,10 @@ export const conversionData = {
             Tonne: { name: "Tonne (t)", toBase: 1_000_000 },
             Pound: { name: "Pound (lb)", toBase: 453.592 },
             Ounce: { name: "Ounce (oz)", toBase: 28.3495 },
-            Stone: { name: "Stone (st)", toBase: 6350.29 } // 1 stone = 6.35029 kg
+            Stone: { name: "Stone (st)", toBase: 6350.29 } // already included
         }
     },
+
     Temperature: {
         icon: "fas fa-temperature-half",
         units: {
@@ -37,6 +40,7 @@ export const conversionData = {
             Kelvin: { name: "Kelvin (K)", toBase: v => v - 273.15, fromBase: v => v + 273.15 }
         }
     },
+
     Volume: {
         icon: "fas fa-wine-bottle",
         units: {
@@ -50,6 +54,7 @@ export const conversionData = {
             Teaspoon: { name: "Teaspoon (tsp)", toBase: 0.00492892 }
         }
     },
+
     Area: {
         icon: "fas fa-vector-square",
         units: {
@@ -61,6 +66,7 @@ export const conversionData = {
             Acre: { name: "Acre (acre)", toBase: 4046.86 }
         }
     },
+
     Speed: {
         icon: "fas fa-tachometer-alt",
         units: {
@@ -70,6 +76,7 @@ export const conversionData = {
             "Foot/Second": { name: "Foot/Second (ft/s)", toBase: 0.3048 }
         }
     },
+
     Time: {
         icon: "fas fa-clock",
         units: {
@@ -79,6 +86,7 @@ export const conversionData = {
             Day: { name: "Day (d)", toBase: 86400 }
         }
     },
+
     Storage: {
         icon: "fas fa-database",
         units: {
@@ -89,6 +97,7 @@ export const conversionData = {
             Terabyte: { name: "Terabyte (TB)", toBase: 1024 ** 4 }
         }
     },
+
     Energy: {
         icon: "fas fa-bolt",
         units: {
@@ -102,7 +111,7 @@ export const conversionData = {
     }
 };
 
-// Ensure every category has an icon
+// fallback icons
 for (const cat in conversionData) {
     if (!conversionData[cat].icon) conversionData[cat].icon = "fas fa-question";
 }
