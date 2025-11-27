@@ -1,55 +1,38 @@
 // converter.js
-import { getCachedRates, fetchCurrencyRates } from './currency.js';
-import units from './units.js';
+import { units } from './units.js';
+import { fetchRates, getCachedRates } from './currency.js';
 
 /**
  * Convert any unit or currency
- * @param {string} category - e.g., "Length", "Temperature", "Currency"
- * @param {number} value - input value
- * @param {string} from - unit to convert from
- * @param {string} to - unit to convert to
- * @returns {number} converted value
+ * @param {string} category - e.g., "length", "temperature", "currency"
+ * @param {number} value - value to convert
+ * @param {string} from - unit key
+ * @param {string} to - unit key
+ * @returns {Promise<number>} converted value
  */
 export async function convert(category, value, from, to) {
-  if (!units[category]) throw new Error(`Unknown category: ${category}`);
-
-  if (category === 'Currency') {
-    return await convertCurrency(value, from, to);
+  if (category === 'currency') {
+    return convertCurrency(value, from, to);
   }
 
-  const { units: categoryUnits } = units[category];
-  if (!categoryUnits[from] || !categoryUnits[to]) throw new Error(`Unknown units`);
+  const fromUnit = units[category][from];
+  const toUnit = units[category][to];
+  if (!fromUnit || !toUnit) throw new Error('Invalid unit');
 
-  const baseValue = toBase(category, value, from);
-  return fromBase(category, baseValue, to);
-}
-
-// Convert to base unit
-function toBase(category, value, unit) {
-  const u = units[category].units[unit];
-  return typeof u.toBase === 'function' ? u.toBase(value) : value * u.toBase;
-}
-
-// Convert from base unit
-function fromBase(category, value, unit) {
-  const u = units[category].units[unit];
-  return typeof u.fromBase === 'function' ? u.fromBase(value) : value * u.fromBase;
+  const baseValue = fromUnit.toBase(value);
+  return toUnit.fromBase(baseValue);
 }
 
 /**
- * Currency conversion using cached rates
+ * Currency conversion
  */
 export async function convertCurrency(amount, from, to) {
-  let rates = getCachedRates();
+  let ratesData = getCachedRates();
+  if (!ratesData) ratesData = await fetchRates();
 
-  if (!rates || !rates[from] || !rates[to]) {
-    rates = await fetchCurrencyRates();
-  }
+  const rates = ratesData.rates;
+  if (!rates[from] || !rates[to]) throw new Error('Invalid currency');
 
-  if (!rates[from] || !rates[to]) {
-    throw new Error('Currency rates not available');
-  }
-
-  const converted = (amount / rates[from]) * rates[to];
-  return Math.round(converted * 100) / 100; // round to 2 decimals
+  const result = (amount / rates[from]) * rates[to];
+  return Math.round(result * 100) / 100; // round 2 decimals
 }
