@@ -1,59 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Unit Converter</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Universal Unit Converter</title>
+
+  <!-- Font Awesome & Tailwind from CDN (ok for quick demo) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+
+  <meta name="theme-color" content="#10b981" />
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
- 
-    <div class="w-full max-w-xl bg-white rounded-xl shadow p-6">
-        <h1 class="text-2xl font-bold text-center mb-4">Universal Unit Converter</h1>
- 
-        <div class="flex items-center gap-2 mb-4">
-            <select id="category-select" class="flex-1 p-2 border rounded">
-                </select>
-            <i class="fas fa-question text-xl text-gray-500"></i>
-        </div>
- 
-        <div class="flex items-center gap-2 mb-2">
-            <input type="number" id="from-value" placeholder="Enter value" class="flex-1 p-2 border rounded" />
-            <select id="from-unit" class="p-2 border rounded">
-                </select>
-        </div>
- 
-        <div class="flex justify-center mb-2">
-            <button id="swap-button" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                <i class="fas fa-exchange-alt"></i> Swap
-            </button>
-        </div>
- 
-        <div class="flex items-center gap-2 mb-4">
-            <input type="text" id="to-value" readonly class="flex-1 p-2 border rounded bg-gray-100" />
-            <select id="to-unit" class="p-2 border rounded">
-                </select>
-        </div>
- 
-        <div id="loading-info" class="text-sm text-gray-500 mb-4 text-center"></div>
- 
-        <div class="flex justify-end mb-4">
-            <button id="clear-history-button" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
-                Clear History
-            </button>
-        </div>
- 
-        <div id="history-list" class="space-y-2 max-h-64 overflow-y-auto">
-            <p class="text-sm text-gray-500">Your recent conversions will appear here.</p>
-        </div>
+
+  <div class="w-full max-w-xl bg-white rounded-xl shadow p-6">
+    <h1 class="text-2xl font-bold text-center mb-4">Universal Unit Converter</h1>
+
+    <div class="flex items-center gap-2 mb-4">
+      <select id="category-select" class="flex-1 p-2 border rounded"></select>
+      <i class="fas fa-question text-xl text-gray-500"></i>
     </div>
- 
-    <script type="module">
-        import { initializeElements, initApp } from "./ui.js";
- 
-        const elements = initializeElements();
-        initApp(elements);
-    </script>
+
+    <div class="flex items-center gap-2 mb-2">
+      <input type="number" id="from-value" placeholder="Enter value" class="flex-1 p-2 border rounded" />
+      <select id="from-unit" class="p-2 border rounded"></select>
+    </div>
+
+    <div class="flex justify-center mb-2">
+      <button id="swap-button" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+        <i class="fas fa-exchange-alt"></i> Swap
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 mb-4">
+      <input type="text" id="to-value" readonly class="flex-1 p-2 border rounded bg-gray-100" />
+      <select id="to-unit" class="p-2 border rounded"></select>
+    </div>
+
+    <div id="loading-info" class="text-sm text-gray-500 mb-4 text-center"></div>
+
+    <div class="flex justify-end mb-4">
+      <button id="clear-history-button" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">
+        Clear History
+      </button>
+    </div>
+
+    <div id="history-list" class="space-y-2 max-h-64 overflow-y-auto">
+      <p class="text-sm text-gray-500">Your recent conversions will appear here.</p>
+    </div>
+  </div>
+
+  <!-- IMPORTANT: correct path to your module -->
+  <script type="module">
+    import { initializeElements, initApp } from "./scripts/ui.js";
+
+    const elements = initializeElements();
+    initApp(elements);
+  </script>
+
 </body>
 </html>
