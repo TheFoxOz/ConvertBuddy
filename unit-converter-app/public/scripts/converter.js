@@ -1,112 +1,145 @@
-// scripts/converter.js
+import { units, categories } from './units.js';
+import { fetchRates, getCachedRates } from './currency.js';
+import { saveHistory, loadHistory, clearHistory } from './history.js';
 
-import { conversionData } from "./units.js";
- 
-/**
- * Convert a value from one unit to another
- * MUST BE ASYNC to handle custom async converters (like Currency).
- */
-export async function convert(category, fromUnit, toUnit, value) {
-    const cat = conversionData[category];
-    if (!cat) throw new Error(`Category "${category}" not found`);
+const DOM = {
+  categorySelect: document.getElementById('category'),
+  fromUnit: document.getElementById('from-unit'),
+  toUnit: document.getElementById('to-unit'),
+  valueInput: document.getElementById('value'),
+  resultOutput: document.getElementById('result'),
+  swapButton: document.getElementById('swap'),
+  historyList: document.getElementById('history-list'),
+  clearHistoryButton: document.getElementById('clear-history'),
+  currencyWarning: document.getElementById('currency-warning'),
+};
 
-    // 1. ASYNC CHECK: Use the custom converter function if defined (e.g., Currency)
-    if (typeof cat.convert === "function") {
-        try {
-            return await cat.convert(fromUnit, toUnit, value);
-        } catch (e) {
-            console.error(`Custom conversion failed for ${category}:`, e);
-            return NaN;
-        }
-    }
-    
-    // --- Standard Linear Conversion Logic ---
-    const from = cat.units[fromUnit];
-    const to = cat.units[toUnit];
-    if (!from || !to)
-        throw new Error(`Units "${fromUnit}" or "${toUnit}" not found in "${category}"`);
- 
-    value = Number(value);
-    if (isNaN(value))
-        return NaN;
- 
-    let base;
-    try {
-        // Step 1: Convert input value to the category's base unit
-        base = typeof from.toBase === "function" ? from.toBase(value) : value * from.toBase;
-    } catch (e) {
-        console.warn(`Error converting from ${fromUnit} to base:`, e);
-        return NaN;
-    }
- 
-    let result;
-    try {
-        // Step 2: Convert base value to the target unit
-        result = typeof to.fromBase === "function" ? to.fromBase(base) : base / to.toBase;
-    } catch (e) {
-        console.warn(`Error converting base to ${toUnit}:`, e);
-        return NaN;
-    }
- 
-    // Step 3: Apply configurable precision
-    const precision = cat.precision ?? 6;
-    const factor = 10 ** precision;
-    const epsilon = Number.EPSILON;
-    
-    return Math.round((result + epsilon) * factor) / factor;
+let currentCategory = DOM.categorySelect.value;
+
+// Populate categories
+categories.forEach(cat => {
+  const option = document.createElement('option');
+  option.value = cat.key;
+  option.textContent = cat.name;
+  DOM.categorySelect.appendChild(option);
+});
+
+// Populate units for a category
+function populateUnitDropdowns(categoryKey) {
+  DOM.fromUnit.innerHTML = '';
+  DOM.toUnit.innerHTML = '';
+
+  const unitList = Object.values(units[categoryKey] || {});
+  unitList.forEach(u => {
+    const fromOption = document.createElement('option');
+    fromOption.value = u.key;
+    fromOption.textContent = u.name;
+    DOM.fromUnit.appendChild(fromOption);
+
+    const toOption = document.createElement('option');
+    toOption.value = u.key;
+    toOption.textContent = u.name;
+    DOM.toUnit.appendChild(toOption);
+  });
 }
- 
-/**
- * List all unit details (key, name, symbol) for a category
- * MUST BE ASYNC to handle custom async listers (like Currency).
- */
-export async function listUnits(category) {
-    const cat = conversionData[category];
-    if (!cat) return [];
- 
-    // ASYNC CHECK: Use the custom listing function if defined (e.g., Currency)
-    if (typeof cat.list === "function") {
-        try {
-            return await cat.list();
-        } catch (e) {
-            console.warn(`Custom unit listing failed for ${category}:`, e);
-            // Return empty or a default list if fetching fails
-            return [];
-        }
+
+// Convert value
+async function convert() {
+  const val = parseFloat(DOM.valueInput.value);
+  if (isNaN(val)) {
+    DOM.resultOutput.textContent = '';
+    return;
+  }
+
+  const from = DOM.fromUnit.value;
+  const to = DOM.toUnit.value;
+
+  let result;
+
+  if (currentCategory === 'currency') {
+    const ratesData = await fetchRates();
+    const rates = ratesData.rates;
+    const fromRate = rates[from];
+    const toRate = rates[to];
+    if (!fromRate || !toRate) {
+      DOM.resultOutput.textContent = 'Invalid currency';
+      return;
     }
- 
-    // Standard static unit listing
-    const units = cat.units;
-    return Object.keys(units).map(key => ({
-        key,
-        name: units[key].name,
-        symbol: units[key].symbol || units[key].name
-    }));
+    result = (val / fromRate) * toRate;
+  } else {
+    const fromUnit = units[currentCategory][from];
+    const toUnit = units[currentCategory][to];
+    const baseValue = fromUnit.toBase(val);
+    result = toUnit.fromBase(baseValue);
+  }
+
+  DOM.resultOutput.textContent = result.toFixed(4);
+  saveHistory(currentCategory, from, to, val, result);
+  renderHistory();
 }
- 
-/**
- * Swap from/to units and values in UI
- */
-export function swapUnits(el, callback) {
-    // Swap units
-    const tmpUnit = el.fromUnit.value;
-    el.fromUnit.value = el.toUnit.value;
-    el.toUnit.value = tmpUnit;
- 
-    // FIX: Only swap the *values* if the result is a valid number, not '---' or empty.
-    // However, the cleanest fix is simply to rely on the callback to re-run the conversion.
-    // If we swap the unit dropdowns, the `change` event might fire, but since we call 
-    // `callback()` (which is `performConversion`), we just need the new units set.
-    // If the user wants to convert the *result* back to the *input*, they should have 
-    // a valid number. We perform the value swap only if `toValue` is a convertible number.
-    if (!isNaN(parseFloat(el.toValue.value))) {
-        const tmpValue = el.fromValue.value;
-        el.fromValue.value = el.toValue.value;
-        el.toValue.value = tmpValue;
-    }
- 
-    el.fromValue.focus();
- 
-    // Reruns the conversion based on the new inputs and new units
-    callback();
+
+// Swap units
+function swapUnits() {
+  const temp = DOM.fromUnit.value;
+  DOM.fromUnit.value = DOM.toUnit.value;
+  DOM.toUnit.value = temp;
+  convert();
 }
+
+// Render history
+function renderHistory() {
+  DOM.historyList.innerHTML = '';
+  const history = loadHistory();
+  history.slice(-50).reverse().forEach(entry => {
+    const li = document.createElement('li');
+    li.textContent = `[${entry.category}] ${entry.value} ${entry.from} → ${entry.result} ${entry.to}`;
+    li.addEventListener('click', () => {
+      DOM.categorySelect.value = entry.category;
+      currentCategory = entry.category;
+      populateUnitDropdowns(currentCategory);
+      DOM.fromUnit.value = entry.from;
+      DOM.toUnit.value = entry.to;
+      DOM.valueInput.value = entry.value;
+      convert();
+    });
+    DOM.historyList.appendChild(li);
+  });
+}
+
+// Update currency last updated warning
+function updateCurrencyWarning() {
+  if (currentCategory !== 'currency') {
+    DOM.currencyWarning.textContent = '';
+    return;
+  }
+  const ratesData = getCachedRates();
+  if (ratesData?.timestamp) {
+    const lastUpdated = new Date(ratesData.timestamp).toLocaleString();
+    DOM.currencyWarning.textContent = `Rates last updated: ${lastUpdated}`;
+  } else {
+    DOM.currencyWarning.textContent = 'Rates not loaded yet';
+  }
+}
+
+// Event listeners
+DOM.categorySelect.addEventListener('change', () => {
+  currentCategory = DOM.categorySelect.value;
+  populateUnitDropdowns(currentCategory);
+  convert();
+  updateCurrencyWarning();
+});
+
+DOM.fromUnit.addEventListener('change', convert);
+DOM.toUnit.addEventListener('change', convert);
+DOM.valueInput.addEventListener('input', convert);
+DOM.swapButton.addEventListener('click', swapUnits);
+DOM.clearHistoryButton.addEventListener('click', () => {
+  clearHistory();
+  renderHistory();
+});
+
+// Initialize
+populateUnitDropdowns(currentCategory);
+renderHistory();
+updateCurrencyWarning();
+convert();
