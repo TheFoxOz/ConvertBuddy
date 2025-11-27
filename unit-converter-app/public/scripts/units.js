@@ -1,5 +1,7 @@
 // scripts/units.js
- 
+// 1. Import the dedicated currency functions
+import { convertCurrency, listCurrencies } from "./currency.js";
+
 /**
  * Defines all conversion categories, units, and conversion factors (to/from a base unit).
  *
@@ -11,15 +13,21 @@ export const conversionData = {
     /* Currency (Dynamic API)    */
     /* ------------------------- */
     Currency: {
+        name: "Currency", // Added name property for UI
         icon: "fas fa-dollar-sign",
-        units: {}, // Auto-filled dynamically by fetchCurrencyRates(). Base is USD.
-        precision: 4 // Currency often requires more precision
+        units: {}, // Empty, as units are populated dynamically by listCurrencies()
+        precision: 4, // Currency often requires more precision
+        
+        // 2. Add the custom conversion and listing functions from currency.js
+        convert: convertCurrency, 
+        list: listCurrencies,
     },
 
     /* ------------------------- */
-    /* Length                    */
+    /* Length                      */
     /* ------------------------- */
     Length: {
+        name: "Length", // Added name property
         icon: "fas fa-ruler",
         precision: 3,
         units: {
@@ -38,9 +46,10 @@ export const conversionData = {
     },
 
     /* ------------------------- */
-    /* Weight / Mass             */
+    /* Weight / Mass               */
     /* ------------------------- */
     Weight: {
+        name: "Weight / Mass", // Added name property
         icon: "fas fa-weight-scale",
         precision: 3,
         units: {
@@ -59,6 +68,7 @@ export const conversionData = {
     /* Temperature               */
     /* ------------------------- */
     Temperature: {
+        name: "Temperature", // Added name property
         icon: "fas fa-temperature-half",
         precision: 2,
         units: {
@@ -85,6 +95,7 @@ export const conversionData = {
     /* Volume                    */
     /* ------------------------- */
     Volume: {
+        name: "Volume", // Added name property
         icon: "fas fa-wine-bottle",
         precision: 3,
         units: {
@@ -105,6 +116,7 @@ export const conversionData = {
     /* Area                      */
     /* ------------------------- */
     Area: {
+        name: "Area", // Added name property
         icon: "fas fa-vector-square",
         precision: 2,
         units: {
@@ -123,6 +135,7 @@ export const conversionData = {
     /* Speed                     */
     /* ------------------------- */
     Speed: {
+        name: "Speed", // Added name property
         icon: "fas fa-tachometer-alt",
         precision: 2,
         units: {
@@ -139,6 +152,7 @@ export const conversionData = {
     /* Time                      */
     /* ------------------------- */
     Time: {
+        name: "Time", // Added name property
         icon: "fas fa-clock",
         precision: 0, // Time units are generally integer-based unless converting to seconds/fractional hours
         units: {
@@ -155,6 +169,7 @@ export const conversionData = {
     /* Storage / Digital         */
     /* ------------------------- */
     Storage: {
+        name: "Storage / Digital", // Added name property
         icon: "fas fa-database",
         precision: 2,
         units: {
@@ -172,6 +187,7 @@ export const conversionData = {
     /* Energy                    */
     /* ------------------------- */
     Energy: {
+        name: "Energy", // Added name property
         icon: "fas fa-bolt",
         precision: 2,
         units: {
@@ -189,6 +205,7 @@ export const conversionData = {
     /* Pressure                  */
     /* ------------------------- */
     Pressure: {
+        name: "Pressure", // Added name property
         icon: "fas fa-compress-alt",
         precision: 2,
         units: {
@@ -205,6 +222,7 @@ export const conversionData = {
     /* Frequency                 */
     /* ------------------------- */
     Frequency: {
+        name: "Frequency", // Added name property
         icon: "fas fa-wave-square",
         precision: 2,
         units: {
@@ -220,6 +238,7 @@ export const conversionData = {
     /* Angle                     */
     /* ------------------------- */
     Angle: {
+        name: "Angle", // Added name property
         icon: "fas fa-compass-drafting",
         precision: 3,
         units: {
@@ -235,6 +254,7 @@ export const conversionData = {
     /* Power                     */
     /* ------------------------- */
     Power: {
+        name: "Power", // Added name property
         icon: "fas fa-plug",
         precision: 2,
         units: {
@@ -250,6 +270,7 @@ export const conversionData = {
     /* Fuel Economy              */
     /* ------------------------- */
     FuelEconomy: {
+        name: "Fuel Economy", // Added name property
         icon: "fas fa-gas-pump",
         precision: 2,
         units: {
@@ -269,6 +290,7 @@ export const conversionData = {
     /* Force                     */
     /* ------------------------- */
     Force: {
+        name: "Force", // Added name property
         icon: "fas fa-hand-fist",
         precision: 2,
         units: {
@@ -279,30 +301,18 @@ export const conversionData = {
         }
     }
 };
- 
-/**
- * Updates the Currency category in conversionData with new exchange rates.
- * @param {Object} rates - An object where keys are currency codes and values are USD base rates.
+
+/* * NOTE: The updateCurrencyUnits function is no longer needed.
+ * Currency units are listed directly using listCurrencies from currency.js.
  */
-export function updateCurrencyUnits(rates) {
-    if (!rates || Object.keys(rates).length === 0) {
-        console.warn("Attempted to update currency units with empty or null rates.");
-        return;
-    }
- 
-    // Set the base unit for currency to USD (since the API provides rates relative to USD)
-    conversionData.Currency.units = Object.fromEntries(
-        Object.entries(rates).map(([code, rate]) => [
-            code,
-            // Currency uses the code as both the name and the symbol
-            { name: code, symbol: code, toBase: rate } 
-        ])
-    );
-    console.log(`Currency units updated with ${Object.keys(rates).length} rates.`);
-}
- 
+// export function updateCurrencyUnits(rates) { ... } // REMOVED
+
 /* Default fallback icons, precision, and icon check */
 for (const cat in conversionData) {
+    if (!conversionData[cat].name) {
+        // Fallback for missing name
+        conversionData[cat].name = cat;
+    }
     if (!conversionData[cat].icon) {
         conversionData[cat].icon = "fas fa-question";
     }
