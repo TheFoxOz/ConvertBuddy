@@ -1,4 +1,4 @@
-// scripts/ui.js - Version finale, robuste, propre et sans bug
+// scripts/ui.js - FINAL VERSION: English, clean, AdSense-ready
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -16,7 +16,7 @@ const DOM = {
   lastUpdatedText: document.getElementById("last-updated-text"),
 };
 
-let currentCategory = Object.keys(conversionData)[0] || "Length";
+let currentCategory = "Length";
 let lastSavedEntry = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -28,16 +28,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function setupEventListeners() {
-  // Mise à jour fluide sans spam d'historique
   DOM.converterForm.addEventListener("input", debounce(performConversionOnly, 300));
-
-  // Sauvegarde uniquement quand l’utilisateur a fini
   DOM.fromValue.addEventListener("blur", performConversionAndSave);
   DOM.fromUnit.addEventListener("change", performConversionAndSave);
   DOM.toUnit.addEventListener("change", performConversionAndSave);
-
   DOM.categorySelect.addEventListener("change", (e) => loadCategory(e.target.value));
-
   DOM.swapButton.addEventListener("click", (e) => {
     e.preventDefault();
     swapUnits(DOM, performConversionAndSave);
@@ -45,20 +40,17 @@ function setupEventListeners() {
 }
 
 function renderCategorySelect() {
-  if (!DOM.categorySelect) return;
   DOM.categorySelect.innerHTML = "";
   Object.keys(conversionData).forEach((key) => {
-    const opt = document.createElement("option");
-    opt.value = key;
-    opt.textContent = conversionData[key].name;
-    DOM.categorySelect.appendChild(opt);
+    const opt = new Option(conversionData[key].name, key);
+    DOM.categorySelect.add(opt);
   });
   DOM.categorySelect.value = currentCategory;
 }
 
 async function loadCategory(key) {
   currentCategory = key;
-  if (DOM.categorySelect) DOM.categorySelect.value = key;
+  DOM.categorySelect.value = key;
 
   const units = await listUnits(key);
   populateUnitDropdowns(units);
@@ -69,25 +61,21 @@ async function loadCategory(key) {
 function populateUnitDropdowns(units) {
   [DOM.fromUnit, DOM.toUnit].forEach((select) => {
     select.innerHTML = "";
-    units.forEach((u) => {
-      const opt = new Option(u.name || u.key, u.key);
-      select.add(opt);
-    });
+    units.forEach((u) => select.add(new Option(u.name || u.key, u.key)));
   });
   DOM.fromUnit.selectedIndex = 0;
   if (DOM.toUnit.options.length > 1) DOM.toUnit.selectedIndex = 1;
 }
 
-// Conversion sans sauvegarde (affichage rapide)
 async function performConversionOnly() {
-  const rawValue = DOM.fromValue.value.replace(/\s/g, "").replace(",", ".");
-  if (!rawValue || isNaN(rawValue)) {
+  const raw = DOM.fromValue.value.trim();
+  if (!raw || isNaN(raw)) {
     DOM.toValue.value = "---";
     return;
   }
 
   try {
-    const result = await convert(currentCategory, DOM.fromUnit.value, DOM.toUnit.value, rawValue);
+    const result = await convert(currentCategory, DOM.fromUnit.value, DOM.toUnit.value, raw);
     if (!isFinite(result)) {
       DOM.toValue.value = "Error";
       return;
@@ -96,7 +84,7 @@ async function performConversionOnly() {
     const precision = conversionData[currentCategory]?.precision ?? 6;
     const rounded = Number(result.toFixed(precision));
 
-    DOM.toValue.value = rounded.toLocaleString("en-GB", {
+    DOM.toValue.value = rounded.toLocaleString("en-US", {
       minimumFractionDigits: precision,
       maximumFractionDigits: precision,
     });
@@ -108,18 +96,15 @@ async function performConversionOnly() {
   }
 }
 
-// Conversion + sauvegarde intelligente
 async function performConversionAndSave() {
   await performConversionOnly();
-
-  const rawInput = DOM.fromValue.value.replace(/\s/g, "").replace(",", ".");
-  if (!rawInput || !DOM.toValue.dataset.raw) return;
+  if (!DOM.toValue.dataset.raw) return;
 
   const entry = {
     category: currentCategory,
     fromUnit: DOM.fromUnit.value,
     toUnit: DOM.toUnit.value,
-    value: Number(rawInput),
+    value: Number(DOM.fromValue.value),
     result: Number(DOM.toValue.dataset.raw),
     timestamp: Date.now(),
   };
@@ -139,11 +124,15 @@ function updateCurrencyWarning(cat = currentCategory) {
   DOM.currencyWarning.classList.remove("hidden");
   const cached = getCachedRates();
   const date = cached?.timestamp
-    ? new Date(cached.timestamp).toLocaleString("en-GB")
+    ? new Date(cached.timestamp).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
     : "Never";
-  if (DOM.lastUpdatedText) {
-    DOM.lastUpdatedText.textContent = `Updated: ${date}`;
-  }
+
+  DOM.lastUpdatedText.textContent = `Rates last updated: ${date}`;
 }
 
 function debounce(fn, delay = 300) {
