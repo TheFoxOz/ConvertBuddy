@@ -1,32 +1,37 @@
-// scripts/history.js
-// Thin wrapper to export the firestore history functions.
-// Keeps callers simple: saveHistory, getHistory, clearHistory
-import { saveHistory as _save, getHistory as _get, clearHistory as _clear } from "./firestore.js";
+// history.js
+import { saveHistoryToFirestore, loadHistoryFromFirestore, clearHistoryFromFirestore } from './firestore.js';
 
-export async function saveHistory(entry) {
-  // ensure timestamp
-  entry.timestamp = entry.timestamp || Date.now();
-  try {
-    await _save(entry);
-  } catch (e) {
-    // swallow - firestore has its own fallback to local
-    console.warn("saveHistory wrapper error:", e);
-  }
+const historyList = document.getElementById("historyList");
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+// Add a new history item
+export async function addToHistory(record) {
+  await saveHistoryToFirestore(record);
+  displayHistoryItem(record);
 }
 
-export async function getHistory(limit = 50) {
-  try {
-    return await _get(limit);
-  } catch (e) {
-    console.warn("getHistory wrapper error:", e);
-    return [];
-  }
+// Show one history line in UI
+function displayHistoryItem(record) {
+  const li = document.createElement("li");
+  li.textContent = `${record.value} ${record.fromUnit} → ${record.result} ${record.toUnit} (${record.category})`;
+  historyList.appendChild(li);
 }
 
-export async function clearHistory() {
-  try {
-    await _clear();
-  } catch (e) {
-    console.warn("clearHistory wrapper error:", e);
+// Load the entire history on startup
+export async function loadHistory() {
+  const history = await loadHistoryFromFirestore();
+  historyList.innerHTML = "";
+
+  if (!history || history.length === 0) {
+    historyList.innerHTML = "<li>No history yet</li>";
+    return;
   }
+
+  history.forEach(displayHistoryItem);
 }
+
+// Clear all history
+clearHistoryBtn.addEventListener("click", async () => {
+  await clearHistoryFromFirestore();
+  historyList.innerHTML = "<li>History cleared</li>";
+});
