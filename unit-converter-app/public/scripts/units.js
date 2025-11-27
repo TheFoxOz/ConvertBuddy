@@ -1,5 +1,3 @@
-// scripts/units.js - SINGLE SOURCE OF TRUTH FOR DATA
-
 // 1. Import the dedicated currency functions
 import { convertCurrency, listCurrencies } from "./currency.js";
  
@@ -16,7 +14,7 @@ export const conversionData = {
     Currency: {
         name: "Currency",
         icon: "fas fa-dollar-sign",
-        units: {}, // Empty, as units are populated dynamically by listCurrencies()
+        units: listCurrencies(), // Dynamically populated from currency.js
         precision: 4,
         convert: convertCurrency,
         list: listCurrencies,
@@ -140,7 +138,7 @@ export const conversionData = {
         units: {
             // Base Unit: Meter/Second (m/s)
             "Meter/Second": { name: "Meter/Second", symbol: "m/s", toBase: 1 },
-            "Kilometer/Hour": { name: "Kilometer/Hour", symbol: "km/h", toBase: 1 / 3.6 }, // 0.277778
+            "Kilometer/Hour": { name: "Kilometer/Hour", symbol: "km/h", toBase: 1 / 3.6 },
             "Mile/Hour": { name: "Mile/Hour", symbol: "mph", toBase: 0.44704 },
             "Foot/Second": { name: "Foot/Second", symbol: "ft/s", toBase: 0.3048 },
             Knot: { name: "Knot", symbol: "kn", toBase: 0.514444 }
@@ -153,7 +151,7 @@ export const conversionData = {
     Time: {
         name: "Time",
         icon: "fas fa-clock",
-        precision: 2, // FIX: Changed from 0 to 2 to handle fractional time conversions
+        precision: 2,
         units: {
             // Base Unit: Second (s)
             Second: { name: "Second", symbol: "s", toBase: 1 },
@@ -164,7 +162,9 @@ export const conversionData = {
         }
     },
     
-    // --- RESTORED CATEGORY: Time (Extended/Longer periods) ---
+    /* ------------------------- */
+    /* Time (Extended)           */
+    /* ------------------------- */
     "Time(Extended)": {
         name: "Time (Extended)",
         icon: "fas fa-hourglass",
@@ -173,15 +173,15 @@ export const conversionData = {
             // Base Unit: Day (d)
             Day: { name: "Day", symbol: "d", toBase: 1 },
             Week: { name: "Week", symbol: "wk", toBase: 7 },
-            Month: { name: "Month (Avg)", symbol: "mo", toBase: 30.4375 }, // Average days in a month
-            Year: { name: "Year (Avg)", symbol: "yr", toBase: 365.25 }, // Average days in a year
+            Month: { name: "Month (Avg)", symbol: "mo", toBase: 30.4375 },
+            Year: { name: "Year (Avg)", symbol: "yr", toBase: 365.25 },
             Decade: { name: "Decade", symbol: "dec", toBase: 3_652.5 },
             Century: { name: "Century", symbol: "cent", toBase: 36_525 },
         }
     },
 
     /* ------------------------- */
-    /* Storage / Digital         */
+    /* Storage / Digital (Byte)  */
     /* ------------------------- */
     Storage: {
         name: "Storage / Digital (Byte)",
@@ -198,10 +198,12 @@ export const conversionData = {
         }
     },
 
-    // --- RESTORED CATEGORY: Digital (Bit-based) ---
+    /* ------------------------- */
+    /* Digital (Bit)             */
+    /* ------------------------- */
     Digital: {
         name: "Digital (Bit)",
-        icon: "fas fa-binary",
+        icon: "fas fa-microchip",
         precision: 2,
         units: {
             // Base Unit: Bit (b)
@@ -276,7 +278,6 @@ export const conversionData = {
         units: {
             // Base Unit: Degree (°)
             Degree: { name: "Degree", symbol: "°", toBase: 1 },
-            // Note: Radian to Degree is 180/pi ≈ 57.2958
             Radian: { name: "Radian", symbol: "rad", toBase: 57.2958 },
             Gradian: { name: "Gradian", symbol: "grad", toBase: 0.9 }
         }
@@ -306,12 +307,12 @@ export const conversionData = {
         icon: "fas fa-gas-pump",
         precision: 2,
         units: {
-            // Base Unit: MPG (US) - Note: L/100km uses reciprocal formula
+            // Base Unit: MPG (US)
             "MPG(US)": { name: "Miles per Gallon (US)", symbol: "MPG (US)", toBase: 1 },
             "MPG(UK)": { name: "Miles per Gallon (UK)", symbol: "MPG (UK)", toBase: 1.20095 },
             "L/100km": {
                 name: "Liters per 100km", symbol: "L/100km",
-                // Convert L/100km to MPG(US) (235.214 is the constant)
+                // Non-linear conversion: Convert L/100km to MPG(US) (235.214 is the constant)
                 toBase: v => 235.214 / v,
                 fromBase: v => 235.214 / v
             }
@@ -336,15 +337,7 @@ export const conversionData = {
 
 /* Default fallback icons, precision, and icon check */
 for (const cat in conversionData) {
-    if (!conversionData[cat].name) {
-        // Fallback for missing name
-        conversionData[cat].name = cat;
-    }
-    if (!conversionData[cat].icon) {
-        conversionData[cat].icon = "fas fa-question";
-    }
-    // Default precision if not explicitly set
-    if (typeof conversionData[cat].precision !== 'number') {
-        conversionData[cat].precision = 6;
-    }
+    if (!conversionData[cat].name) conversionData[cat].name = cat;
+    if (!conversionData[cat].icon) conversionData[cat].icon = "fas fa-question";
+    if (typeof conversionData[cat].precision !== 'number') conversionData[cat].precision = 6;
 }
