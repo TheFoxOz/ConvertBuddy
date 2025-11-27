@@ -1,4 +1,4 @@
-// scripts/ui.js - FIXED: Delay history load for DOM readiness
+// scripts/ui.js - FIXED: Removed duplicate export
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadCategory(currentCategory);
   setupEventListeners();
   
-  // FIXED: Delay history load to ensure DOM refs are ready
+  // Delay history load to ensure DOM refs are ready
   setTimeout(async () => {
     await loadHistory();
   }, 100);
@@ -32,8 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateCurrencyWarning();
 });
 
-export { loadCategory, performConversionOnly as performConversion };
-
+// FIXED: Only export once at the end
 function setupEventListeners() {
   if (DOM.converterForm) DOM.converterForm.addEventListener("input", debounce(performConversionOnly, 300));
   if (DOM.fromValue) DOM.fromValue.addEventListener("blur", performConversionAndSave);
@@ -56,7 +55,7 @@ async function renderCategorySelect() {
   DOM.categorySelect.value = currentCategory;
 }
 
-export async function loadCategory(key) {
+async function loadCategory(key) {
   currentCategory = key;
   if (DOM.categorySelect) DOM.categorySelect.value = key;
 
@@ -167,3 +166,6 @@ function debounce(fn, delay = 300) {
     timer = setTimeout(() => fn(...args), delay);
   };
 }
+
+// FIXED: Export only once at the end
+export { loadCategory, performConversionOnly as performConversion };
