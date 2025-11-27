@@ -2,7 +2,7 @@
 
 // 1. Import the dedicated currency functions
 import { convertCurrency, listCurrencies } from "./currency.js";
- 
+ 
 /**
  * Defines all conversion categories, units, and conversion factors (to/from a base unit).
  *
@@ -32,12 +32,12 @@ export const conversionData = {
         units: {
             // Base Unit: Meter (m)
             Meter: { name: "Meter", symbol: "m", toBase: 1 },
-            Kilometer: { name: "Kilometer", symbol: "km", toBase: 1000 },
+            Kilometer: { name: "Kilometer", symbol: "km", toBase: 1_000 },
             Centimeter: { name: "Centimeter", symbol: "cm", toBase: 0.01 },
             Millimeter: { name: "Millimeter", symbol: "mm", toBase: 0.001 },
             Micrometer: { name: "Micrometer", symbol: "µm", toBase: 1e-6 },
             Nanometer: { name: "Nanometer", symbol: "nm", toBase: 1e-9 },
-            Mile: { name: "Mile", symbol: "mi", toBase: 1609.34 },
+            Mile: { name: "Mile", symbol: "mi", toBase: 1_609.34 },
             Yard: { name: "Yard", symbol: "yd", toBase: 0.9144 },
             Foot: { name: "Foot", symbol: "ft", toBase: 0.3048 },
             Inch: { name: "Inch", symbol: "in", toBase: 0.0254 },
@@ -45,7 +45,7 @@ export const conversionData = {
     },
 
     /* ------------------------- */
-    /* Weight / Mass               */
+    /* Weight / Mass             */
     /* ------------------------- */
     Weight: {
         name: "Weight / Mass",
@@ -55,16 +55,16 @@ export const conversionData = {
             // Base Unit: Gram (g)
             Milligram: { name: "Milligram", symbol: "mg", toBase: 0.001 },
             Gram: { name: "Gram", symbol: "g", toBase: 1 },
-            Kilogram: { name: "Kilogram", symbol: "kg", toBase: 1000 },
+            Kilogram: { name: "Kilogram", symbol: "kg", toBase: 1_000 },
             Tonne: { name: "Tonne", symbol: "t", toBase: 1_000_000 },
             Pound: { name: "Pound", symbol: "lb", toBase: 453.592 },
             Ounce: { name: "Ounce", symbol: "oz", toBase: 28.3495 },
-            Stone: { name: "Stone", symbol: "st", toBase: 6350.29 }
+            Stone: { name: "Stone", symbol: "st", toBase: 6_350.29 }
         }
     },
 
     /* ------------------------- */
-    /* Temperature                 */
+    /* Temperature               */
     /* ------------------------- */
     Temperature: {
         name: "Temperature",
@@ -101,7 +101,7 @@ export const conversionData = {
             // Base Unit: Liter (L)
             Liter: { name: "Liter", symbol: "L", toBase: 1 },
             Milliliter: { name: "Milliliter", symbol: "mL", toBase: 0.001 },
-            CubicMeter: { name: "Cubic Meter", symbol: "m³", toBase: 1000 },
+            CubicMeter: { name: "Cubic Meter", symbol: "m³", toBase: 1_000 },
             Gallon: { name: "Gallon", symbol: "gal", toBase: 3.78541 },
             Quart: { name: "Quart", symbol: "qt", toBase: 0.946353 },
             Pint: { name: "Pint", symbol: "pt", toBase: 0.473176 },
@@ -126,7 +126,7 @@ export const conversionData = {
             SquareInch: { name: "Square Inch", symbol: "in²", toBase: 0.00064516 },
             SquareMile: { name: "Square Mile", symbol: "mi²", toBase: 2_589_988 },
             Hectare: { name: "Hectare", symbol: "ha", toBase: 10_000 },
-            Acre: { name: "Acre", symbol: "ac", toBase: 4046.86 }
+            Acre: { name: "Acre", symbol: "ac", toBase: 4_046.86 }
         }
     },
 
@@ -153,14 +153,14 @@ export const conversionData = {
     Time: {
         name: "Time",
         icon: "fas fa-clock",
-        precision: 0, // Time units are generally integer-based unless converting to seconds/fractional hours
+        precision: 2, // FIX: Changed from 0 to 2 to handle fractional time conversions
         units: {
             // Base Unit: Second (s)
             Second: { name: "Second", symbol: "s", toBase: 1 },
             Minute: { name: "Minute", symbol: "min", toBase: 60 },
-            Hour: { name: "Hour", symbol: "h", toBase: 3600 },
-            Day: { name: "Day", symbol: "d", toBase: 86400 },
-            Week: { name: "Week", symbol: "wk", toBase: 604800 }
+            Hour: { name: "Hour", symbol: "h", toBase: 3_600 },
+            Day: { name: "Day", symbol: "d", toBase: 86_400 },
+            Week: { name: "Week", symbol: "wk", toBase: 604_800 }
         }
     },
     
@@ -175,8 +175,8 @@ export const conversionData = {
             Week: { name: "Week", symbol: "wk", toBase: 7 },
             Month: { name: "Month (Avg)", symbol: "mo", toBase: 30.4375 }, // Average days in a month
             Year: { name: "Year (Avg)", symbol: "yr", toBase: 365.25 }, // Average days in a year
-            Decade: { name: "Decade", symbol: "dec", toBase: 3652.5 },
-            Century: { name: "Century", symbol: "cent", toBase: 36525 },
+            Decade: { name: "Decade", symbol: "dec", toBase: 3_652.5 },
+            Century: { name: "Century", symbol: "cent", toBase: 36_525 },
         }
     },
 
@@ -190,11 +190,11 @@ export const conversionData = {
         units: {
             // Base Unit: Byte (B) - Uses 1024 for standard computing
             Byte: { name: "Byte", symbol: "B", toBase: 1 },
-            Kilobyte: { name: "Kilobyte", symbol: "KB", toBase: 1024 },
-            Megabyte: { name: "Megabyte", symbol: "MB", toBase: 1024 ** 2 },
-            Gigabyte: { name: "Gigabyte", symbol: "GB", toBase: 1024 ** 3 },
-            Terabyte: { name: "Terabyte", symbol: "TB", toBase: 1024 ** 4 },
-            Petabyte: { name: "Petabyte", symbol: "PB", toBase: 1024 ** 5 }
+            Kilobyte: { name: "Kilobyte", symbol: "KB", toBase: 1_024 },
+            Megabyte: { name: "Megabyte", symbol: "MB", toBase: 1_024 ** 2 },
+            Gigabyte: { name: "Gigabyte", symbol: "GB", toBase: 1_024 ** 3 },
+            Terabyte: { name: "Terabyte", symbol: "TB", toBase: 1_024 ** 4 },
+            Petabyte: { name: "Petabyte", symbol: "PB", toBase: 1_024 ** 5 }
         }
     },
 
@@ -206,11 +206,11 @@ export const conversionData = {
         units: {
             // Base Unit: Bit (b)
             Bit: { name: "Bit", symbol: "b", toBase: 1 },
-            Kilobit: { name: "Kilobit", symbol: "kb", toBase: 1024 },
-            Megabit: { name: "Megabit", symbol: "Mb", toBase: 1024 ** 2 },
-            Gigabit: { name: "Gigabit", symbol: "Gb", toBase: 1024 ** 3 },
-            Terabit: { name: "Terabit", symbol: "Tb", toBase: 1024 ** 4 },
-            Petabit: { name: "Petabit", symbol: "Pb", toBase: 1024 ** 5 }
+            Kilobit: { name: "Kilobit", symbol: "kb", toBase: 1_024 },
+            Megabit: { name: "Megabit", symbol: "Mb", toBase: 1_024 ** 2 },
+            Gigabit: { name: "Gigabit", symbol: "Gb", toBase: 1_024 ** 3 },
+            Terabit: { name: "Terabit", symbol: "Tb", toBase: 1_024 ** 4 },
+            Petabit: { name: "Petabit", symbol: "Pb", toBase: 1_024 ** 5 }
         }
     },
 
@@ -225,10 +225,10 @@ export const conversionData = {
         units: {
             // Base Unit: Joule (J)
             Joule: { name: "Joule", symbol: "J", toBase: 1 },
-            Kilojoule: { name: "Kilojoule", symbol: "kJ", toBase: 1000 },
+            Kilojoule: { name: "Kilojoule", symbol: "kJ", toBase: 1_000 },
             Calorie: { name: "Calorie", symbol: "cal", toBase: 4.184 },
-            Kilocalorie: { name: "Kilocalorie", symbol: "kcal", toBase: 4184 },
-            WattHour: { name: "Watt Hour", symbol: "Wh", toBase: 3600 },
+            Kilocalorie: { name: "Kilocalorie", symbol: "kcal", toBase: 4_184 },
+            WattHour: { name: "Watt Hour", symbol: "Wh", toBase: 3_600 },
             KilowattHour: { name: "Kilowatt Hour", symbol: "kWh", toBase: 3_600_000 }
         }
     },
@@ -243,10 +243,10 @@ export const conversionData = {
         units: {
             // Base Unit: Pascal (Pa)
             Pascal: { name: "Pascal", symbol: "Pa", toBase: 1 },
-            Kilopascal: { name: "Kilopascal", symbol: "kPa", toBase: 1000 },
-            Bar: { name: "Bar", symbol: "bar", toBase: 100000 },
-            PSI: { name: "Pound/psi", symbol: "psi", toBase: 6894.76 },
-            Atmosphere: { name: "Atmosphere", symbol: "atm", toBase: 101325 }
+            Kilopascal: { name: "Kilopascal", symbol: "kPa", toBase: 1_000 },
+            Bar: { name: "Bar", symbol: "bar", toBase: 100_000 },
+            PSI: { name: "Pound/psi", symbol: "psi", toBase: 6_894.76 },
+            Atmosphere: { name: "Atmosphere", symbol: "atm", toBase: 101_325 }
         }
     },
 
@@ -260,7 +260,7 @@ export const conversionData = {
         units: {
             // Base Unit: Hertz (Hz)
             Hertz: { name: "Hertz", symbol: "Hz", toBase: 1 },
-            Kilohertz: { name: "Kilohertz", symbol: "kHz", toBase: 1000 },
+            Kilohertz: { name: "Kilohertz", symbol: "kHz", toBase: 1_000 },
             Megahertz: { name: "Megahertz", symbol: "MHz", toBase: 1_000_000 },
             Gigahertz: { name: "Gigahertz", symbol: "GHz", toBase: 1_000_000_000 }
         }
@@ -292,7 +292,7 @@ export const conversionData = {
         units: {
             // Base Unit: Watt (W)
             Watt: { name: "Watt", symbol: "W", toBase: 1 },
-            Kilowatt: { name: "Kilowatt", symbol: "kW", toBase: 1000 },
+            Kilowatt: { name: "Kilowatt", symbol: "kW", toBase: 1_000 },
             Megawatt: { name: "Megawatt", symbol: "MW", toBase: 1_000_000 },
             Horsepower: { name: "Horsepower", symbol: "hp", toBase: 745.7 }
         }
@@ -328,7 +328,7 @@ export const conversionData = {
         units: {
             // Base Unit: Newton (N)
             Newton: { name: "Newton", symbol: "N", toBase: 1 },
-            Kilonewton: { name: "Kilonewton", symbol: "kN", toBase: 1000 },
+            Kilonewton: { name: "Kilonewton", symbol: "kN", toBase: 1_000 },
             PoundForce: { name: "Pound Force", symbol: "lbf", toBase: 4.44822 }
         }
     }
