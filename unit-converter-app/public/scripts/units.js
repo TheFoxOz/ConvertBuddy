@@ -1,7 +1,8 @@
-// scripts/units.js
+// scripts/units.js - SINGLE SOURCE OF TRUTH FOR DATA
+
 // 1. Import the dedicated currency functions
 import { convertCurrency, listCurrencies } from "./currency.js";
-
+ 
 /**
  * Defines all conversion categories, units, and conversion factors (to/from a base unit).
  *
@@ -13,13 +14,11 @@ export const conversionData = {
     /* Currency (Dynamic API)    */
     /* ------------------------- */
     Currency: {
-        name: "Currency", // Added name property for UI
+        name: "Currency",
         icon: "fas fa-dollar-sign",
         units: {}, // Empty, as units are populated dynamically by listCurrencies()
-        precision: 4, // Currency often requires more precision
-        
-        // 2. Add the custom conversion and listing functions from currency.js
-        convert: convertCurrency, 
+        precision: 4,
+        convert: convertCurrency,
         list: listCurrencies,
     },
 
@@ -27,7 +26,7 @@ export const conversionData = {
     /* Length                      */
     /* ------------------------- */
     Length: {
-        name: "Length", // Added name property
+        name: "Length",
         icon: "fas fa-ruler",
         precision: 3,
         units: {
@@ -49,7 +48,7 @@ export const conversionData = {
     /* Weight / Mass               */
     /* ------------------------- */
     Weight: {
-        name: "Weight / Mass", // Added name property
+        name: "Weight / Mass",
         icon: "fas fa-weight-scale",
         precision: 3,
         units: {
@@ -65,10 +64,10 @@ export const conversionData = {
     },
 
     /* ------------------------- */
-    /* Temperature               */
+    /* Temperature                 */
     /* ------------------------- */
     Temperature: {
-        name: "Temperature", // Added name property
+        name: "Temperature",
         icon: "fas fa-temperature-half",
         precision: 2,
         units: {
@@ -95,7 +94,7 @@ export const conversionData = {
     /* Volume                    */
     /* ------------------------- */
     Volume: {
-        name: "Volume", // Added name property
+        name: "Volume",
         icon: "fas fa-wine-bottle",
         precision: 3,
         units: {
@@ -116,7 +115,7 @@ export const conversionData = {
     /* Area                      */
     /* ------------------------- */
     Area: {
-        name: "Area", // Added name property
+        name: "Area",
         icon: "fas fa-vector-square",
         precision: 2,
         units: {
@@ -135,7 +134,7 @@ export const conversionData = {
     /* Speed                     */
     /* ------------------------- */
     Speed: {
-        name: "Speed", // Added name property
+        name: "Speed",
         icon: "fas fa-tachometer-alt",
         precision: 2,
         units: {
@@ -152,7 +151,7 @@ export const conversionData = {
     /* Time                      */
     /* ------------------------- */
     Time: {
-        name: "Time", // Added name property
+        name: "Time",
         icon: "fas fa-clock",
         precision: 0, // Time units are generally integer-based unless converting to seconds/fractional hours
         units: {
@@ -164,16 +163,32 @@ export const conversionData = {
             Week: { name: "Week", symbol: "wk", toBase: 604800 }
         }
     },
+    
+    // --- RESTORED CATEGORY: Time (Extended/Longer periods) ---
+    "Time(Extended)": {
+        name: "Time (Extended)",
+        icon: "fas fa-hourglass",
+        precision: 2,
+        units: {
+            // Base Unit: Day (d)
+            Day: { name: "Day", symbol: "d", toBase: 1 },
+            Week: { name: "Week", symbol: "wk", toBase: 7 },
+            Month: { name: "Month (Avg)", symbol: "mo", toBase: 30.4375 }, // Average days in a month
+            Year: { name: "Year (Avg)", symbol: "yr", toBase: 365.25 }, // Average days in a year
+            Decade: { name: "Decade", symbol: "dec", toBase: 3652.5 },
+            Century: { name: "Century", symbol: "cent", toBase: 36525 },
+        }
+    },
 
     /* ------------------------- */
     /* Storage / Digital         */
     /* ------------------------- */
     Storage: {
-        name: "Storage / Digital", // Added name property
+        name: "Storage / Digital (Byte)",
         icon: "fas fa-database",
         precision: 2,
         units: {
-            // Base Unit: Byte (B)
+            // Base Unit: Byte (B) - Uses 1024 for standard computing
             Byte: { name: "Byte", symbol: "B", toBase: 1 },
             Kilobyte: { name: "Kilobyte", symbol: "KB", toBase: 1024 },
             Megabyte: { name: "Megabyte", symbol: "MB", toBase: 1024 ** 2 },
@@ -183,11 +198,28 @@ export const conversionData = {
         }
     },
 
+    // --- RESTORED CATEGORY: Digital (Bit-based) ---
+    Digital: {
+        name: "Digital (Bit)",
+        icon: "fas fa-binary",
+        precision: 2,
+        units: {
+            // Base Unit: Bit (b)
+            Bit: { name: "Bit", symbol: "b", toBase: 1 },
+            Kilobit: { name: "Kilobit", symbol: "kb", toBase: 1024 },
+            Megabit: { name: "Megabit", symbol: "Mb", toBase: 1024 ** 2 },
+            Gigabit: { name: "Gigabit", symbol: "Gb", toBase: 1024 ** 3 },
+            Terabit: { name: "Terabit", symbol: "Tb", toBase: 1024 ** 4 },
+            Petabit: { name: "Petabit", symbol: "Pb", toBase: 1024 ** 5 }
+        }
+    },
+
+
     /* ------------------------- */
     /* Energy                    */
     /* ------------------------- */
     Energy: {
-        name: "Energy", // Added name property
+        name: "Energy",
         icon: "fas fa-bolt",
         precision: 2,
         units: {
@@ -205,7 +237,7 @@ export const conversionData = {
     /* Pressure                  */
     /* ------------------------- */
     Pressure: {
-        name: "Pressure", // Added name property
+        name: "Pressure",
         icon: "fas fa-compress-alt",
         precision: 2,
         units: {
@@ -222,7 +254,7 @@ export const conversionData = {
     /* Frequency                 */
     /* ------------------------- */
     Frequency: {
-        name: "Frequency", // Added name property
+        name: "Frequency",
         icon: "fas fa-wave-square",
         precision: 2,
         units: {
@@ -238,7 +270,7 @@ export const conversionData = {
     /* Angle                     */
     /* ------------------------- */
     Angle: {
-        name: "Angle", // Added name property
+        name: "Angle",
         icon: "fas fa-compass-drafting",
         precision: 3,
         units: {
@@ -254,7 +286,7 @@ export const conversionData = {
     /* Power                     */
     /* ------------------------- */
     Power: {
-        name: "Power", // Added name property
+        name: "Power",
         icon: "fas fa-plug",
         precision: 2,
         units: {
@@ -270,7 +302,7 @@ export const conversionData = {
     /* Fuel Economy              */
     /* ------------------------- */
     FuelEconomy: {
-        name: "Fuel Economy", // Added name property
+        name: "Fuel Economy",
         icon: "fas fa-gas-pump",
         precision: 2,
         units: {
@@ -290,7 +322,7 @@ export const conversionData = {
     /* Force                     */
     /* ------------------------- */
     Force: {
-        name: "Force", // Added name property
+        name: "Force",
         icon: "fas fa-hand-fist",
         precision: 2,
         units: {
@@ -301,11 +333,6 @@ export const conversionData = {
         }
     }
 };
-
-/* * NOTE: The updateCurrencyUnits function is no longer needed.
- * Currency units are listed directly using listCurrencies from currency.js.
- */
-// export function updateCurrencyUnits(rates) { ... } // REMOVED
 
 /* Default fallback icons, precision, and icon check */
 for (const cat in conversionData) {
