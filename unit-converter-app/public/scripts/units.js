@@ -1,10 +1,8 @@
-// scripts/units.js
-// 1. Import the dedicated currency functions
+// scripts/units.js - FIXED: Removed Digital(Bit) & Fuel Economy, merged Time categories
 import { convertCurrency, listCurrencies } from "./currency.js";
 
 /**
  * All conversion categories – fully UK-localised.
- * Currency is now completely dynamic → the old Promise-bug is fixed.
  */
 export const conversionData = {
     /* ------------------------- */
@@ -12,11 +10,10 @@ export const conversionData = {
     /* ------------------------- */
     Currency: {
         name: "Currency",
-        icon: "fas fa-pound-sign",     // GBP symbol for UK users
+        icon: "fas fa-pound-sign",
         precision: 4,
-        convert: convertCurrency,      // async conversion via API + cache
-        list: listCurrencies,          // async unit list – this is the ONLY source of units
-        // NO static `units` property → removes the Promise bug!
+        convert: convertCurrency,
+        list: listCurrencies,
     },
 
     /* ------------------------- */
@@ -27,7 +24,6 @@ export const conversionData = {
         icon: "fas fa-ruler",
         precision: 3,
         units: {
-            // Base Unit: Metre (m)
             Meter:        { name: "Metre",      symbol: "m",   toBase: 1 },
             Kilometer:    { name: "Kilometre",  symbol: "km",  toBase: 1_000 },
             Centimeter:   { name: "Centimetre", symbol: "cm",  toBase: 0.01 },
@@ -42,7 +38,7 @@ export const conversionData = {
     },
 
     /* ------------------------- */
-    /* Weight / Mass (Stone kept – very British!) */
+    /* Weight / Mass */
     /* ------------------------- */
     Weight: {
         name: "Weight / Mass",
@@ -140,37 +136,30 @@ export const conversionData = {
     },
 
     /* ------------------------- */
-    /* Time */
+    /* Time (MERGED - includes all time units) */
     /* ------------------------- */
     Time: {
         name: "Time",
         icon: "fas fa-clock",
         precision: 2,
         units: {
-            Second: { name: "Second", symbol: "s",   toBase: 1 },
-            Minute: { name: "Minute", symbol: "min", toBase: 60 },
-            Hour:   { name: "Hour",   symbol: "h",   toBase: 3_600 },
-            Day:    { name: "Day",    symbol: "d",   toBase: 86_400 },
-            Week:   { name: "Week",   symbol: "wk",  toBase: 604_800 }
+            Second:  { name: "Second",        symbol: "s",    toBase: 1 },
+            Minute:  { name: "Minute",        symbol: "min",  toBase: 60 },
+            Hour:    { name: "Hour",          symbol: "h",    toBase: 3_600 },
+            Day:     { name: "Day",           symbol: "d",    toBase: 86_400 },
+            Week:    { name: "Week",          symbol: "wk",   toBase: 604_800 },
+            Month:   { name: "Month (Avg)",   symbol: "mo",   toBase: 2_629_800 },  // 30.4375 days
+            Year:    { name: "Year (Avg)",    symbol: "yr",   toBase: 31_557_600 }, // 365.25 days
+            Decade:  { name: "Decade",        symbol: "dec",  toBase: 315_576_000 },
+            Century: { name: "Century",       symbol: "cent", toBase: 3_155_760_000 },
         }
     },
 
-    "Time(Extended)": {
-        name: "Time (Extended)",
-        icon: "fas fa-hourglass",
-        precision: 2,
-        units: {
-            Day:     { name: "Day",           symbol: "d",    toBase: 1 },
-            Week:    { name: "Week",          symbol: "wk",   toBase: 7 },
-            Month:   { name: "Month (Avg)",   symbol: "mo",   toBase: 30.4375 },
-            Year:    { name: "Year (Avg)",    symbol: "yr",   toBase: 365.25 },
-            Decade:  { name: "Decade",        symbol: "dec",  toBase: 3_652.5 },
-            Century: { name: "Century",       symbol: "cent", toBase: 36_525 },
-        }
-    },
-
+    /* ------------------------- */
+    /* Storage (Bytes) */
+    /* ------------------------- */
     Storage: {
-        name: "Storage / Digital (Byte)",
+        name: "Storage",
         icon: "fas fa-database",
         precision: 2,
         units: {
@@ -183,20 +172,9 @@ export const conversionData = {
         }
     },
 
-    Digital: {
-        name: "Digital (Bit)",
-        icon: "fas fa-microchip",
-        precision: 2,
-        units: {
-            Bit:       { name: "Bit",       symbol: "b",  toBase: 1 },
-            Kilobit:   { name: "Kilobit",   symbol: "kb", toBase: 1_024 },
-            Megabit:   { name: "Megabit",   symbol: "Mb", toBase: 1_024 ** 2 },
-            Gigabit:   { name: "Gigabit",   symbol: "Gb", toBase: 1_024 ** 3 },
-            Terabit:   { name: "Terabit",   symbol: "Tb", toBase: 1_024 ** 4 },
-            Petabit:   { name: "Petabit",   symbol: "Pb", toBase: 1_024 ** 5 }
-        }
-    },
-
+    /* ------------------------- */
+    /* Energy */
+    /* ------------------------- */
     Energy: {
         name: "Energy",
         icon: "fas fa-bolt",
@@ -211,6 +189,9 @@ export const conversionData = {
         }
     },
 
+    /* ------------------------- */
+    /* Pressure */
+    /* ------------------------- */
     Pressure: {
         name: "Pressure",
         icon: "fas fa-compress-alt",
@@ -224,6 +205,9 @@ export const conversionData = {
         }
     },
 
+    /* ------------------------- */
+    /* Frequency */
+    /* ------------------------- */
     Frequency: {
         name: "Frequency",
         icon: "fas fa-wave-square",
@@ -236,6 +220,9 @@ export const conversionData = {
         }
     },
 
+    /* ------------------------- */
+    /* Angle */
+    /* ------------------------- */
     Angle: {
         name: "Angle",
         icon: "fas fa-compass-drafting",
@@ -247,6 +234,9 @@ export const conversionData = {
         }
     },
 
+    /* ------------------------- */
+    /* Power */
+    /* ------------------------- */
     Power: {
         name: "Power",
         icon: "fas fa-plug",
@@ -259,22 +249,9 @@ export const conversionData = {
         }
     },
 
-    FuelEconomy: {
-        name: "Fuel Economy",
-        icon: "fas fa-gas-pump",
-        precision: 2,
-        units: {
-            "MPG(US)": { name: "Miles per Gallon (US)", symbol: "MPG (US)", toBase: 1 },
-            "MPG(UK)": { name: "Miles per Gallon (UK)", symbol: "MPG (UK)", toBase: 1.20095 },
-            "L/100km": {
-                name: "Litres per 100 km",
-                symbol: "L/100km",
-                toBase: v => 235.214 / v,
-                fromBase: v => 235.214 / v
-            }
-        }
-    },
-
+    /* ------------------------- */
+    /* Force */
+    /* ------------------------- */
     Force: {
         name: "Force",
         icon: "fas fa-hand-fist",
