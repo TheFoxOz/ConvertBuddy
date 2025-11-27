@@ -1,176 +1,170 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// scripts/currency.js - Currency conversion with Firebase caching
+import { initializeFirebase } from "./firebase.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- FIREBASE SETUP ---
-// Global variables provided by the Canvas environment
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-let db;
-let auth;
-let isFirebaseInitialized = false;
-
-// Function to initialize Firebase and sign in the user
-async function initializeFirebase() {
-    if (isFirebaseInitialized) return { db, auth };
-
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    auth = getAuth(app);
-
-    try {
-        if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
-        } else {
-            await signInAnonymously(auth);
-        }
-        isFirebaseInitialized = true;
-    } catch (error) {
-        console.error("Firebase Auth failed:", error);
-    }
-    return { db, auth };
-}
-
-// --- CURRENCY CONFIG ---
-// NOTE: Embedding API keys is insecure. This key is for demonstration only.
-const API_KEY = "b55c79e2ac77eeb4091f0253"; 
+// Currency API Configuration
+const API_KEY = "b55c79e2ac77eeb4091f0253";
 const BASE_CURRENCY = "USD";
 const API_URL = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/${BASE_CURRENCY}`;
-const EXCHANGE_RATES_DOC_PATH = `/artifacts/${appId}/public/data/currency_data/latest_rates`;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-// -----------------------
+
+// Cache storage path in Firestore
+const CACHE_COLLECTION = "currency_cache";
+const CACHE_DOC_ID = "latest_rates";
 
 /**
- * Fetches currency rates from the external API and caches them in Firestore.
- * @returns {Promise<Object | null>} Cached data object or null on failure.
+ * Fetches fresh currency rates from the API and caches them
+ * @returns {Promise<Object|null>}
  */
 export async function fetchCurrencyRates() {
-    await initializeFirebase();
-
-    try {
-        const resp = await fetch(API_URL);
-        if (!resp.ok) {
-            console.error("Currency API responded:", resp.status);
-            return null;
-        }
-        const data = await resp.json();
-
-        if (data.result !== "success" || !data.conversion_rates) {
-            console.error("Currency API returned invalid body", data);
-            return null;
-        }
-
-        const cacheData = {
-            rates: data.conversion_rates,
-            timestamp: Date.now(),
-            base: data.base_code || BASE_CURRENCY
-        };
-
-        // Write the fetched data to Firestore
-        await setDoc(doc(db, EXCHANGE_RATES_DOC_PATH), cacheData);
-        return cacheData;
-
-    } catch (e) {
-        console.warn("Failed to fetch or cache currency rates:", e);
-        return null;
+  try {
+    const { db } = await initializeFirebase();
+    
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+      console.error("Currency API error:", response.status);
+      return null;
     }
+
+    const data = await response.json();
+    if (data.result !== "success" || !data.conversion_rates) {
+      console.error("Invalid API response:", data);
+      return null;
+    }
+
+    const cacheData = {
+      rates: data.conversion_rates,
+      timestamp: Date.now(),
+      base: data.base_code || BASE_CURRENCY
+    };
+
+    // Save to Firestore
+    if (db) {
+      try {
+        await setDoc(doc(db, CACHE_COLLECTION, CACHE_DOC_ID), cacheData);
+        console.log("Currency rates cached successfully");
+      } catch (error) {
+        console.warn("Failed to cache rates:", error);
+      }
+    }
+
+    return cacheData;
+  } catch (error) {
+    console.error("Failed to fetch currency rates:", error);
+    return null;
+  }
 }
 
 /**
- * Retrieves cached rates from Firebase Firestore.
- * @returns {Promise<Object | null>} Cached data object or null if not found or stale.
+ * Gets cached currency rates from Firestore
+ * @returns {Promise<Object|null>}
  */
 export async function getCachedRates() {
-    await initializeFirebase();
-
-    try {
-        const docRef = doc(db, EXCHANGE_RATES_DOC_PATH);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const cached = docSnap.data();
-            // Check for staleness
-            if (Date.now() - (cached.timestamp || 0) > ONE_DAY_MS) {
-                console.log("Cached rates are stale. Initiating refresh.");
-                // Immediately return stale data but kick off a background refresh
-                fetchCurrencyRates();
-                return cached;
-            }
-            return cached;
-        }
-    } catch (e) {
-        console.error("Failed to retrieve currency cache from Firestore:", e);
+  try {
+    const { db } = await initializeFirebase();
+    
+    if (!db) {
+      console.warn("Firestore not available");
+      return null;
     }
+
+    const docRef = doc(db, CACHE_COLLECTION, CACHE_DOC_ID);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const cached = docSnap.data();
+      
+      // Check if stale (older than 1 day)
+      const isStale = Date.now() - (cached.timestamp || 0) > ONE_DAY_MS;
+      
+      if (isStale) {
+        console.log("Rates are stale, refreshing in background...");
+        fetchCurrencyRates(); // Non-blocking refresh
+      }
+      
+      return cached;
+    }
+    
     return null;
+  } catch (error) {
+    console.error("Failed to get cached rates:", error);
+    return null;
+  }
 }
 
 /**
- * Converts a currency value from source to target using cached or freshly fetched rates.
- * @param {string} fromCode - The currency code to convert from.
- * @param {string} toCode - The currency code to convert to.
- * @param {number} value - The numerical value to convert.
- * @returns {Promise<number>} The converted and rounded value.
+ * Converts currency from one code to another
+ * @param {string} fromCode - Source currency code (e.g., 'USD')
+ * @param {string} toCode - Target currency code (e.g., 'EUR')
+ * @param {number} value - Amount to convert
+ * @returns {Promise<number>}
  */
 export async function convertCurrency(fromCode, toCode, value) {
-    let ratesData = await getCachedRates();
+  let ratesData = await getCachedRates();
+
+  // If no cache, fetch fresh data
+  if (!ratesData || !ratesData.rates) {
+    console.log("No cache found, fetching fresh rates...");
+    ratesData = await fetchCurrencyRates();
     
-    // If rates are missing (first run), fetch them blocking
-    if (!ratesData || !ratesData.rates) {
-        ratesData = await fetchCurrencyRates();
-        if (!ratesData) throw new Error("Currency rates unavailable");
+    if (!ratesData) {
+      throw new Error("Currency rates unavailable");
     }
+  }
 
-    value = Number(value);
-    if (isNaN(value)) return NaN;
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return NaN;
+  }
 
-    const rates = ratesData.rates;
-    const fromRate = rates[fromCode];
-    const toRate = rates[toCode];
-    if (!fromRate || !toRate) throw new Error(`Rate missing for ${fromCode} or ${toCode}`);
+  const rates = ratesData.rates;
+  const fromRate = rates[fromCode];
+  const toRate = rates[toCode];
 
-    // Convert = (value / fromRate) * toRate (both rates relative to BASE_CURRENCY)
-    const result = (value / fromRate) * toRate;
-    const precision = 4;
-    const factor = 10 ** precision;
-    
-    // Rounding to fixed precision
-    return Math.round((result + Number.EPSILON) * factor) / factor;
+  if (!fromRate || !toRate) {
+    throw new Error(`Rate not found for ${fromCode} or ${toCode}`);
+  }
+
+  // Convert via base currency: (value / fromRate) * toRate
+  const result = (numValue / fromRate) * toRate;
+  
+  // Round to 4 decimal places
+  return Math.round((result + Number.EPSILON) * 10000) / 10000;
 }
 
 /**
- * Returns an array of available currencies (from cache) or a fallback list.
- * @returns {Promise<Array<Object>>} Array of currency objects { key, name, symbol }.
+ * Returns list of available currencies
+ * @returns {Promise<Array>}
  */
 export async function listCurrencies() {
-    const cached = await getCachedRates();
-    if (!cached || !cached.rates) {
-        // Fallback list
-        return [
-            { key: "USD", name: "US Dollar", symbol: "USD" },
-            { key: "EUR", name: "Euro", symbol: "EUR" },
-            { key: "GBP", name: "British Pound", symbol: "GBP" }
-        ];
-    }
-    
-    // Convert rate keys to currency list objects and sort
-    return Object.keys(cached.rates)
-        .map(code => ({ 
-            key: code, 
-            name: code, 
-            symbol: code 
-        }))
-        .sort((a,b) => a.key.localeCompare(b.key));
+  const cached = await getCachedRates();
+  
+  if (!cached || !cached.rates) {
+    // Fallback list while rates are loading
+    return [
+      { key: "USD", name: "US Dollar", symbol: "USD" },
+      { key: "EUR", name: "Euro", symbol: "EUR" },
+      { key: "GBP", name: "British Pound", symbol: "GBP" },
+      { key: "JPY", name: "Japanese Yen", symbol: "JPY" },
+      { key: "CAD", name: "Canadian Dollar", symbol: "CAD" }
+    ];
+  }
+
+  // Convert rates to currency list
+  return Object.keys(cached.rates)
+    .map(code => ({
+      key: code,
+      name: code,
+      symbol: code
+    }))
+    .sort((a, b) => a.key.localeCompare(b.key));
 }
 
-// Initial background check and refresh (non-blocking)
-async function initialLoad() {
-    const cached = await getCachedRates();
-    // If no cache exists, or if the cache is stale (stale check handled in getCachedRates)
-    if (!cached) {
-        console.log("No cache found. Fetching rates in background.");
-        fetchCurrencyRates();
-    }
-}
-initialLoad();
+// Initialize currency rates in background (non-blocking)
+(async () => {
+  const cached = await getCachedRates();
+  if (!cached) {
+    console.log("No cached rates, fetching initial data...");
+    await fetchCurrencyRates();
+  }
+})();
