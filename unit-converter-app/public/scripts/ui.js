@@ -1,323 +1,279 @@
-// scripts/units.js
-// 1. Import the dedicated currency functions
-import { convertCurrency, listCurrencies } from "./currency.js";
+// scripts/ui.js
 
-/**
- * Defines all conversion categories, units, and conversion factors (to/from a base unit).
- *
- * Each category defines a common BASE unit (toBase: 1) for linear conversions.
- * The 'precision' defines the default rounding for results in this category.
- */
-export const conversionData = {
-    /* ------------------------- */
-    /* Currency (Dynamic API)    */
-    /* ------------------------- */
-    Currency: {
-        name: "Currency", // Added name property for UI
-        icon: "fas fa-dollar-sign",
-        units: {}, // Empty, as units are populated dynamically by listCurrencies()
-        precision: 4, // Currency often requires more precision
-        
-        // 2. Add the custom conversion and listing functions from currency.js
-        convert: convertCurrency, 
-        list: listCurrencies,
-    },
+import { conversionData } from "./units.js";
+import { convert, listUnits, swapUnits } from "./converter.js";
+import { getCachedRates } from "./currency.js";
 
-    /* ------------------------- */
-    /* Length                      */
-    /* ------------------------- */
-    Length: {
-        name: "Length", // Added name property
-        icon: "fas fa-ruler",
-        precision: 3,
-        units: {
-            // Base Unit: Meter (m)
-            Meter: { name: "Meter", symbol: "m", toBase: 1 },
-            Kilometer: { name: "Kilometer", symbol: "km", toBase: 1000 },
-            Centimeter: { name: "Centimeter", symbol: "cm", toBase: 0.01 },
-            Millimeter: { name: "Millimeter", symbol: "mm", toBase: 0.001 },
-            Micrometer: { name: "Micrometer", symbol: "µm", toBase: 1e-6 },
-            Nanometer: { name: "Nanometer", symbol: "nm", toBase: 1e-9 },
-            Mile: { name: "Mile", symbol: "mi", toBase: 1609.34 },
-            Yard: { name: "Yard", symbol: "yd", toBase: 0.9144 },
-            Foot: { name: "Foot", symbol: "ft", toBase: 0.3048 },
-            Inch: { name: "Inch", symbol: "in", toBase: 0.0254 },
-        }
-    },
-
-    /* ------------------------- */
-    /* Weight / Mass               */
-    /* ------------------------- */
-    Weight: {
-        name: "Weight / Mass", // Added name property
-        icon: "fas fa-weight-scale",
-        precision: 3,
-        units: {
-            // Base Unit: Gram (g)
-            Milligram: { name: "Milligram", symbol: "mg", toBase: 0.001 },
-            Gram: { name: "Gram", symbol: "g", toBase: 1 },
-            Kilogram: { name: "Kilogram", symbol: "kg", toBase: 1000 },
-            Tonne: { name: "Tonne", symbol: "t", toBase: 1_000_000 },
-            Pound: { name: "Pound", symbol: "lb", toBase: 453.592 },
-            Ounce: { name: "Ounce", symbol: "oz", toBase: 28.3495 },
-            Stone: { name: "Stone", symbol: "st", toBase: 6350.29 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Temperature               */
-    /* ------------------------- */
-    Temperature: {
-        name: "Temperature", // Added name property
-        icon: "fas fa-temperature-half",
-        precision: 2,
-        units: {
-            // Base Unit: Celsius (°C)
-            Celsius: {
-                name: "Celsius", symbol: "°C",
-                toBase: v => v, // C to C (Base)
-                fromBase: v => v // C (Base) to C
-            },
-            Fahrenheit: {
-                name: "Fahrenheit", symbol: "°F",
-                toBase: v => (v - 32) * (5 / 9), // F to C (Base)
-                fromBase: v => v * (9 / 5) + 32 // C (Base) to F
-            },
-            Kelvin: {
-                name: "Kelvin", symbol: "K",
-                toBase: v => v - 273.15, // K to C (Base)
-                fromBase: v => v + 273.15 // C (Base) to K
-            }
-        }
-    },
-
-    /* ------------------------- */
-    /* Volume                    */
-    /* ------------------------- */
-    Volume: {
-        name: "Volume", // Added name property
-        icon: "fas fa-wine-bottle",
-        precision: 3,
-        units: {
-            // Base Unit: Liter (L)
-            Liter: { name: "Liter", symbol: "L", toBase: 1 },
-            Milliliter: { name: "Milliliter", symbol: "mL", toBase: 0.001 },
-            CubicMeter: { name: "Cubic Meter", symbol: "m³", toBase: 1000 },
-            Gallon: { name: "Gallon", symbol: "gal", toBase: 3.78541 },
-            Quart: { name: "Quart", symbol: "qt", toBase: 0.946353 },
-            Pint: { name: "Pint", symbol: "pt", toBase: 0.473176 },
-            Cup: { name: "Cup", symbol: "cup", toBase: 0.236588 },
-            Tablespoon: { name: "Tablespoon", symbol: "tbsp", toBase: 0.0147868 },
-            Teaspoon: { name: "Teaspoon", symbol: "tsp", toBase: 0.00492892 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Area                      */
-    /* ------------------------- */
-    Area: {
-        name: "Area", // Added name property
-        icon: "fas fa-vector-square",
-        precision: 2,
-        units: {
-            // Base Unit: Square Meter (m²)
-            SquareMeter: { name: "Square Meter", symbol: "m²", toBase: 1 },
-            SquareKilometer: { name: "Square Kilometer", symbol: "km²", toBase: 1_000_000 },
-            SquareFoot: { name: "Square Foot", symbol: "ft²", toBase: 0.092903 },
-            SquareInch: { name: "Square Inch", symbol: "in²", toBase: 0.00064516 },
-            SquareMile: { name: "Square Mile", symbol: "mi²", toBase: 2_589_988 },
-            Hectare: { name: "Hectare", symbol: "ha", toBase: 10_000 },
-            Acre: { name: "Acre", symbol: "ac", toBase: 4046.86 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Speed                     */
-    /* ------------------------- */
-    Speed: {
-        name: "Speed", // Added name property
-        icon: "fas fa-tachometer-alt",
-        precision: 2,
-        units: {
-            // Base Unit: Meter/Second (m/s)
-            "Meter/Second": { name: "Meter/Second", symbol: "m/s", toBase: 1 },
-            "Kilometer/Hour": { name: "Kilometer/Hour", symbol: "km/h", toBase: 1 / 3.6 }, // 0.277778
-            "Mile/Hour": { name: "Mile/Hour", symbol: "mph", toBase: 0.44704 },
-            "Foot/Second": { name: "Foot/Second", symbol: "ft/s", toBase: 0.3048 },
-            Knot: { name: "Knot", symbol: "kn", toBase: 0.514444 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Time                      */
-    /* ------------------------- */
-    Time: {
-        name: "Time", // Added name property
-        icon: "fas fa-clock",
-        precision: 0, // Time units are generally integer-based unless converting to seconds/fractional hours
-        units: {
-            // Base Unit: Second (s)
-            Second: { name: "Second", symbol: "s", toBase: 1 },
-            Minute: { name: "Minute", symbol: "min", toBase: 60 },
-            Hour: { name: "Hour", symbol: "h", toBase: 3600 },
-            Day: { name: "Day", symbol: "d", toBase: 86400 },
-            Week: { name: "Week", symbol: "wk", toBase: 604800 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Storage / Digital         */
-    /* ------------------------- */
-    Storage: {
-        name: "Storage / Digital", // Added name property
-        icon: "fas fa-database",
-        precision: 2,
-        units: {
-            // Base Unit: Byte (B)
-            Byte: { name: "Byte", symbol: "B", toBase: 1 },
-            Kilobyte: { name: "Kilobyte", symbol: "KB", toBase: 1024 },
-            Megabyte: { name: "Megabyte", symbol: "MB", toBase: 1024 ** 2 },
-            Gigabyte: { name: "Gigabyte", symbol: "GB", toBase: 1024 ** 3 },
-            Terabyte: { name: "Terabyte", symbol: "TB", toBase: 1024 ** 4 },
-            Petabyte: { name: "Petabyte", symbol: "PB", toBase: 1024 ** 5 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Energy                    */
-    /* ------------------------- */
-    Energy: {
-        name: "Energy", // Added name property
-        icon: "fas fa-bolt",
-        precision: 2,
-        units: {
-            // Base Unit: Joule (J)
-            Joule: { name: "Joule", symbol: "J", toBase: 1 },
-            Kilojoule: { name: "Kilojoule", symbol: "kJ", toBase: 1000 },
-            Calorie: { name: "Calorie", symbol: "cal", toBase: 4.184 },
-            Kilocalorie: { name: "Kilocalorie", symbol: "kcal", toBase: 4184 },
-            WattHour: { name: "Watt Hour", symbol: "Wh", toBase: 3600 },
-            KilowattHour: { name: "Kilowatt Hour", symbol: "kWh", toBase: 3_600_000 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Pressure                  */
-    /* ------------------------- */
-    Pressure: {
-        name: "Pressure", // Added name property
-        icon: "fas fa-compress-alt",
-        precision: 2,
-        units: {
-            // Base Unit: Pascal (Pa)
-            Pascal: { name: "Pascal", symbol: "Pa", toBase: 1 },
-            Kilopascal: { name: "Kilopascal", symbol: "kPa", toBase: 1000 },
-            Bar: { name: "Bar", symbol: "bar", toBase: 100000 },
-            PSI: { name: "Pound/psi", symbol: "psi", toBase: 6894.76 },
-            Atmosphere: { name: "Atmosphere", symbol: "atm", toBase: 101325 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Frequency                 */
-    /* ------------------------- */
-    Frequency: {
-        name: "Frequency", // Added name property
-        icon: "fas fa-wave-square",
-        precision: 2,
-        units: {
-            // Base Unit: Hertz (Hz)
-            Hertz: { name: "Hertz", symbol: "Hz", toBase: 1 },
-            Kilohertz: { name: "Kilohertz", symbol: "kHz", toBase: 1000 },
-            Megahertz: { name: "Megahertz", symbol: "MHz", toBase: 1_000_000 },
-            Gigahertz: { name: "Gigahertz", symbol: "GHz", toBase: 1_000_000_000 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Angle                     */
-    /* ------------------------- */
-    Angle: {
-        name: "Angle", // Added name property
-        icon: "fas fa-compass-drafting",
-        precision: 3,
-        units: {
-            // Base Unit: Degree (°)
-            Degree: { name: "Degree", symbol: "°", toBase: 1 },
-            // Note: Radian to Degree is 180/pi ≈ 57.2958
-            Radian: { name: "Radian", symbol: "rad", toBase: 57.2958 },
-            Gradian: { name: "Gradian", symbol: "grad", toBase: 0.9 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Power                     */
-    /* ------------------------- */
-    Power: {
-        name: "Power", // Added name property
-        icon: "fas fa-plug",
-        precision: 2,
-        units: {
-            // Base Unit: Watt (W)
-            Watt: { name: "Watt", symbol: "W", toBase: 1 },
-            Kilowatt: { name: "Kilowatt", symbol: "kW", toBase: 1000 },
-            Megawatt: { name: "Megawatt", symbol: "MW", toBase: 1_000_000 },
-            Horsepower: { name: "Horsepower", symbol: "hp", toBase: 745.7 }
-        }
-    },
-
-    /* ------------------------- */
-    /* Fuel Economy              */
-    /* ------------------------- */
-    FuelEconomy: {
-        name: "Fuel Economy", // Added name property
-        icon: "fas fa-gas-pump",
-        precision: 2,
-        units: {
-            // Base Unit: MPG (US) - Note: L/100km uses reciprocal formula
-            "MPG(US)": { name: "Miles per Gallon (US)", symbol: "MPG (US)", toBase: 1 },
-            "MPG(UK)": { name: "Miles per Gallon (UK)", symbol: "MPG (UK)", toBase: 1.20095 },
-            "L/100km": {
-                name: "Liters per 100km", symbol: "L/100km",
-                // Convert L/100km to MPG(US) (235.214 is the constant)
-                toBase: v => 235.214 / v,
-                fromBase: v => 235.214 / v
-            }
-        }
-    },
-
-    /* ------------------------- */
-    /* Force                     */
-    /* ------------------------- */
-    Force: {
-        name: "Force", // Added name property
-        icon: "fas fa-hand-fist",
-        precision: 2,
-        units: {
-            // Base Unit: Newton (N)
-            Newton: { name: "Newton", symbol: "N", toBase: 1 },
-            Kilonewton: { name: "Kilonewton", symbol: "kN", toBase: 1000 },
-            PoundForce: { name: "Pound Force", symbol: "lbf", toBase: 4.44822 }
-        }
-    }
+// --- Global DOM Elements ---
+const DOM = {
+    categoryList: document.getElementById('category-list'),
+    converterForm: document.getElementById('converter-form'),
+    fromValue: document.getElementById('from-value'),
+    toValue: document.getElementById('to-value'),
+    fromUnit: document.getElementById('from-unit'),
+    toUnit: document.getElementById('to-unit'),
+    historyList: document.getElementById('history-list'),
+    swapButton: document.getElementById('swap-btn'),
+    currencyWarning: document.getElementById('currency-warning'),
+    lastUpdatedText: document.getElementById('last-updated-text')
 };
 
-/* * NOTE: The updateCurrencyUnits function is no longer needed.
- * Currency units are listed directly using listCurrencies from currency.js.
- */
-// export function updateCurrencyUnits(rates) { ... } // REMOVED
+let currentCategory = 'Length'; // Default category
 
-/* Default fallback icons, precision, and icon check */
-for (const cat in conversionData) {
-    if (!conversionData[cat].name) {
-        // Fallback for missing name
-        conversionData[cat].name = cat;
+// -----------------------------------------------------------------
+// 1. Initialization and Setup
+// -----------------------------------------------------------------
+
+/**
+ * Initializes the application by setting up the category list and loading the default category.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    renderCategoryList();
+    loadCategory(currentCategory);
+    setupEventListeners();
+    updateCurrencyWarning();
+});
+
+/**
+ * Sets up global event listeners for form actions and the swap button.
+ */
+function setupEventListeners() {
+    DOM.converterForm.addEventListener('input', debounce(performConversion, 250));
+    DOM.fromUnit.addEventListener('change', performConversion);
+    DOM.toUnit.addEventListener('change', performConversion);
+    
+    DOM.swapButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        swapUnits(DOM, performConversion);
+    });
+}
+
+/**
+ * Creates the sidebar list of available conversion categories.
+ */
+function renderCategoryList() {
+    const categories = Object.keys(conversionData);
+    DOM.categoryList.innerHTML = categories.map(key => {
+        const cat = conversionData[key];
+        const isActive = key === currentCategory ? 'bg-indigo-700 text-white' : 'text-gray-300 hover:bg-indigo-800';
+        return `
+            <a href="#" data-category="${key}" class="p-3 my-1 rounded-lg flex items-center ${isActive} transition-colors">
+                <i class="${cat.icon} w-6 text-center"></i>
+                <span class="ml-3 font-medium">${cat.name}</span>
+            </a>
+        `;
+    }).join('');
+
+    // Attach click handler to category links
+    DOM.categoryList.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newCategory = e.currentTarget.dataset.category;
+            if (newCategory !== currentCategory) {
+                loadCategory(newCategory);
+            }
+        });
+    });
+}
+
+// -----------------------------------------------------------------
+// 2. Category Management
+// -----------------------------------------------------------------
+
+/**
+ * Loads a new category, updating the UI and fetching units.
+ * @param {string} categoryKey - The key of the new category.
+ */
+async function loadCategory(categoryKey) {
+    currentCategory = categoryKey;
+    const cat = conversionData[categoryKey];
+
+    // 1. Update active state in category list
+    DOM.categoryList.querySelectorAll('a').forEach(link => {
+        if (link.dataset.category === categoryKey) {
+            link.classList.add('bg-indigo-700', 'text-white');
+            link.classList.remove('text-gray-300', 'hover:bg-indigo-800');
+        } else {
+            link.classList.remove('bg-indigo-700', 'text-white');
+            link.classList.add('text-gray-300', 'hover:bg-indigo-800');
+        }
+    });
+
+    // 2. Fetch units (uses custom list function for Currency, listUnits for others)
+    let units;
+    if (cat.list) {
+        // Use custom list function (e.g., listCurrencies)
+        units = await cat.list(categoryKey);
+    } else {
+        // Use standard list function
+        units = listUnits(categoryKey);
     }
-    if (!conversionData[cat].icon) {
-        conversionData[cat].icon = "fas fa-question";
+
+    // 3. Populate dropdowns
+    populateUnitDropdowns(units);
+    
+    // 4. Update currency warning visibility
+    updateCurrencyWarning(categoryKey);
+
+    // 5. Trigger initial conversion
+    performConversion();
+}
+
+/**
+ * Populates both 'from' and 'to' unit dropdowns.
+ * @param {Array<Object>} units - Array of unit objects {key, name, symbol}.
+ */
+function populateUnitDropdowns(units) {
+    if (units.length === 0) {
+        DOM.fromUnit.innerHTML = '<option value="">No Units Available</option>';
+        DOM.toUnit.innerHTML = '<option value="">No Units Available</option>';
+        return;
     }
-    // Default precision if not explicitly set
-    if (typeof conversionData[cat].precision !== 'number') {
-        conversionData[cat].precision = 6;
+    
+    const optionsHTML = units.map(unit => 
+        `<option value="${unit.key}">${unit.name} (${unit.symbol})</option>`
+    ).join('');
+
+    DOM.fromUnit.innerHTML = optionsHTML;
+    DOM.toUnit.innerHTML = optionsHTML;
+
+    // Set a default selection (e.g., the first two units or stored preferences)
+    DOM.fromUnit.value = units[0]?.key;
+    // Ensure 'to' unit is different from 'from' unit if possible
+    DOM.toUnit.value = units.length > 1 ? units[1]?.key : units[0]?.key;
+}
+
+/**
+ * Toggles the visibility of the currency API update warning.
+ * @param {string} category - The current category key.
+ */
+function updateCurrencyWarning(category = currentCategory) {
+    const isCurrency = category === 'Currency';
+    DOM.currencyWarning.classList.toggle('hidden', !isCurrency);
+
+    if (isCurrency) {
+        const cached = getCachedRates();
+        if (cached && cached.timestamp) {
+            const date = new Date(cached.timestamp);
+            DOM.lastUpdatedText.textContent = `Rates last updated: ${date.toLocaleString()}`;
+        } else {
+            DOM.lastUpdatedText.textContent = "Rates are not yet available or failed to fetch. Try refreshing.";
+        }
     }
+}
+
+// -----------------------------------------------------------------
+// 3. Conversion and History
+// -----------------------------------------------------------------
+
+/**
+ * Performs the conversion based on current UI state.
+ */
+async function performConversion() {
+    const fromUnit = DOM.fromUnit.value;
+    const toUnit = DOM.toUnit.value;
+    const value = DOM.fromValue.value;
+    const category = currentCategory;
+    
+    if (!value || isNaN(Number(value)) || !fromUnit || !toUnit) {
+        DOM.toValue.value = '---';
+        return;
+    }
+
+    let result;
+    const cat = conversionData[category];
+
+    try {
+        if (cat.convert) {
+            // Use custom conversion function (e.g., convertCurrency)
+            result = await cat.convert(fromUnit, toUnit, value);
+        } else {
+            // Use standard conversion function (convert in converter.js)
+            result = convert(category, fromUnit, toUnit, value);
+        }
+
+        if (isNaN(result)) {
+            DOM.toValue.value = 'Error';
+            return;
+        }
+
+        DOM.toValue.value = result;
+        addHistoryEntry(category, fromUnit, toUnit, value, result, cat.precision);
+
+    } catch (error) {
+        console.error("Conversion failed:", error);
+        DOM.toValue.value = 'Error';
+    }
+}
+
+/**
+ * Adds a successful conversion to the history list.
+ * @param {string} category 
+ * @param {string} fromUnit 
+ * @param {string} toUnit 
+ * @param {string} value 
+ * @param {number} result 
+ * @param {number} precision 
+ */
+function addHistoryEntry(category, fromUnit, toUnit, value, result, precision) {
+    // Limit history size (e.g., to 10 entries)
+    if (DOM.historyList.children.length >= 10) {
+        DOM.historyList.removeChild(DOM.historyList.lastChild);
+    }
+    
+    // Get unit names/symbols for history display
+    const cat = conversionData[category];
+    
+    // Use listUnits (or cat.list if it exists) to get unit details
+    const units = cat.list ? cat.list(category) : listUnits(category);
+    
+    // Find the full unit object for better display
+    const fromUnitObj = units.find(u => u.key === fromUnit) || { name: fromUnit, symbol: fromUnit };
+    const toUnitObj = units.find(u => u.key === toUnit) || { name: toUnit, symbol: toUnit };
+
+    // Format the result for cleaner history display
+    const formattedResult = result.toFixed(precision).replace(/\.?0+$/, "");
+    
+    const newEntry = document.createElement('li');
+    newEntry.className = "p-3 border-b border-gray-700 last:border-b-0 cursor-pointer hover:bg-gray-700 transition-colors";
+    newEntry.innerHTML = `
+        <p class="text-sm text-gray-400">${cat.name}</p>
+        <p class="font-medium">
+            ${value} ${fromUnitObj.symbol} 
+            <i class="fas fa-arrow-right text-indigo-400 mx-2"></i> 
+            ${formattedResult} ${toUnitObj.symbol}
+        </p>
+    `;
+    
+    // Optional: Clicking history reloads the conversion
+    newEntry.addEventListener('click', () => {
+        loadCategory(category).then(() => {
+            DOM.fromValue.value = value;
+            DOM.fromUnit.value = fromUnit;
+            DOM.toUnit.value = toUnit;
+            performConversion(); // Re-run the conversion
+        });
+    });
+
+    DOM.historyList.prepend(newEntry);
+}
+
+
+// -----------------------------------------------------------------
+// 4. Utility Functions
+// -----------------------------------------------------------------
+
+/**
+ * Debounce function to limit how often a function is called.
+ * @param {function} func - The function to debounce.
+ * @param {number} delay - The delay in milliseconds.
+ */
+function debounce(func, delay) {
+    let timeout;
+    return function() {
+        const context = this;
+        const args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
 }
