@@ -1,127 +1,128 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ConvertBuddy - Convertisseur Universel</title>
-    <meta name="description" content="Convertisseur d'unités hors ligne - Longueur, Poids, Température, Devises et plus">
-    
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#10b981">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/Icon-192.png">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConvertBuddy - Unit & Currency Converter</title>
+  <meta name="description" content="Fast, offline-first universal unit and currency converter. No ads tracking. Works without internet." />
+  
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#10b981" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/Icon-192.png" />
+  <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/style.css" />
 </head>
 
-<body class="bg-emerald-50 text-gray-800 min-h-screen pt-12 pb-12">
+<body class="bg-emerald-50 text-gray-800 min-h-screen py-12 px-4 font-sans">
+  <main class="max-w-sm mx-auto">
+    <section class="bg-white rounded-3xl shadow-2xl p-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-emerald-600 mb-2">ConvertBuddy</h1>
+        <p class="text-sm text-gray-600">Fast • Offline • No tracking</p>
+      </div>
 
-    <main class="max-w-sm mx-auto p-4 sm:p-0">
-        <section id="converter-card" class="bg-white p-8 rounded-3xl shadow-2xl">
+      <!-- Converter Form -->
+      <form id="converter-form" class="space-y-6">
+        <!-- Category -->
+        <div>
+          <label for="category-select" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+          <select id="category-select" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none text-base">
+            <!-- Filled by JS -->
+          </select>
+        </div>
 
-            <div class="text-center mb-6">
-                <h1 class="text-3xl font-extrabold text-emerald-600 mb-2">
-                    ConvertBuddy
-                </h1>
-                <p class="text-sm text-gray-600">
-                    Votre convertisseur hors ligne amical — Longueur, Poids, Température, Vitesse, Volume, Aire, et Devises.
-                </p>
-            </div>
+        <!-- From / To Units -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="from-unit" class="block text-sm font-semibold text-gray-700 mb-2">From</label>
+            <select id="from-unit" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <label for="to-unit" class="block text-sm font-semibold text-gray-700 mb-2">To</label>
+            <select id="to-unit" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none"></select>
+          </div>
+        </div>
 
-            <form id="converter-form" class="space-y-4">
-                
-                <div>
-                    <label for="category-select" class="block mb-1 font-semibold text-gray-700">Catégorie</label>
-                    <select id="category-select" class="w-full p-3 border-2 border-emerald-300 rounded-lg 
-                             focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none 
-                             bg-white cursor-pointer font-medium text-base">
-                    </select>
-                </div>
+        <!-- Input Value -->
+        <div>
+          <label for="from-value" class="block text-sm font-semibold text-gray-700 mb-2">Value</label>
+          <input 
+            type="number" 
+            id="from-value" 
+            value="1" 
+            step="any"
+            class="w-full px-4 py-5 text-2xl text-center font-bold rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none" 
+            placeholder="Enter value" 
+          />
+        </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label for="from-value" class="block mb-1 font-semibold text-gray-700">Valeur</label>
-                        <input type="number" id="from-value" value="1" step="any"
-                               class="w-full p-4 border-2 border-emerald-300 rounded-lg text-lg text-center font-bold 
-                                      focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                    </div>
+        <!-- Swap Button -->
+        <div class="flex justify-center">
+          <button 
+            type="button" 
+            id="swap-btn" 
+            class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
+            title="Swap units"
+          >
+            <svg class="w-7 h-7 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
+          </button>
+        </div>
 
-                    <div>
-                        <label for="from-unit" class="block mb-1 font-semibold text-gray-700">De</label>
-                        <select id="from-unit" class="w-full p-3 border-2 border-emerald-300 rounded-lg 
-                                 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none 
-                                 bg-white cursor-pointer font-medium text-base">
-                        </select>
-                    </div>
-                </div>
+        <!-- Result -->
+        <div>
+          <label for="to-value" class="block text-sm font-semibold text-gray-700 mb-2">Result</label>
+          <input 
+            type="text" 
+            id="to-value" 
+            readonly 
+            value="1" 
+            class="w-full px-4 py-5 text-2xl text-center font-bold bg-emerald-50 rounded-lg border-2 border-emerald-300 cursor-default"
+          />
+        </div>
 
-                <div class="flex justify-center py-2">
-                    <button type="button" id="swap-btn" 
-                            class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center 
-                                   shadow-lg hover:bg-emerald-600 transition-colors transform rotate-90"
-                            title="Inverser les unités">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 transform -rotate-90">
-                          <path fill-rule="evenodd" d="M3.97 3.97a.75.75 0 0 1 1.06 0l1.72 1.72v-1.5a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1 0-1.5h1.5l-1.72-1.72a.75.75 0 0 1 0-1.06Zm16.06 0a.75.75 0 0 1 0 1.06L17.28 6.75h1.5a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1-.75-.75v-3a.75.75 0 0 1 1.5 0v1.5l1.72-1.72a.75.75 0 0 1 1.06 0ZM3.97 20.03a.75.75 0 0 1 0-1.06L6.72 17.25h-1.5a.75.75 0 0 1 0-1.5h3a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-1.5l-1.72 1.72a.75.75 0 0 1-1.06 0Zm16.06 0a.75.75 0 0 1-1.06 0L17.28 18.28v1.5a.75.75 0 0 1-1.5 0v-3a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5h-1.5l1.72 1.72a.75.75 0 0 1 0 1.06Z" />
-                        </svg>
-                    </button>
-                </div>
+        <!-- Currency Warning -->
+        <div id="currency-warning" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-sm p-4 rounded-lg text-center">
+          <span id="last-updated-text"></span>
+        </div>
+      </form>
 
-                <div class="space-y-4">
-                    <div>
-                        <label for="to-value" class="block mb-1 font-semibold text-gray-700">Résultat</label>
-                        <input type="text" id="to-value" readonly value="0,001"
-                               class="w-full p-4 border-2 border-emerald-300 rounded-lg bg-emerald-50 text-lg text-center font-bold" />
-                    </div>
+      <!-- Privacy Link -->
+      <div class="text-center mt-6">
+        <a href="/privacy.html" class="text-xs text-gray-500 hover:text-emerald-600 underline">Privacy Policy</a>
+      </div>
 
-                    <div>
-                        <label for="to-unit" class="block mb-1 font-semibold text-gray-700">À</label>
-                        <select id="to-unit" class="w-full p-3 border-2 border-emerald-300 rounded-lg 
-                                 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none 
-                                 bg-white cursor-pointer font-medium text-base">
-                        </select>
-                    </div>
-                </div>
+      <!-- History Section -->
+      <section class="mt-10 pt-8 border-t border-gray-200">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-800">Recent Conversions</h2>
+          <button id="clear-history-button" class="text-sm text-red-600 hover:text-red-700 font-medium">Clear All</button>
+        </div>
+        <ul id="history-list" class="space-y-2 max-h-64 overflow-y-auto text-sm"></ul>
+      </section>
+    </section>
+  </main>
 
-                <div id="currency-warning" class="hidden text-sm text-amber-600 bg-amber-50 p-3 rounded-lg text-center mt-2">
-                    <svg class="inline w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                    </svg>
-                    <span id="last-updated-text">Les taux peuvent être périmés</span>
-                </div>
-                
-            </form>
-
-            <section id="history-section" class="pt-6 mt-6 border-t border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">Conversions Récentes</h2>
-                    <button id="clear-history-button" class="text-sm text-red-500 hover:text-red-700 transition-colors font-medium">
-                        Effacer tout
-                    </button>
-                </div>
-                
-                <ul id="history-list" class="space-y-2 max-h-48 overflow-y-auto pr-2">
-                </ul>
-            </section>
-
-        </section>
-    </main>
-
-    <!-- Scripts - Note the /scripts/ path -->
-    <script type="module" src="/scripts/ui.js"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed:', err));
-            });
-        }
-    </script>
+  <!-- Scripts -->
+  <script type="module" src="/scripts/ui.js"></script>
+  
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js")
+          .then(reg => console.log("SW registered"))
+          .catch(err => console.log("SW failed:", err));
+      });
+    }
+  </script>
 </body>
 </html>
