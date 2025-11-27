@@ -1,5 +1,5 @@
 // sw.js - Service Worker for offline functionality
-const CACHE_NAME = 'convertbuddy-v12';
+const CACHE_NAME = 'convertbuddy-v13';
 const DATA_CACHE = 'convertbuddy-data-v2';
 
 const FILES_TO_CACHE = [
@@ -108,7 +108,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle app resources (Cache first)
+  // Handle app resources (Cache first, network fallback)
   event.respondWith(
     caches.match(event.request)
       .then(cached => {
@@ -116,8 +116,16 @@ self.addEventListener('fetch', event => {
           return cached;
         }
         
-        return fetch(event.request)
+        // Create request with proper redirect handling
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest, { redirect: 'follow' })
           .then(response => {
+            // Don't cache redirects or error responses
+            if (!response || response.status !== 200 || response.type === 'error') {
+              return response;
+            }
+
             // Cache successful responses
             if (response.ok) {
               return caches.open(CACHE_NAME).then(cache => {
@@ -127,11 +135,13 @@ self.addEventListener('fetch', event => {
             }
             return response;
           })
-          .catch(() => {
+          .catch(error => {
+            console.log('[SW] Fetch failed:', error);
             // Fallback for navigation requests
             if (event.request.mode === 'navigate') {
               return caches.match('/index.html');
             }
+            throw error;
           });
       })
   );
