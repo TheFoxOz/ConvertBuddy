@@ -1,38 +1,34 @@
-// converter.js
-import { units } from './units.js';
+// scripts/converter.js
+import { units, categories } from './units.js';
 import { fetchRates, getCachedRates } from './currency.js';
 
-/**
- * Convert any unit or currency
- * @param {string} category - e.g., "length", "temperature", "currency"
- * @param {number} value - value to convert
- * @param {string} from - unit key
- * @param {string} to - unit key
- * @returns {Promise<number>} converted value
- */
-export async function convert(category, value, from, to) {
-  if (category === 'currency') {
-    return convertCurrency(value, from, to);
-  }
+// Convert a value from one unit to another
+export async function convert(category, fromKey, toKey, value) {
+    const val = parseFloat(value);
+    if (isNaN(val)) return null;
 
-  const fromUnit = units[category][from];
-  const toUnit = units[category][to];
-  if (!fromUnit || !toUnit) throw new Error('Invalid unit');
-
-  const baseValue = fromUnit.toBase(value);
-  return toUnit.fromBase(baseValue);
+    if (category === 'Currency') {
+        const ratesData = await fetchRates();
+        const rates = ratesData.rates;
+        const fromRate = rates[fromKey];
+        const toRate = rates[toKey];
+        if (!fromRate || !toRate) return null;
+        return (val / fromRate) * toRate;
+    } else {
+        const fromUnit = units[category][fromKey];
+        const toUnit = units[category][toKey];
+        const baseValue = fromUnit.toBase(val);
+        return toUnit.fromBase(baseValue);
+    }
 }
 
-/**
- * Currency conversion
- */
-export async function convertCurrency(amount, from, to) {
-  let ratesData = getCachedRates();
-  if (!ratesData) ratesData = await fetchRates();
+// Return units for a category
+export async function listUnits(category) {
+    if (!units[category]) return {};
+    return units[category];
+}
 
-  const rates = ratesData.rates;
-  if (!rates[from] || !rates[to]) throw new Error('Invalid currency');
-
-  const result = (amount / rates[from]) * rates[to];
-  return Math.round(result * 100) / 100; // round 2 decimals
+// Swap two values
+export function swapUnitsValues(fromValue, toValue) {
+    return [toValue, fromValue];
 }
