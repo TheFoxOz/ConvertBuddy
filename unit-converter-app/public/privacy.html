@@ -13,38 +13,151 @@
   <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-8 md:p-12">
     <header class="mb-10 text-center">
       <h1 class="text-4xl font-extrabold text-emerald-700 mb-3">Privacy Policy</h1>
-      <p class="text-gray-600">Last updated: November 27, 2025</p>
+      <p class="text-gray-600">Last updated: November 27, 2024</p>
     </header>
 
     <section class="space-y-8 text-gray-700 leading-relaxed">
+      
+      <!-- 1. Introduction -->
       <div>
         <h2 class="text-2xl font-bold text-emerald-600 mb-3">1. Introduction</h2>
-        <p>ConvertBuddy is a free offline-first unit and currency converter. We respect your privacy and collect minimal data.</p>
+        <p>ConvertBuddy ("we," "our," or "us") is a free unit and currency converter tool. We are committed to protecting your privacy and being transparent about the data we collect.</p>
+        <p class="mt-2"><strong>No Personal Information Collected:</strong> We do not collect names, email addresses, phone numbers, or any personally identifiable information about you.</p>
       </div>
 
+      <!-- 2. Data We Collect -->
       <div>
         <h2 class="text-2xl font-bold text-emerald-600 mb-3">2. Data We Collect</h2>
-        <ul class="list-disc pl-6 space-y-2">
-          <li><strong>Anonymous Usage ID:</strong> A random ID stored locally to save your conversion history.</li>
-          <li><strong>Conversion History:</strong> Only stored if you allow it (optional, anonymous).</li>
-          <li><strong>Currency Rates:</strong> Cached from a public API (no personal data).</li>
+        <p>We collect minimal data to provide our service:</p>
+        <ul class="list-disc pl-6 space-y-2 mt-3">
+          <li><strong>Anonymous Device ID:</strong> A randomly generated ID stored locally in your browser to save your conversion history (optional feature).</li>
+          <li><strong>Conversion History:</strong> Your conversion calculations are stored anonymously in Firebase Firestore (Google Cloud) only if you use the history feature. This data is linked only to your anonymous device ID.</li>
+          <li><strong>Currency Exchange Rates:</strong> Cached from a public API (ExchangeRate-API) to enable offline currency conversions. No personal data is involved.</li>
+          <li><strong>Cookies and Local Storage:</strong> We use browser local storage to save your device ID and conversion preferences. We also use cookies via Google AdSense (see Section 4 below).</li>
         </ul>
       </div>
 
+      <!-- 3. How We Use Your Data -->
       <div>
-        <h2 class="text-2xl font-bold text-emerald-600 mb-3">3. No Personal Data</h2>
-        <p>We do <strong>not</strong> collect names, emails, location, IP addresses, or any identifiable information.</p>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">3. How We Use Your Data</h2>
+        <p>We use the data we collect for the following purposes:</p>
+        <ul class="list-disc pl-6 space-y-2 mt-3">
+          <li>To provide unit and currency conversion functionality</li>
+          <li>To save your conversion history across sessions (optional)</li>
+          <li>To cache currency rates for offline use</li>
+          <li>To display relevant advertisements via Google AdSense</li>
+        </ul>
       </div>
 
+      <!-- 4. Third-Party Services & Cookies -->
       <div>
-        <h2 class="text-2xl font-bold text-emerald-600 mb-3">4. Third-Party Services</h2>
-        <p>We use Google Firebase only for anonymous history storage (optional) and Google AdSense for non-intrusive ads.</p>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">4. Third-Party Services & Cookies</h2>
+        <p>We use the following third-party services that may collect data:</p>
+        
+        <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <h3 class="font-bold text-amber-900 mb-2">⚠️ Important: Cookies & Advertising</h3>
+          <p class="text-sm text-amber-800">This website uses cookies from Google AdSense to display personalized advertisements. By using this site, you consent to the use of cookies for advertising purposes.</p>
+        </div>
+
+        <h3 class="font-bold text-gray-800 mt-6 mb-2">4.1 Google AdSense</h3>
+        <p>We use <strong>Google AdSense</strong> to display advertisements on our website. Google AdSense uses cookies and similar technologies to:</p>
+        <ul class="list-disc pl-6 space-y-1 mt-2 text-sm">
+          <li>Show you personalized ads based on your browsing activity</li>
+          <li>Measure ad performance and engagement</li>
+          <li>Prevent fraud and abuse</li>
+        </ul>
+        <p class="mt-3 text-sm"><strong>What data does Google collect?</strong> Google may collect and use data including your IP address, device information, browser type, pages visited, time spent on pages, and interaction with ads.</p>
+        <p class="mt-2 text-sm"><strong>Third-Party Ad Networks:</strong> Google AdSense may allow third-party ad networks to display ads on our site. These networks may also use cookies to track your activity.</p>
+        <p class="mt-3 text-sm">
+          <strong>Learn more & Opt-out:</strong><br>
+          • Google's Privacy Policy: <a href="https://policies.google.com/privacy" class="text-emerald-600 underline" target="_blank" rel="noopener">https://policies.google.com/privacy</a><br>
+          • Google's Ad Settings: <a href="https://adssettings.google.com/" class="text-emerald-600 underline" target="_blank" rel="noopener">https://adssettings.google.com/</a><br>
+          • Opt-out of personalized ads: <a href="https://www.google.com/settings/ads" class="text-emerald-600 underline" target="_blank" rel="noopener">https://www.google.com/settings/ads</a><br>
+          • NAI Opt-Out: <a href="http://www.networkadvertising.org/choices/" class="text-emerald-600 underline" target="_blank" rel="noopener">http://www.networkadvertising.org/choices/</a>
+        </p>
+
+        <h3 class="font-bold text-gray-800 mt-6 mb-2">4.2 Firebase (Google Cloud)</h3>
+        <p class="text-sm">We use Firebase Firestore and Firebase Authentication (anonymous sign-in) to store conversion history. This data is stored on Google's servers and is subject to <a href="https://firebase.google.com/support/privacy" class="text-emerald-600 underline" target="_blank" rel="noopener">Google's Privacy Policy</a>.</p>
+
+        <h3 class="font-bold text-gray-800 mt-6 mb-2">4.3 ExchangeRate-API</h3>
+        <p class="text-sm">We fetch live currency exchange rates from ExchangeRate-API. No personal data is sent to this service. View their privacy policy at <a href="https://www.exchangerate-api.com/terms" class="text-emerald-600 underline" target="_blank" rel="noopener">ExchangeRate-API Terms</a>.</p>
       </div>
 
+      <!-- 5. Your Rights (GDPR/CCPA) -->
       <div>
-        <h2 class="text-2xl font-bold text-emerald-600 mb-3">5. Contact</h2>
-        <p>For any questions, contact us at: <a href="mailto:convertbuddy@gmail.com" class="text-emerald-600 underline">convertbuddy@gmail.com</a></p>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">5. Your Privacy Rights</h2>
+        <p>Depending on your location, you may have the following rights:</p>
+        <ul class="list-disc pl-6 space-y-2 mt-3">
+          <li><strong>Right to Access:</strong> Request a copy of the data we store about you (anonymous device ID and conversion history).</li>
+          <li><strong>Right to Delete:</strong> Request deletion of your conversion history. You can also clear it manually using the "Clear All" button in the app, or by clearing your browser's local storage.</li>
+          <li><strong>Right to Opt-Out:</strong> Opt-out of personalized advertising via <a href="https://adssettings.google.com/" class="text-emerald-600 underline" target="_blank" rel="noopener">Google Ad Settings</a>.</li>
+          <li><strong>Right to Object:</strong> Object to the processing of your data for advertising purposes.</li>
+          <li><strong>Right to Data Portability:</strong> Request your data in a machine-readable format (JSON).</li>
+        </ul>
+        <p class="mt-3">To exercise any of these rights, contact us at <a href="mailto:convertbuddy@gmail.com" class="text-emerald-600 underline">convertbuddy@gmail.com</a>.</p>
       </div>
+
+      <!-- 6. Data Security -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">6. Data Security</h2>
+        <p>We take reasonable measures to protect your data:</p>
+        <ul class="list-disc pl-6 space-y-1 mt-2">
+          <li>All data is stored anonymously (no personal identifiers)</li>
+          <li>Firebase data is secured with Google's infrastructure and encryption</li>
+          <li>Local storage is only accessible by your browser</li>
+          <li>We use HTTPS to encrypt data in transit</li>
+        </ul>
+      </div>
+
+      <!-- 7. Data Retention -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">7. Data Retention</h2>
+        <p>We retain your data as follows:</p>
+        <ul class="list-disc pl-6 space-y-1 mt-2">
+          <li><strong>Conversion History:</strong> Stored indefinitely unless you clear it manually or request deletion.</li>
+          <li><strong>Cookies:</strong> AdSense cookies expire according to Google's retention policy (typically 90 days to 2 years).</li>
+          <li><strong>Currency Rates Cache:</strong> Refreshed every 24 hours.</li>
+        </ul>
+      </div>
+
+      <!-- 8. Children's Privacy -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">8. Children's Privacy</h2>
+        <p>Our service is not directed to children under 13 (or 16 in the EU). We do not knowingly collect data from children. If you believe a child has provided us with data, please contact us immediately.</p>
+      </div>
+
+      <!-- 9. International Data Transfers -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">9. International Data Transfers</h2>
+        <p>Your data may be transferred to and stored on servers located outside your country, including in the United States (Google Firebase, AdSense). By using our service, you consent to these transfers.</p>
+      </div>
+
+      <!-- 10. Changes to This Policy -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">10. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. We encourage you to review this policy periodically.</p>
+      </div>
+
+      <!-- 11. Contact Us -->
+      <div>
+        <h2 class="text-2xl font-bold text-emerald-600 mb-3">11. Contact Us</h2>
+        <p>If you have any questions about this Privacy Policy or your data, please contact us:</p>
+        <p class="mt-2"><strong>Email:</strong> <a href="mailto:convertbuddy@gmail.com" class="text-emerald-600 underline">convertbuddy@gmail.com</a></p>
+      </div>
+
+      <!-- Cookie Management -->
+      <div class="mt-8 p-6 bg-emerald-50 border-2 border-emerald-300 rounded-lg">
+        <h3 class="font-bold text-emerald-800 text-lg mb-3">🍪 Cookie Management</h3>
+        <p class="text-sm text-emerald-900 mb-3">You can control cookies through your browser settings:</p>
+        <ul class="list-disc pl-6 space-y-1 text-sm text-emerald-900">
+          <li><strong>Chrome:</strong> Settings → Privacy and security → Cookies</li>
+          <li><strong>Firefox:</strong> Preferences → Privacy & Security → Cookies</li>
+          <li><strong>Safari:</strong> Preferences → Privacy → Cookies</li>
+          <li><strong>Edge:</strong> Settings → Privacy → Cookies</li>
+        </ul>
+        <p class="text-sm text-emerald-800 mt-3"><strong>Note:</strong> Blocking cookies may affect website functionality and prevent ads from displaying.</p>
+      </div>
+
     </section>
 
     <div class="mt-12 text-center">
