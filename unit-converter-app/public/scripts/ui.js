@@ -1,11 +1,8 @@
-// scripts/ui.js - MAIN SCRIPT
+// scripts/ui.js
+import { convert, listUnits, swapUnitsValues } from './converter.js';
+import { getCachedRates } from './currency.js';
+import { saveHistory, getHistory, clearHistory } from './firestore.js';
 
-// --- Imports ---
-import { conversionData } from "./units.js"; 
-import { convert, listUnits, swapUnits } from "./converter.js";
-import { getCachedRates } from "./currency.js";
-
-// --- Global DOM Elements ---
 const DOM = {
     categoryList: document.getElementById('category-list'),
     converterForm: document.getElementById('converter-form'),
@@ -19,16 +16,15 @@ const DOM = {
     lastUpdatedText: document.getElementById('last-updated-text')
 };
 
-let currentCategory = 'Length'; // Default category
+let currentCategory = 'Length';
 
 // -----------------------------------------------------------------
 // Initialization
 // -----------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
-    renderCategoryList();
-    loadCategory(currentCategory);
+document.addEventListener('DOMContentLoaded', async () => {
+    await renderCategoryList();
+    await loadCategory(currentCategory);
     setupEventListeners();
-    updateCurrencyWarning();
 });
 
 // -----------------------------------------------------------------
@@ -44,7 +40,10 @@ function setupEventListeners() {
     if (DOM.swapButton) {
         DOM.swapButton.addEventListener('click', (e) => {
             e.preventDefault();
-            swapUnits(DOM, performConversion);
+            const [from, to] = swapUnitsValues(DOM.fromValue.value, DOM.toValue.value);
+            DOM.fromValue.value = from;
+            DOM.toValue.value = to;
+            performConversion();
         });
     }
 }
@@ -52,11 +51,11 @@ function setupEventListeners() {
 // -----------------------------------------------------------------
 // Category Management
 // -----------------------------------------------------------------
-function renderCategoryList() {
+async function renderCategoryList() {
     if (!DOM.categoryList) return;
     DOM.categoryList.innerHTML = '';
 
-    Object.keys(conversionData).forEach(catKey => {
+    Object.keys(units).forEach(catKey => {
         const li = document.createElement('li');
         const link = document.createElement('a');
         link.href = "#";
@@ -72,89 +71,66 @@ function renderCategoryList() {
     });
 }
 
-/**
- * Loads a new category, updates UI and dropdowns.
- */
 async function loadCategory(categoryKey) {
     currentCategory = categoryKey;
-    const cat = conversionData[categoryKey];
-    if (!cat) return;
+    if (!units[categoryKey]) return;
 
-    // Update active category styling
-    if (DOM.categoryList) {
-        DOM.categoryList.querySelectorAll('a').forEach(link => {
-            if (link.dataset.category === categoryKey) {
-                link.classList.add('bg-indigo-700', 'text-white');
-                link.classList.remove('text-gray-300', 'hover:bg-indigo-800');
-            } else {
-                link.classList.remove('bg-indigo-700', 'text-white');
-                link.classList.add('text-gray-300', 'hover:bg-indigo-800');
-            }
-        });
-    }
+    // Update dropdowns
+    const categoryUnits = await listUnits(categoryKey);
+    populateUnitDropdowns(categoryUnits);
 
-    // Fetch units
-    const units = await listUnits(categoryKey);
-
-    // Populate dropdowns
-    populateUnitDropdowns(units);
-
-    // Update currency warning
-    updateCurrencyWarning(categoryKey);
-
-    // Initial conversion
+    updateCurrencyWarning();
     await performConversion();
 }
 
-/**
- * Populates 'from' and 'to' dropdowns.
- */
-function populateUnitDropdowns(units) {
+function populateUnitDropdowns(categoryUnits) {
     if (!DOM.fromUnit || !DOM.toUnit) return;
 
     DOM.fromUnit.innerHTML = '';
     DOM.toUnit.innerHTML = '';
 
-    Object.keys(units).forEach(unitKey => {
+    Object.keys(categoryUnits).forEach(unitKey => {
         const fromOption = document.createElement('option');
         fromOption.value = unitKey;
-        fromOption.textContent = units[unitKey].name || unitKey;
+        fromOption.textContent = categoryUnits[unitKey].name || unitKey;
         DOM.fromUnit.appendChild(fromOption);
 
         const toOption = document.createElement('option');
         toOption.value = unitKey;
-        toOption.textContent = units[unitKey].name || unitKey;
+        toOption.textContent = categoryUnits[unitKey].name || unitKey;
         DOM.toUnit.appendChild(toOption);
     });
 }
 
 // -----------------------------------------------------------------
-// Conversion and History
+// Conversion + History
 // -----------------------------------------------------------------
 async function performConversion() {
-    if (!DOM.fromValue || !DOM.toValue || !DOM.fromUnit || !DOM.toUnit) return;
+    if (!DOM.fromValue || !DOM.toValue) return;
 
     const fromUnit = DOM.fromUnit.value;
     const toUnit = DOM.toUnit.value;
     const value = DOM.fromValue.value;
-    const category = currentCategory;
-
     if (!value || isNaN(Number(value)) || !fromUnit || !toUnit) {
         DOM.toValue.value = '---';
         return;
     }
 
     try {
-        const result = await convert(category, fromUnit, toUnit, value);
-        if (isNaN(result) || !isFinite(result)) {
-            DOM.toValue.value = 'Error / No Rates';
-            return;
-        }
+        const result = await convert(currentCategory, fromUnit, toUnit, value);
+        DOM.toValue.value = (result !== null) ? result.toFixed(4) : 'Error';
 
-        DOM.toValue.value = result;
-
-        // Add to history
-        addHistoryEntry(category, fromUnit, toUnit, value, result, conversionData[category].precision);
+        // Save history
+        const entry = {
+            category: currentCategory,
+            fromUnit,
+            toUnit,
+            value,
+            result: result || 0,
+            timestamp: Date.now()
+        };
+        await saveHistory(entry);
+        await renderHistory();
 
     } catch (err) {
         console.error("Conversion failed:", err);
@@ -162,48 +138,20 @@ async function performConversion() {
     }
 }
 
-/**
- * Adds a conversion to history
- */
-function addHistoryEntry(category, fromUnit, toUnit, value, result, precision = 2) {
+async function renderHistory() {
     if (!DOM.historyList) return;
+    DOM.historyList.innerHTML = '';
 
-    const li = document.createElement('li');
-    li.className = 'p-2 border-b border-emerald-200 text-emerald-700 cursor-pointer hover:bg-emerald-100';
-    li.textContent = `${value} ${fromUnit} → ${result} ${toUnit}`;
+    const history = await getHistory(50);
+    history.forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'p-2 border-b border-emerald-200 text-emerald-700 cursor-pointer hover:bg-emerald-100';
+        li.textContent = `${entry.value} ${entry.fromUnit} → ${entry.result} ${entry.toUnit}`;
 
-    li.addEventListener('click', async () => {
-        await loadCategory(category);
-        DOM.fromValue.value = value;
-        DOM.fromUnit.value = fromUnit;
-        DOM.toUnit.value = toUnit;
-        await performConversion();
-    });
-
-    DOM.historyList.prepend(li);
-}
-
-// -----------------------------------------------------------------
-// Currency warning
-// -----------------------------------------------------------------
-function updateCurrencyWarning(category = currentCategory) {
-    if (!DOM.currencyWarning) return;
-    if (category.toLowerCase().includes('currency')) {
-        DOM.currencyWarning.style.display = 'block';
-        const lastUpdated = getCachedRates()?.date || 'Unknown';
-        if (DOM.lastUpdatedText) DOM.lastUpdatedText.textContent = `Last updated: ${lastUpdated}`;
-    } else {
-        DOM.currencyWarning.style.display = 'none';
-    }
-}
-
-// -----------------------------------------------------------------
-// Utility
-// -----------------------------------------------------------------
-function debounce(fn, delay) {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn(...args), delay);
-    };
-}
+        li.addEventListener('click', async () => {
+            await loadCategory(entry.category);
+            DOM.fromValue.value = entry.value;
+            DOM.fromUnit.value = entry.fromUnit;
+            DOM.toUnit.value = entry.toUnit;
+            await performConversion();
+        });
