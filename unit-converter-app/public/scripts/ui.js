@@ -1,4 +1,4 @@
-// scripts/ui.js - FINAL VERSION: English, clean, AdSense-ready
+// scripts/ui.js - FIXED: Exports for history.js + Weight default + Robust error handling
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -16,16 +16,19 @@ const DOM = {
   lastUpdatedText: document.getElementById("last-updated-text"),
 };
 
-let currentCategory = "Length";
+let currentCategory = "Weight"; // Changed to Weight by default
 let lastSavedEntry = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
-  renderCategorySelect();
+  await renderCategorySelect();
   await loadCategory(currentCategory);
   setupEventListeners();
   await loadHistory();
   updateCurrencyWarning();
 });
+
+// EXPORTS FOR history.js (this fixes the SyntaxError)
+export { loadCategory, performConversionOnly as performConversion }; // Export the main conversion func
 
 function setupEventListeners() {
   DOM.converterForm.addEventListener("input", debounce(performConversionOnly, 300));
@@ -39,7 +42,7 @@ function setupEventListeners() {
   });
 }
 
-function renderCategorySelect() {
+async function renderCategorySelect() {
   DOM.categorySelect.innerHTML = "";
   Object.keys(conversionData).forEach((key) => {
     const opt = new Option(conversionData[key].name, key);
@@ -48,12 +51,25 @@ function renderCategorySelect() {
   DOM.categorySelect.value = currentCategory;
 }
 
-async function loadCategory(key) {
+export async function loadCategory(key) {
   currentCategory = key;
   DOM.categorySelect.value = key;
 
-  const units = await listUnits(key);
-  populateUnitDropdowns(units);
+  try {
+    const units = await listUnits(key);
+    if (units.length === 0) {
+      console.warn(`No units for category: ${key}`);
+      DOM.fromUnit.innerHTML = '<option>No units available</option>';
+      DOM.toUnit.innerHTML = '<option>No units available</option>';
+      return;
+    }
+    populateUnitDropdowns(units);
+  } catch (err) {
+    console.error("Failed to load units:", err);
+    DOM.fromUnit.innerHTML = '<option>Error loading units</option>';
+    DOM.toUnit.innerHTML = '<option>Error loading units</option>';
+  }
+
   updateCurrencyWarning(key);
   await performConversionOnly();
 }
@@ -91,7 +107,7 @@ async function performConversionOnly() {
 
     DOM.toValue.dataset.raw = rounded;
   } catch (err) {
-    console.error(err);
+    console.error("Conversion error:", err);
     DOM.toValue.value = "Error";
   }
 }
