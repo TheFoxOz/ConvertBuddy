@@ -1,4 +1,4 @@
-// scripts/ui.js - FIXED: Removed duplicate export
+// scripts/ui.js - FINAL FIX: Weight default + kg→g defaults
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -16,7 +16,7 @@ const DOM = {
   lastUpdatedText: document.getElementById("last-updated-text"),
 };
 
-let currentCategory = "Weight";
+let currentCategory = "Weight"; // FIXED: Changed from Currency to Weight
 let lastSavedEntry = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateCurrencyWarning();
 });
 
-// FIXED: Only export once at the end
 function setupEventListeners() {
   if (DOM.converterForm) DOM.converterForm.addEventListener("input", debounce(performConversionOnly, 300));
   if (DOM.fromValue) DOM.fromValue.addEventListener("blur", performConversionAndSave);
@@ -59,15 +58,19 @@ async function loadCategory(key) {
   currentCategory = key;
   if (DOM.categorySelect) DOM.categorySelect.value = key;
 
+  console.log(`[UI] Loading category: ${key}`); // Debug log
+
   try {
     const units = await listUnits(key);
+    console.log(`[UI] Got ${units.length} units for ${key}`); // Debug log
+    
     if (units.length === 0) {
       console.warn(`No units for category: ${key}`);
       if (DOM.fromUnit) DOM.fromUnit.innerHTML = '<option>No units available</option>';
       if (DOM.toUnit) DOM.toUnit.innerHTML = '<option>No units available</option>';
       return;
     }
-    populateUnitDropdowns(units);
+    populateUnitDropdowns(units, key); // FIXED: Pass category key
   } catch (err) {
     console.error("Failed to load units:", err);
     if (DOM.fromUnit) DOM.fromUnit.innerHTML = '<option>Error loading units</option>';
@@ -78,14 +81,29 @@ async function loadCategory(key) {
   await performConversionOnly();
 }
 
-function populateUnitDropdowns(units) {
+function populateUnitDropdowns(units, categoryKey) {
   [DOM.fromUnit, DOM.toUnit].forEach((select) => {
     if (!select) return;
     select.innerHTML = "";
     units.forEach((u) => select.add(new Option(u.name || u.key, u.key)));
   });
-  if (DOM.fromUnit) DOM.fromUnit.selectedIndex = 0;
-  if (DOM.toUnit && DOM.toUnit.options.length > 1) DOM.toUnit.selectedIndex = 1;
+  
+  // FIXED: Set smart defaults based on category
+  if (categoryKey === "Weight") {
+    // Default: Kilogram → Gram
+    if (DOM.fromUnit) {
+      const kgIndex = Array.from(DOM.fromUnit.options).findIndex(opt => opt.value === "Kilogram");
+      DOM.fromUnit.selectedIndex = kgIndex >= 0 ? kgIndex : 0;
+    }
+    if (DOM.toUnit) {
+      const gIndex = Array.from(DOM.toUnit.options).findIndex(opt => opt.value === "Gram");
+      DOM.toUnit.selectedIndex = gIndex >= 0 ? gIndex : 1;
+    }
+  } else {
+    // Other categories: default to first and second unit
+    if (DOM.fromUnit) DOM.fromUnit.selectedIndex = 0;
+    if (DOM.toUnit && DOM.toUnit.options.length > 1) DOM.toUnit.selectedIndex = 1;
+  }
 }
 
 async function performConversionOnly() {
@@ -96,8 +114,11 @@ async function performConversionOnly() {
   }
 
   try {
+    console.log(`[UI] Converting ${raw} ${DOM.fromUnit.value} → ${DOM.toUnit.value}`); // Debug
+    
     const result = await convert(currentCategory, DOM.fromUnit.value, DOM.toUnit.value, raw);
     if (!isFinite(result)) {
+      console.error("Conversion returned non-finite value:", result);
       if (DOM.toValue) DOM.toValue.value = "Error";
       return;
     }
@@ -106,12 +127,15 @@ async function performConversionOnly() {
     const rounded = Number(result.toFixed(precision));
 
     if (DOM.toValue) {
+      // FIXED: Better number formatting (no forced minimum decimals)
       DOM.toValue.value = rounded.toLocaleString("en-US", {
-        minimumFractionDigits: precision,
+        minimumFractionDigits: 0,
         maximumFractionDigits: precision,
       });
       DOM.toValue.dataset.raw = rounded;
     }
+    
+    console.log(`[UI] Result: ${rounded}`); // Debug
   } catch (err) {
     console.error("Conversion error:", err);
     if (DOM.toValue) DOM.toValue.value = "Error";
@@ -167,5 +191,5 @@ function debounce(fn, delay = 300) {
   };
 }
 
-// FIXED: Export only once at the end
+// Export functions needed by other modules
 export { loadCategory, performConversionOnly as performConversion };
