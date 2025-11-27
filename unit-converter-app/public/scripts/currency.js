@@ -1,5 +1,6 @@
-// scripts/currency.js - Version corrigée et fonctionnelle
+// scripts/currency.js - Version finale, stable, sans dynamic import
 import { initializeFirebase } from "./firebase.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 const API_KEY = "b55c79e2ac77eeb4091f0253";
 const BASE_CURRENCY = "USD";
@@ -10,85 +11,71 @@ const ONE_DAY = 24 * 60 * 60 * 1000;
 
 let ratesCache = null;
 
-/**
- * Récupère les taux (cache ou frais)
- */
+async function getDb() {
+  const { db } = await initializeFirebase();
+  return db;
+}
+
 export async function getRates() {
   if (ratesCache && Date.now() - ratesCache.timestamp < ONE_DAY) {
     return ratesCache.rates;
   }
 
-  const { db } = await initializeFirebase();
-
+  const db = await getDb();
   if (db) {
     try {
-      const doc = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-      const docRef = doc.doc(db, CACHE_COLLECTION, CACHE_DOC);
-      const snapshot = await doc.getDoc(docRef);
-
-      if (snapshot.exists()) {
-        ratesCache = snapshot.data();
+      const snap = await getDoc(doc(db, CACHE_COLLECTION, CACHE_DOC));
+      if (snap.exists()) {
+        ratesCache = snap.data();
         if (Date.now() - ratesCache.timestamp < ONE_DAY) {
           return ratesCache.rates;
         }
       }
     } catch (e) {
-      console.warn("Firestore cache read failed", e);
+      console.warn("Failed to read currency cache", e);
     }
   }
 
-  // Sinon → fetch API
   return await refreshRates();
 }
 
-/**
- * Force le rafraîchissement des taux
- */
 async function refreshRates() {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
-
-    if (data.result !== "success") throw new Error("API failed");
+    if (data.result !== "success") throw new Error("API error");
 
     const newCache = {
       rates: data.conversion_rates,
       timestamp: Date.now(),
-      base: data.base_code
+      base: data.base_code,
     };
 
     ratesCache = newCache;
 
-    // Sauvegarde en arrière-plan
-    const { db } = await initializeFirebase();
+    const db = await getDb();
     if (db) {
       try {
-        const firestore = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-        await firestore.setDoc(firestore.doc(db, CACHE_COLLECTION, CACHE_DOC), newCache);
+        await setDoc(doc(db, CACHE_COLLECTION, CACHE_DOC), newCache);
       } catch (e) {
-        console.warn("Failed to save rates to Firestore", e);
+        console.warn("Failed to save rates", e);
       }
     }
 
     return newCache.rates;
   } catch (e) {
     console.error("Currency refresh failed", e);
-    if (ratesCache) return ratesCache.rates; // fallback
+    if (ratesCache) return ratesCache.rates;
     throw e;
   }
 }
 
-// === Exports publics ===
-
 export async function convertCurrency(from, to, amount) {
   if (from === to) return amount;
-
   const rates = await getRates();
   const fromRate = rates[from];
   const toRate = rates[to];
-
-  if (!fromRate || !toRate) throw new Error(`Currency not supported: ${from} → ${to}`);
-
+  if (!fromRate || !toRate) throw new Error(`Missing rate: ${from} → ${to}`);
   return (amount / fromRate) * toRate;
 }
 
@@ -99,7 +86,6 @@ export async function listCurrencies() {
       .map(code => ({ key: code, name: code, symbol: code }))
       .sort((a, b) => a.key.localeCompare(b.key));
   } catch {
-    // Fallback minimal
     return [
       { key: "USD", name: "USD", symbol: "USD" },
       { key: "EUR", name: "EUR", symbol: "EUR" },
@@ -112,5 +98,5 @@ export function getCachedRates() {
   return ratesCache;
 }
 
-// Pré-charge au démarrage
+// Pré-charge
 getRates().catch(() => {});
