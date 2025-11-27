@@ -1,49 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unit Converter</title>
-<script type="module" src="scripts/ui.js" defer></script>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Universal Unit Converter</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="bg-gray-50 text-gray-800">
 
-<div class="container mx-auto p-6">
+<body>
+  <header>
+    <h1>Universal Unit Converter</h1>
+  </header>
 
-  <!-- Categories -->
-  <nav class="mb-4">
-    <ul id="category-list" class="flex gap-2 flex-wrap"></ul>
-  </nav>
+  <main>
+    <!-- Conversion Form -->
+    <section id="converter-section">
+      <h2>Convert Units</h2>
 
-  <!-- Converter Form -->
-  <form id="converter-form" class="flex flex-col gap-4 max-w-md bg-white p-6 rounded shadow">
-    <div class="flex gap-2">
-      <input id="from-value" type="number" placeholder="Value" class="flex-1 p-2 border rounded">
-      <select id="from-unit" class="p-2 border rounded"></select>
-    </div>
+      <label for="category">Category</label>
+      <select id="category">
+        <option value="length">Length</option>
+        <option value="weight">Weight</option>
+        <option value="temperature">Temperature</option>
+        <option value="currency">Currency</option>
+      </select>
 
-    <button id="swap-btn" class="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition-colors">Swap</button>
+      <label for="fromValue">Value</label>
+      <input type="number" id="fromValue" placeholder="Enter value" />
 
-    <div class="flex gap-2">
-      <input id="to-value" type="text" placeholder="Result" readonly class="flex-1 p-2 border rounded bg-gray-100">
-      <select id="to-unit" class="p-2 border rounded"></select>
-    </div>
-  </form>
+      <label for="fromUnit">From</label>
+      <select id="fromUnit"></select>
 
-  <!-- Currency Warning -->
-  <div id="currency-warning" class="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded hidden">
-    <p>Currency rates may be outdated.</p>
-    <p id="last-updated-text" class="text-sm mt-1"></p>
-  </div>
+      <label for="toUnit">To</label>
+      <select id="toUnit"></select>
 
-  <!-- Conversion History -->
-  <section class="mt-6">
-    <h2 class="text-lg font-semibold mb-2">History</h2>
-    <ul id="history-list" class="border rounded bg-white divide-y divide-gray-200"></ul>
-  </section>
+      <button id="convertBtn">Convert</button>
 
-</div>
+      <p id="result"></p>
+    </section>
 
+    <!-- Conversion History -->
+    <section id="history-section">
+      <h2>History</h2>
+      <ul id="historyList"></ul>
+      <button id="clearHistoryBtn">Clear History</button>
+    </section>
+  </main>
+
+  <!-- Firebase -->
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="firestore.js"></script>
+
+  <!-- Logic -->
+  <script type="module" src="converter.js"></script>
+  <script type="module" src="history.js"></script>
+  <script type="module" src="ui.js"></script>
 </body>
 </html>
