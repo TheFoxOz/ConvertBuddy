@@ -1,11 +1,8 @@
-// sw.js - Service Worker for offline functionality
-const CACHE_NAME = 'convertbuddy-v13';
+// sw.js - FIXED: Don't cache HTML pages to avoid privacy.html issues
+const CACHE_NAME = 'convertbuddy-v14';
 const DATA_CACHE = 'convertbuddy-data-v2';
 
 const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/privacy.html',
   '/manifest.json',
   '/style.css',
   '/scripts/ui.js',
@@ -20,7 +17,7 @@ const FILES_TO_CACHE = [
   '/icons/Icon-maskable.png'
 ];
 
-// Install - Cache critical files
+// Install - Cache critical files (but NOT HTML)
 self.addEventListener('install', event => {
   console.log('[SW] Installing...');
   event.waitUntil(
@@ -58,12 +55,18 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch - Serve from cache, fallback to network
+// Fetch - Handle requests intelligently
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
+
+  // FIXED: Never cache HTML pages - always fetch from network
+  if (event.request.url.endsWith('.html') || event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request));
+    return;
+  }
 
   // Handle Currency API (Network first, cache fallback)
   if (url.href.includes('exchangerate-api.com')) {
@@ -91,7 +94,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle CDN resources (Tailwind, etc.) - Network first, cache fallback
+  // Handle CDN resources (Tailwind, Font Awesome, etc.) - Cache with fallback
   if (url.origin !== location.origin) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
@@ -108,7 +111,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Handle app resources (Cache first, network fallback)
+  // Handle app resources (Cache first for scripts, styles, icons)
   event.respondWith(
     caches.match(event.request)
       .then(cached => {
@@ -116,17 +119,8 @@ self.addEventListener('fetch', event => {
           return cached;
         }
         
-        // Create request with proper redirect handling
-        const fetchRequest = event.request.clone();
-        
-        return fetch(fetchRequest, { redirect: 'follow' })
+        return fetch(event.request)
           .then(response => {
-            // Don't cache redirects or error responses
-            if (!response || response.status !== 200 || response.type === 'error') {
-              return response;
-            }
-
-            // Cache successful responses
             if (response.ok) {
               return caches.open(CACHE_NAME).then(cache => {
                 cache.put(event.request, response.clone());
@@ -137,10 +131,6 @@ self.addEventListener('fetch', event => {
           })
           .catch(error => {
             console.log('[SW] Fetch failed:', error);
-            // Fallback for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/index.html');
-            }
             throw error;
           });
       })
