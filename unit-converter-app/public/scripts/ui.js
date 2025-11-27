@@ -1,4 +1,4 @@
-// scripts/ui.js - FINAL FIX: Weight default + kg→g defaults
+// scripts/ui.js - COMPLETE FIX: Weight default, no icons, better formatting
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -16,7 +16,7 @@ const DOM = {
   lastUpdatedText: document.getElementById("last-updated-text"),
 };
 
-let currentCategory = "Weight"; // FIXED: Changed from Currency to Weight
+let currentCategory = "Weight"; // FIXED: Default to Weight
 let lastSavedEntry = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -58,19 +58,15 @@ async function loadCategory(key) {
   currentCategory = key;
   if (DOM.categorySelect) DOM.categorySelect.value = key;
 
-  console.log(`[UI] Loading category: ${key}`); // Debug log
-
   try {
     const units = await listUnits(key);
-    console.log(`[UI] Got ${units.length} units for ${key}`); // Debug log
-    
     if (units.length === 0) {
       console.warn(`No units for category: ${key}`);
       if (DOM.fromUnit) DOM.fromUnit.innerHTML = '<option>No units available</option>';
       if (DOM.toUnit) DOM.toUnit.innerHTML = '<option>No units available</option>';
       return;
     }
-    populateUnitDropdowns(units, key); // FIXED: Pass category key
+    populateUnitDropdowns(units, key);
   } catch (err) {
     console.error("Failed to load units:", err);
     if (DOM.fromUnit) DOM.fromUnit.innerHTML = '<option>Error loading units</option>';
@@ -88,7 +84,7 @@ function populateUnitDropdowns(units, categoryKey) {
     units.forEach((u) => select.add(new Option(u.name || u.key, u.key)));
   });
   
-  // FIXED: Set smart defaults based on category
+  // Set smart defaults based on category
   if (categoryKey === "Weight") {
     // Default: Kilogram → Gram
     if (DOM.fromUnit) {
@@ -114,11 +110,8 @@ async function performConversionOnly() {
   }
 
   try {
-    console.log(`[UI] Converting ${raw} ${DOM.fromUnit.value} → ${DOM.toUnit.value}`); // Debug
-    
     const result = await convert(currentCategory, DOM.fromUnit.value, DOM.toUnit.value, raw);
     if (!isFinite(result)) {
-      console.error("Conversion returned non-finite value:", result);
       if (DOM.toValue) DOM.toValue.value = "Error";
       return;
     }
@@ -127,15 +120,12 @@ async function performConversionOnly() {
     const rounded = Number(result.toFixed(precision));
 
     if (DOM.toValue) {
-      // FIXED: Better number formatting (no forced minimum decimals)
       DOM.toValue.value = rounded.toLocaleString("en-US", {
         minimumFractionDigits: 0,
         maximumFractionDigits: precision,
       });
       DOM.toValue.dataset.raw = rounded;
     }
-    
-    console.log(`[UI] Result: ${rounded}`); // Debug
   } catch (err) {
     console.error("Conversion error:", err);
     if (DOM.toValue) DOM.toValue.value = "Error";
@@ -191,5 +181,4 @@ function debounce(fn, delay = 300) {
   };
 }
 
-// Export functions needed by other modules
 export { loadCategory, performConversionOnly as performConversion };
