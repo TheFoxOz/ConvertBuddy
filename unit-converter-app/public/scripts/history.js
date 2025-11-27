@@ -1,37 +1,66 @@
-// history.js
-import { saveHistoryToFirestore, loadHistoryFromFirestore, clearHistoryFromFirestore } from './firestore.js';
+// scripts/history.js
+import {
+  saveHistoryToFirestore,
+  loadHistoryFromFirestore,
+  clearHistoryFromFirestore
+} from "./firestore.js";
 
+// DOM elements
 const historyList = document.getElementById("historyList");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-// Add a new history item
-export async function addToHistory(record) {
-  await saveHistoryToFirestore(record);
-  displayHistoryItem(record);
-}
-
-// Show one history line in UI
-function displayHistoryItem(record) {
+/**
+ * Add a single entry to the DOM list
+ */
+function renderEntry(entry) {
   const li = document.createElement("li");
-  li.textContent = `${record.value} ${record.fromUnit} → ${record.result} ${record.toUnit} (${record.category})`;
+  li.textContent = `${entry.input} → ${entry.output} (${entry.category})`;
   historyList.appendChild(li);
 }
 
-// Load the entire history on startup
+/**
+ * Reload history from Firestore or local fallback
+ */
 export async function loadHistory() {
-  const history = await loadHistoryFromFirestore();
-  historyList.innerHTML = "";
+  historyList.innerHTML = "<li>Loading…</li>";
 
-  if (!history || history.length === 0) {
-    historyList.innerHTML = "<li>No history yet</li>";
+  const history = await loadHistoryFromFirestore();
+
+  historyList.innerHTML = ""; // clear placeholder
+
+  if (!history.length) {
+    historyList.innerHTML = "<li>No history yet.</li>";
     return;
   }
 
-  history.forEach(displayHistoryItem);
+  history.forEach(renderEntry);
 }
 
-// Clear all history
-clearHistoryBtn.addEventListener("click", async () => {
+/**
+ * Add a new conversion entry
+ */
+export function addToHistory(entry) {
+  // Add to UI instantly
+  renderEntry(entry);
+
+  // Save to Firestore + Local fallback
+  saveHistoryToFirestore(entry);
+}
+
+/**
+ * Clear history (Firestore + Local)
+ */
+async function handleClearHistory() {
+  const confirmClear = confirm("Clear all history?");
+
+  if (!confirmClear) return;
+
   await clearHistoryFromFirestore();
-  historyList.innerHTML = "<li>History cleared</li>";
-});
+  historyList.innerHTML = "<li>History cleared.</li>";
+}
+
+// Event listener
+clearHistoryBtn.addEventListener("click", handleClearHistory);
+
+// Load history on page load
+loadHistory();
