@@ -1,8 +1,10 @@
-// scripts/firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-analytics.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+// scripts/firebase.js - Unified Firebase Configuration
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAzVq-WhSd4w5oYp3S0LgJm4u2qxLqf-9Q",
   authDomain: "covertbuddy-c8b99.firebaseapp.com",
@@ -13,14 +15,48 @@ const firebaseConfig = {
   measurementId: "G-1GXL1GWBL5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+// Initialize Firebase
+let app;
+let db;
+let auth;
 let analytics = null;
-try {
-  analytics = getAnalytics(app);
-} catch (e) {
-  console.warn("Analytics not supported:", e);
+let isInitialized = false;
+
+/**
+ * Initialize Firebase services (called on first use)
+ */
+export async function initializeFirebase() {
+  if (isInitialized) {
+    return { app, db, auth, analytics };
+  }
+
+  try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+
+    // Sign in anonymously for history storage
+    await signInAnonymously(auth);
+    
+    // Analytics (optional, may fail in some browsers)
+    try {
+      analytics = getAnalytics(app);
+    } catch (e) {
+      console.warn("Analytics not supported:", e);
+    }
+
+    isInitialized = true;
+    console.log("Firebase initialized successfully");
+    
+    return { app, db, auth, analytics };
+  } catch (error) {
+    console.error("Firebase initialization failed:", error);
+    throw error;
+  }
 }
 
-export { app, analytics, db };
+// Auto-initialize (but don't block)
+initializeFirebase().catch(err => console.warn("Firebase auto-init failed:", err));
+
+// Export instances (will be undefined until initialized)
+export { app, db, auth, analytics };
