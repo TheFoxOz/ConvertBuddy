@@ -1,6 +1,6 @@
-const CACHE_NAME = 'convertbuddy-v10'; // <-- INCREMENTED TO FORCE REFRESH
+const CACHE_NAME = 'convertbuddy-v11'; // Incremented to force new cache install
 const DATA_CACHE = 'convertbuddy-data-v1';
- 
+
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
@@ -10,14 +10,14 @@ const FILES_TO_CACHE = [
   '/scripts/converter.js',
   '/scripts/currency.js',
   '/scripts/units.js',
-  // External CDN assets used by index.html (optional but good for offline)
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', // <-- FIXED VERSION TO 6.5.1
-  'https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css',
+  // Removed CDN links from this critical list. 
+  // They will be cached dynamically via the 'fetch' handler, 
+  // preventing install failure if the CDN is temporarily down.
   '/icons/Icon-192.png',
   '/icons/Icon-512.png',
   '/icons/Icon-maskable.png'
 ];
- 
+
 // Install
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -34,7 +34,7 @@ self.addEventListener('install', event => {
   );
   self.skipWaiting();
 });
- 
+
 // Activate
 self.addEventListener('activate', event => {
   event.waitUntil(
@@ -50,11 +50,11 @@ self.addEventListener('activate', event => {
   );
   self.clients.claim();
 });
- 
+
 // Fetch
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
- 
+
   // Handle currency API separately (Cache, then Network fallback)
   if (url.href.includes("open.er-api.com")) {
     event.respondWith(
@@ -70,7 +70,7 @@ self.addEventListener('fetch', event => {
     return;
   }
   
-  // Cache-first for app shell assets and local files
+  // Cache-first for app shell assets, local files, and CDN assets
   event.respondWith(
     caches.match(event.request).then(cached => {
       return (
