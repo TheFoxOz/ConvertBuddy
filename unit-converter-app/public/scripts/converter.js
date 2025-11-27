@@ -1,14 +1,52 @@
-// converter.js or utils.js
-
-// Import the data structure defined in units.js
-import { conversionData } from "./units.js"; 
+import { conversionData } from "./units.js";
 
 /**
- * Converts a value from one unit to another based on the conversionData structure.
- * * @param {number} value - The numerical value to convert.
- * @param {string} sourceUnitName - The name of the source unit (e.g., 'Kilometer').
- * @param {string} targetUnitName - The name of the target unit (e.g., 'Mile').
- * @returns {{value: number, symbol: string}} An object containing the converted value and the target unit's symbol, or null if conversion fails.
+ * Transforms the conversionData object into a structured array 
+ * for easier UI population.
+ * @returns {Array<Object>} Array of categories with their units.
+ */
+export function getUnitCategories() {
+    const categoriesArray = [];
+
+    for (const catKey in conversionData) {
+        if (Object.hasOwnProperty.call(conversionData, catKey)) {
+            const category = conversionData[catKey];
+            const unitsList = [];
+
+            // Populate units, checking if units are defined or need listing (like currency)
+            const unitsSource = category.units || (category.list ? category.list() : {});
+
+            for (const unitKey in unitsSource) {
+                if (Object.hasOwnProperty.call(unitsSource, unitKey)) {
+                    const unitDef = unitsSource[unitKey];
+                    
+                    unitsList.push({
+                        key: unitKey,
+                        name: unitDef.name, 
+                        symbol: unitDef.symbol
+                    });
+                }
+            }
+
+            categoriesArray.push({
+                key: catKey,
+                name: category.name,
+                icon: category.icon,
+                precision: category.precision,
+                units: unitsList
+            });
+        }
+    }
+    return categoriesArray;
+}
+
+
+/**
+ * Converts a value from one unit to another within the same category.
+ * @param {number} value - The numerical value to convert.
+ * @param {string} sourceUnitName - The name of the source unit (e.g., 'Mile').
+ * @param {string} targetUnitName - The name of the target unit (e.g., 'Kilometer').
+ * @returns {{value: (number|string), symbol: string} | null} Converted value and symbol, or null on error.
  */
 export function convertUnits(value, sourceUnitName, targetUnitName) {
     if (typeof value !== 'number' || isNaN(value)) {
@@ -23,31 +61,29 @@ export function convertUnits(value, sourceUnitName, targetUnitName) {
     // 1. Find the Category and Unit Definitions for both source and target.
     for (const catName in conversionData) {
         const category = conversionData[catName];
+        const unitsSource = category.units || (category.list ? category.list() : {});
         
-        if (category.units[sourceUnitName]) {
+        if (unitsSource[sourceUnitName]) {
             sourceCat = category;
-            sourceUnitDef = category.units[sourceUnitName];
+            sourceUnitDef = unitsSource[sourceUnitName];
         }
         
-        if (category.units[targetUnitName]) {
+        if (unitsSource[targetUnitName]) {
             targetCat = category;
-            targetUnitDef = category.units[targetUnitName];
+            targetUnitDef = unitsSource[targetUnitName];
         }
     }
 
-    // Check if units were found and belong to the same category
     if (!sourceUnitDef || !targetUnitDef || sourceCat !== targetCat) {
-        console.error("Conversion Error: Units not found or belong to different categories.");
-        return null;
+        return null; // Incompatible units or not found
     }
 
-    // The category is the same for both
     const category = sourceCat;
     let convertedValue;
 
     // 2. Handle Dynamic/External Conversions (e.g., Currency)
     if (category.convert) {
-        // This relies on an external/dynamic function (like convertCurrency)
+        // The convert function handles the entire conversion (source to target)
         convertedValue = category.convert(value, sourceUnitName, targetUnitName);
     } 
     
@@ -73,14 +109,21 @@ export function convertUnits(value, sourceUnitName, targetUnitName) {
             convertedValue = baseToTarget(baseValue);
         } else {
             // Linear conversion (baseValue / factor)
-            // Note: If targetUnitDef.toBase is X, then fromBase is 1/X
             const factor = targetUnitDef.toBase;
             convertedValue = baseValue / factor;
         }
     }
 
-    // 4. Round the result based on category precision
+    // 4. Round the result based on category precision, handling scientific notation for extremes
     const precision = category.precision;
+    
+    if (Math.abs(convertedValue) >= 1e12 || (Math.abs(convertedValue) > 0 && Math.abs(convertedValue) <= 1e-6)) {
+        return {
+            value: convertedValue.toExponential(precision),
+            symbol: targetUnitDef.symbol
+        };
+    }
+    
     const roundedValue = parseFloat(convertedValue.toFixed(precision));
 
     // 5. Return the result and the target symbol
