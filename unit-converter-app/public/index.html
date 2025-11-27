@@ -12,8 +12,11 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/Icon-192.png" />
   <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS (CDN for dev; for prod, install via npm as warned) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { colors: { emerald: { 50: '#f0fdf4' } } } } }
+  </script>
   
   <!-- Custom Styles -->
   <link rel="stylesheet" href="/style.css" />
@@ -38,7 +41,7 @@
           </select>
         </div>
 
-        <!-- From / To Units -->
+        <!-- From / To Units (Above Value as requested) -->
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label for="from-unit" class="block text-sm font-semibold text-gray-700 mb-2">From</label>
@@ -63,7 +66,7 @@
           />
         </div>
 
-        <!-- Swap Button -->
+        <!-- Swap Button with Double Arrows -->
         <div class="flex justify-center">
           <button 
             type="button" 
@@ -71,8 +74,8 @@
             class="w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg transition-all hover:scale-110 active:scale-95"
             title="Swap units"
           >
-            <svg class="w-7 h-7 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
             </svg>
           </button>
         </div>
