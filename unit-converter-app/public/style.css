@@ -12,29 +12,33 @@ body {
 button,
 select,
 input {
-    transition: all 0.2s ease; /* Transition all properties for better feel */
+    transition: all 0.2s ease;
 }
 
 /* ------------------------------------- */
-/* Form Element Styling for the Target  */
+/* Form Element Styling - FIXED ARROWS  */
 /* ------------------------------------- */
 
-/* Apply custom arrow to the dropdowns to match the minimal style */
+/* FIXED: Hide default browser arrow and show only custom arrow */
 select {
-    /* Tailwind's 'appearance-none' requires a custom arrow for modern styling */
+    /* Remove default browser arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* Add single custom arrow */
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2310B981'%3e%3cpath d='M7 7l3 5 3-5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1.5em 1.5em;
-    padding-right: 2.5rem !important; /* Make room for the arrow */
+    padding-right: 2.5rem !important;
 }
 
-/* Ensure the result box (to-value) looks distinct but clean, matching the pale background color */
+/* Ensure the result box looks distinct but clean */
 #to-value {
-    /* Use !important if Tailwind's p-4 / bg-emerald-50 isn't fully applied */
     background-color: #f0fdf4 !important; /* Tailwind's bg-emerald-50 */
     color: #1f2937; /* Dark text */
-    opacity: 1; /* Reset the default disabled opacity */
+    opacity: 1;
     cursor: default;
 }
 
@@ -45,54 +49,45 @@ select {
 /* History items should be clean, not dark-themed */
 #history-list li {
     padding: 8px 10px;
-    background-color: transparent; /* No background color on list item */
+    background-color: transparent;
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.2s ease;
     font-size: 0.9rem;
-    color: #4b5563; /* Subtle text color */
-    border-bottom: 1px solid #f3f4f6; /* Very light separator */
+    color: #4b5563;
+    border-bottom: 1px solid #f3f4f6;
     display: flex;
     justify-content: space-between;
 }
 
 #history-list li:hover {
-    background-color: #f9fafb; /* Light hover effect */
+    background-color: #f9fafb;
 }
 
 /* History time/details text */
 #history-list li span:last-child {
-    color: #9ca3af; /* gray-400 */
+    color: #9ca3af;
     font-size: 0.75rem;
 }
-
 
 /* ------------------------------------- */
 /* CUSTOM SCROLLBAR (Green/White Theme) */
 /* ------------------------------------- */
 
-/* Resetting the dark scrollbar */
 #history-list::-webkit-scrollbar {
-    width: 6px; /* Slightly thinner */
+    width: 6px;
 }
 
 #history-list::-webkit-scrollbar-track {
-    background: #f0fdf4; /* Pale green track */
+    background: #f0fdf4;
     border-radius: 4px;
 }
 
 #history-list::-webkit-scrollbar-thumb {
-    background: #a7f3d0; /* Light green thumb (emerald-200) */
+    background: #a7f3d0;
     border-radius: 4px;
 }
 
 #history-list::-webkit-scrollbar-thumb:hover {
-    background: #34d399; /* Medium green hover (emerald-400) */
-}
-
-/* Removing old category list styles (since it's now a dropdown) */
-#category-list,
-#category-list li,
-#category-list li.active {
-    /* These styles are no longer needed, assuming you'll use a single dropdown */
+    background: #34d399;
 }
