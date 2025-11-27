@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ConvertBuddy - Unit & Currency Converter</title>
-  <meta name="description" content="Fast, offline-first universal unit and currency converter. No ads tracking. Works without internet." />
+  <title>ConvertBuddy - All-in-One Unit & Currency Converter</title>
+  <meta name="description" content="Convert currency, weight, length, temperature, and 15+ unit types in one place. Fast, clean, and privacy-focused converter." />
   
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
@@ -12,10 +12,10 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/Icon-192.png" />
   <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
 
-  <!-- Font Awesome for Icons (optional, can be removed if not needed) -->
+  <!-- Font Awesome for Icons (optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <!-- Tailwind CSS (CDN for dev; for prod, install via npm as warned) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { theme: { extend: { colors: { emerald: { 50: '#f0fdf4' } } } } }
@@ -28,15 +28,20 @@
 <body class="bg-emerald-50 text-gray-800 min-h-screen py-12 px-4 font-sans">
   <main class="max-w-sm mx-auto">
     <section class="bg-white rounded-3xl shadow-2xl p-8">
-      <!-- Header -->
+      <!-- Header - UPDATED -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-emerald-600 mb-2">ConvertBuddy</h1>
-        <p class="text-sm text-gray-600">Fast • Offline • No tracking</p>
+        <h1 class="text-4xl font-extrabold text-emerald-600 mb-3">ConvertBuddy</h1>
+        <p class="text-base text-gray-700 font-medium leading-relaxed">
+          All your conversions in one place
+        </p>
+        <p class="text-sm text-gray-500 mt-2">
+          Currency • Weight • Length • Temperature & more
+        </p>
       </div>
 
       <!-- Converter Form -->
       <form id="converter-form" class="space-y-6">
-        <!-- Category - FIXED: Removed icon -->
+        <!-- Category -->
         <div>
           <label for="category-select" class="block text-sm font-semibold text-gray-700 mb-2">
             Category
