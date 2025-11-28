@@ -1,4 +1,4 @@
-// scripts/units.js - UPDATED: Added cooking units to Weight category
+// scripts/units.js - All English spelling + cooking units in Weight
 import { convertCurrency, listCurrencies } from "./currency.js";
 
 export const conversionData = {
@@ -15,12 +15,12 @@ export const conversionData = {
         icon: "fas fa-ruler",
         precision: 3,
         units: {
-            Meter:        { name: "Metre",      symbol: "m",   toBase: 1 },
-            Kilometer:    { name: "Kilometre",  symbol: "km",  toBase: 1_000 },
-            Centimeter:   { name: "Centimetre", symbol: "cm",  toBase: 0.01 },
-            Millimeter:   { name: "Millimetre", symbol: "mm",  toBase: 0.001 },
-            Micrometer:   { name: "Micrometre", symbol: "µm",  toBase: 1e-6 },
-            Nanometer:    { name: "Nanometre",  symbol: "nm",  toBase: 1e-9 },
+            Meter:        { name: "Meter",      symbol: "m",   toBase: 1 },
+            Kilometer:    { name: "Kilometer",  symbol: "km",  toBase: 1_000 },
+            Centimeter:   { name: "Centimeter", symbol: "cm",  toBase: 0.01 },
+            Millimeter:   { name: "Millimeter", symbol: "mm",  toBase: 0.001 },
+            Micrometer:   { name: "Micrometer", symbol: "µm",  toBase: 1e-6 },
+            Nanometer:    { name: "Nanometer",  symbol: "nm",  toBase: 1e-9 },
             Mile:         { name: "Mile",       symbol: "mi",  toBase: 1_609.34 },
             Yard:         { name: "Yard",       symbol: "yd",  toBase: 0.9144 },
             Foot:         { name: "Foot",       symbol: "ft",  toBase: 0.3048 },
@@ -75,9 +75,9 @@ export const conversionData = {
         icon: "fas fa-wine-bottle",
         precision: 3,
         units: {
-            Litre:        { name: "Litre",        symbol: "L",   toBase: 1 },
-            Millilitre:   { name: "Millilitre",   symbol: "mL",  toBase: 0.001 },
-            CubicMetre:   { name: "Cubic Metre",  symbol: "m³",  toBase: 1_000 },
+            Liter:        { name: "Liter",        symbol: "L",   toBase: 1 },
+            Milliliter:   { name: "Milliliter",   symbol: "mL",  toBase: 0.001 },
+            CubicMeter:   { name: "Cubic Meter",  symbol: "m³",  toBase: 1_000 },
             Gallon:       { name: "Gallon (US)",  symbol: "gal", toBase: 3.78541 },
             Quart:        { name: "Quart",        symbol: "qt",  toBase: 0.946353 },
             Pint:         { name: "Pint",         symbol: "pt",  toBase: 0.473176 },
@@ -92,8 +92,8 @@ export const conversionData = {
         icon: "fas fa-vector-square",
         precision: 2,
         units: {
-            SquareMetre:    { name: "Square Metre",    symbol: "m²",  toBase: 1 },
-            SquareKilometre:{ name: "Square Kilometre",symbol: "km²", toBase: 1_000_000 },
+            SquareMeter:    { name: "Square Meter",    symbol: "m²",  toBase: 1 },
+            SquareKilometer:{ name: "Square Kilometer",symbol: "km²", toBase: 1_000_000 },
             SquareFoot:     { name: "Square Foot",     symbol: "ft²", toBase: 0.092903 },
             SquareInch:     { name: "Square Inch",     symbol: "in²", toBase: 0.00064516 },
             SquareMile:     { name: "Square Mile",     symbol: "mi²", toBase: 2_589_988 },
@@ -107,8 +107,8 @@ export const conversionData = {
         icon: "fas fa-tachometer-alt",
         precision: 2,
         units: {
-            "Metre/Second":     { name: "Metre/Second",     symbol: "m/s",   toBase: 1 },
-            "Kilometre/Hour":   { name: "Kilometre/Hour",   symbol: "km/h",  toBase: 1 / 3.6 },
+            "Meter/Second":     { name: "Meter/Second",     symbol: "m/s",   toBase: 1 },
+            "Kilometer/Hour":   { name: "Kilometer/Hour",   symbol: "km/h",  toBase: 1 / 3.6 },
             "Mile/Hour":        { name: "Mile/Hour",        symbol: "mph",   toBase: 0.44704 },
             "Foot/Second":      { name: "Foot/Second",      symbol: "ft/s",  toBase: 0.3048 },
             Knot:               { name: "Knot",             symbol: "kn",    toBase: 0.514444 }
