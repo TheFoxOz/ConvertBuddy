@@ -1,4 +1,4 @@
-// scripts/ui.js - COMPLETE FIX: Weight default, no icons, better formatting
+// scripts/ui.js - UPDATED: Manual convert button + smart decimal formatting
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -11,12 +11,13 @@ const DOM = {
   toValue: document.getElementById("to-value"),
   fromUnit: document.getElementById("from-unit"),
   toUnit: document.getElementById("to-unit"),
+  convertBtn: document.getElementById("convert-btn"), // NEW
   swapButton: document.getElementById("swap-btn"),
   currencyWarning: document.getElementById("currency-warning"),
   lastUpdatedText: document.getElementById("last-updated-text"),
 };
 
-let currentCategory = "Weight"; // FIXED: Default to Weight
+let currentCategory = "Weight";
 let lastSavedEntry = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -24,7 +25,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadCategory(currentCategory);
   setupEventListeners();
   
-  // Delay history load to ensure DOM refs are ready
   setTimeout(async () => {
     await loadHistory();
   }, 100);
@@ -33,15 +33,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function setupEventListeners() {
-  if (DOM.converterForm) DOM.converterForm.addEventListener("input", debounce(performConversionOnly, 300));
-  if (DOM.fromValue) DOM.fromValue.addEventListener("blur", performConversionAndSave);
-  if (DOM.fromUnit) DOM.fromUnit.addEventListener("change", performConversionAndSave);
-  if (DOM.toUnit) DOM.toUnit.addEventListener("change", performConversionAndSave);
-  if (DOM.categorySelect) DOM.categorySelect.addEventListener("change", (e) => loadCategory(e.target.value));
-  if (DOM.swapButton) DOM.swapButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    swapUnits(DOM, performConversionAndSave);
-  });
+  // CHANGED: Removed auto-convert on input, only on Convert button click
+  if (DOM.convertBtn) {
+    DOM.convertBtn.addEventListener("click", async () => {
+      await performConversionAndSave();
+    });
+  }
+  
+  // Keep Enter key for quick conversion
+  if (DOM.fromValue) {
+    DOM.fromValue.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        performConversionAndSave();
+      }
+    });
+  }
+  
+  if (DOM.categorySelect) {
+    DOM.categorySelect.addEventListener("change", (e) => loadCategory(e.target.value));
+  }
+  
+  if (DOM.swapButton) {
+    DOM.swapButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      swapUnits(DOM, performConversionAndSave);
+    });
+  }
 }
 
 async function renderCategorySelect() {
@@ -74,7 +92,9 @@ async function loadCategory(key) {
   }
 
   updateCurrencyWarning(key);
-  await performConversionOnly();
+  
+  // Reset result when changing category
+  if (DOM.toValue) DOM.toValue.value = "---";
 }
 
 function populateUnitDropdowns(units, categoryKey) {
@@ -86,7 +106,6 @@ function populateUnitDropdowns(units, categoryKey) {
   
   // Set smart defaults based on category
   if (categoryKey === "Weight") {
-    // Default: Kilogram → Gram
     if (DOM.fromUnit) {
       const kgIndex = Array.from(DOM.fromUnit.options).findIndex(opt => opt.value === "Kilogram");
       DOM.fromUnit.selectedIndex = kgIndex >= 0 ? kgIndex : 0;
@@ -96,13 +115,39 @@ function populateUnitDropdowns(units, categoryKey) {
       DOM.toUnit.selectedIndex = gIndex >= 0 ? gIndex : 1;
     }
   } else {
-    // Other categories: default to first and second unit
     if (DOM.fromUnit) DOM.fromUnit.selectedIndex = 0;
     if (DOM.toUnit && DOM.toUnit.options.length > 1) DOM.toUnit.selectedIndex = 1;
   }
 }
 
-async function performConversionOnly() {
+/**
+ * NEW: Smart decimal formatter
+ * - Removes trailing zeros
+ * - Max 5 decimal places
+ * - Examples: 0.75000 → 0.75, 0.78451 → 0.78451, 1000 → 1,000
+ */
+function formatNumber(num, maxDecimals = 5) {
+  if (!isFinite(num)) return "Error";
+  
+  // Round to max decimals
+  const rounded = Number(num.toFixed(maxDecimals));
+  
+  // Convert to string and remove trailing zeros
+  let str = rounded.toString();
+  
+  // If number has decimal point, remove trailing zeros
+  if (str.includes('.')) {
+    str = str.replace(/\.?0+$/, '');
+  }
+  
+  // Add thousand separators for readability
+  const parts = str.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  
+  return parts.join('.');
+}
+
+async function performConversionAndSave() {
   const raw = DOM.fromValue ? DOM.fromValue.value.trim() : '';
   if (!raw || isNaN(raw)) {
     if (DOM.toValue) DOM.toValue.value = "---";
@@ -111,43 +156,37 @@ async function performConversionOnly() {
 
   try {
     const result = await convert(currentCategory, DOM.fromUnit.value, DOM.toUnit.value, raw);
+    
     if (!isFinite(result)) {
       if (DOM.toValue) DOM.toValue.value = "Error";
       return;
     }
 
-    const precision = conversionData[currentCategory]?.precision ?? 6;
-    const rounded = Number(result.toFixed(precision));
-
+    // Use smart decimal formatting (max 5 decimals, no trailing zeros)
+    const formatted = formatNumber(result, 5);
+    
     if (DOM.toValue) {
-      DOM.toValue.value = rounded.toLocaleString("en-US", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: precision,
-      });
-      DOM.toValue.dataset.raw = rounded;
+      DOM.toValue.value = formatted;
+      DOM.toValue.dataset.raw = result;
+    }
+
+    // Save to history
+    const entry = {
+      category: currentCategory,
+      fromUnit: DOM.fromUnit.value,
+      toUnit: DOM.toUnit.value,
+      value: Number(raw),
+      result: result,
+      timestamp: Date.now(),
+    };
+
+    if (JSON.stringify(entry) !== JSON.stringify(lastSavedEntry)) {
+      addToHistory(entry);
+      lastSavedEntry = entry;
     }
   } catch (err) {
     console.error("Conversion error:", err);
     if (DOM.toValue) DOM.toValue.value = "Error";
-  }
-}
-
-async function performConversionAndSave() {
-  await performConversionOnly();
-  if (!DOM.toValue?.dataset.raw) return;
-
-  const entry = {
-    category: currentCategory,
-    fromUnit: DOM.fromUnit.value,
-    toUnit: DOM.toUnit.value,
-    value: Number(DOM.fromValue.value),
-    result: Number(DOM.toValue.dataset.raw),
-    timestamp: Date.now(),
-  };
-
-  if (JSON.stringify(entry) !== JSON.stringify(lastSavedEntry)) {
-    addToHistory(entry);
-    lastSavedEntry = entry;
   }
 }
 
@@ -173,12 +212,4 @@ function updateCurrencyWarning(cat = currentCategory) {
   }
 }
 
-function debounce(fn, delay = 300) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), delay);
-  };
-}
-
-export { loadCategory, performConversionOnly as performConversion };
+export { loadCategory, performConversionAndSave as performConversion };
