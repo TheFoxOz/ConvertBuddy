@@ -1,13 +1,7 @@
-// scripts/units.js - FIXED: Removed Digital(Bit) & Fuel Economy, merged Time categories
+// scripts/units.js - UPDATED: Added cooking units to Weight category
 import { convertCurrency, listCurrencies } from "./currency.js";
 
-/**
- * All conversion categories – fully UK-localised.
- */
 export const conversionData = {
-    /* ------------------------- */
-    /* Currency (Dynamic API)    */
-    /* ------------------------- */
     Currency: {
         name: "Currency",
         icon: "fas fa-pound-sign",
@@ -16,9 +10,6 @@ export const conversionData = {
         list: listCurrencies,
     },
 
-    /* ------------------------- */
-    /* Length (British spelling) */
-    /* ------------------------- */
     Length: {
         name: "Length",
         icon: "fas fa-ruler",
@@ -37,13 +28,10 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Weight / Mass */
-    /* ------------------------- */
     Weight: {
         name: "Weight / Mass",
         icon: "fas fa-weight-scale",
-        precision: 3,
+        precision: 5,
         units: {
             Milligram: { name: "Milligram",  symbol: "mg", toBase: 0.001 },
             Gram:      { name: "Gram",       symbol: "g",  toBase: 1 },
@@ -51,13 +39,14 @@ export const conversionData = {
             Tonne:     { name: "Tonne",      symbol: "t",  toBase: 1_000_000 },
             Pound:     { name: "Pound",      symbol: "lb", toBase: 453.592 },
             Ounce:     { name: "Ounce",      symbol: "oz", toBase: 28.3495 },
-            Stone:     { name: "Stone",      symbol: "st", toBase: 6_350.29 }
+            Stone:     { name: "Stone",      symbol: "st", toBase: 6_350.29 },
+            Cup:       { name: "Cup",        symbol: "cup",  toBase: 236.588 },
+            HalfCup:   { name: "Half Cup",   symbol: "½ cup",toBase: 118.294 },
+            Tablespoon:{ name: "Tablespoon", symbol: "tbsp", toBase: 14.7868 },
+            Teaspoon:  { name: "Teaspoon",   symbol: "tsp",  toBase: 4.92892 },
         }
     },
 
-    /* ------------------------- */
-    /* Temperature */
-    /* ------------------------- */
     Temperature: {
         name: "Temperature",
         icon: "fas fa-temperature-half",
@@ -81,9 +70,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Volume */
-    /* ------------------------- */
     Volume: {
         name: "Volume",
         icon: "fas fa-wine-bottle",
@@ -101,9 +87,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Area */
-    /* ------------------------- */
     Area: {
         name: "Area",
         icon: "fas fa-vector-square",
@@ -119,9 +102,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Speed */
-    /* ------------------------- */
     Speed: {
         name: "Speed",
         icon: "fas fa-tachometer-alt",
@@ -135,9 +115,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Time (MERGED - includes all time units) */
-    /* ------------------------- */
     Time: {
         name: "Time",
         icon: "fas fa-clock",
@@ -148,16 +125,13 @@ export const conversionData = {
             Hour:    { name: "Hour",          symbol: "h",    toBase: 3_600 },
             Day:     { name: "Day",           symbol: "d",    toBase: 86_400 },
             Week:    { name: "Week",          symbol: "wk",   toBase: 604_800 },
-            Month:   { name: "Month (Avg)",   symbol: "mo",   toBase: 2_629_800 },  // 30.4375 days
-            Year:    { name: "Year (Avg)",    symbol: "yr",   toBase: 31_557_600 }, // 365.25 days
+            Month:   { name: "Month (Avg)",   symbol: "mo",   toBase: 2_629_800 },
+            Year:    { name: "Year (Avg)",    symbol: "yr",   toBase: 31_557_600 },
             Decade:  { name: "Decade",        symbol: "dec",  toBase: 315_576_000 },
             Century: { name: "Century",       symbol: "cent", toBase: 3_155_760_000 },
         }
     },
 
-    /* ------------------------- */
-    /* Storage (Bytes) */
-    /* ------------------------- */
     Storage: {
         name: "Storage",
         icon: "fas fa-database",
@@ -172,9 +146,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Energy */
-    /* ------------------------- */
     Energy: {
         name: "Energy",
         icon: "fas fa-bolt",
@@ -189,9 +160,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Pressure */
-    /* ------------------------- */
     Pressure: {
         name: "Pressure",
         icon: "fas fa-compress-alt",
@@ -205,9 +173,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Frequency */
-    /* ------------------------- */
     Frequency: {
         name: "Frequency",
         icon: "fas fa-wave-square",
@@ -220,9 +185,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Angle */
-    /* ------------------------- */
     Angle: {
         name: "Angle",
         icon: "fas fa-compass-drafting",
@@ -234,9 +196,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Power */
-    /* ------------------------- */
     Power: {
         name: "Power",
         icon: "fas fa-plug",
@@ -249,9 +208,6 @@ export const conversionData = {
         }
     },
 
-    /* ------------------------- */
-    /* Force */
-    /* ------------------------- */
     Force: {
         name: "Force",
         icon: "fas fa-hand-fist",
@@ -264,7 +220,6 @@ export const conversionData = {
     }
 };
 
-/* Fallback values */
 for (const cat in conversionData) {
     if (!conversionData[cat].name) conversionData[cat].name = cat;
     if (!conversionData[cat].icon) conversionData[cat].icon = "fas fa-question";
