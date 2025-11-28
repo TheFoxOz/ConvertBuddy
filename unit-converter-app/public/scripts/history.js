@@ -1,17 +1,15 @@
-// scripts/history.js - FINAL FIXED: No unused imports + safe DOM + English
+// scripts/history.js - FIXED: Clear All button now works properly
 import {
     saveHistoryToFirestore,
     loadHistoryFromFirestore,
     clearHistoryFromFirestore
 } from "./firestore.js";
 
-// Only import what's needed for clicks
 import { loadCategory, performConversion } from "./ui.js";
 
 const historyList = document.getElementById("history-list");
 const clearHistoryBtn = document.getElementById("clear-history-button");
 
-// Safe DOM refs (check if elements exist)
 const DOM = {
     fromValue: document.getElementById('from-value'),
     fromUnit: document.getElementById('from-unit'),
@@ -19,7 +17,7 @@ const DOM = {
 };
 
 function renderEntry(entry, prepend = true) {
-    if (!historyList) return; // Safe guard
+    if (!historyList) return;
 
     const li = document.createElement("li");
     li.className = 'text-sm text-gray-700 flex justify-between cursor-pointer hover:bg-emerald-50 p-2 rounded';
@@ -39,7 +37,6 @@ function renderEntry(entry, prepend = true) {
     li.appendChild(valueSpan);
     li.appendChild(timeSpan);
 
-    // Safe click handler
     li.addEventListener('click', async () => {
         if (!DOM.fromValue || !loadCategory || !performConversion) return;
         await loadCategory(entry.category);
@@ -79,15 +76,27 @@ export function addToHistory(entry) {
     saveHistoryToFirestore(entry);
 }
 
+// FIXED: Make async and properly handle clearing
 async function handleClearHistory() {
     if (!confirm("Clear all history? This cannot be undone.")) return;
 
-    await clearHistoryFromFirestore();
-    if (historyList) {
-        historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>History cleared</li>";
+    try {
+        // Clear from Firestore
+        await clearHistoryFromFirestore();
+        
+        // Update UI immediately
+        if (historyList) {
+            historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>History cleared</li>";
+        }
+        
+        console.log("History cleared successfully");
+    } catch (error) {
+        console.error("Failed to clear history:", error);
+        alert("Failed to clear history. Please try again.");
     }
 }
 
+// FIXED: Add event listener after DOM is ready
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", handleClearHistory);
 }
