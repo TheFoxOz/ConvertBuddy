@@ -1,4 +1,4 @@
-// scripts/ui.js - UPDATED: Manual convert button + smart decimal formatting
+// scripts/ui.js - UPDATED: Category icons + manual convert + smart decimals
 import { listUnits, convert, swapUnits } from "./converter.js";
 import { conversionData } from "./units.js";
 import { getCachedRates } from "./currency.js";
@@ -11,7 +11,7 @@ const DOM = {
   toValue: document.getElementById("to-value"),
   fromUnit: document.getElementById("from-unit"),
   toUnit: document.getElementById("to-unit"),
-  convertBtn: document.getElementById("convert-btn"), // NEW
+  convertBtn: document.getElementById("convert-btn"),
   swapButton: document.getElementById("swap-btn"),
   currencyWarning: document.getElementById("currency-warning"),
   lastUpdatedText: document.getElementById("last-updated-text"),
@@ -19,6 +19,24 @@ const DOM = {
 
 let currentCategory = "Weight";
 let lastSavedEntry = null;
+
+const categoryIcons = {
+  'Currency': '💰',
+  'Length': '📏',
+  'Weight': '⚖️',
+  'Temperature': '🌡️',
+  'Volume': '🧪',
+  'Area': '📐',
+  'Speed': '🚀',
+  'Time': '⏰',
+  'Storage': '💾',
+  'Energy': '⚡',
+  'Pressure': '🔧',
+  'Frequency': '📻',
+  'Angle': '📐',
+  'Power': '🔌',
+  'Force': '💪'
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
   await renderCategorySelect();
@@ -33,14 +51,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function setupEventListeners() {
-  // CHANGED: Removed auto-convert on input, only on Convert button click
   if (DOM.convertBtn) {
     DOM.convertBtn.addEventListener("click", async () => {
       await performConversionAndSave();
     });
   }
   
-  // Keep Enter key for quick conversion
   if (DOM.fromValue) {
     DOM.fromValue.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
@@ -65,10 +81,14 @@ function setupEventListeners() {
 async function renderCategorySelect() {
   if (!DOM.categorySelect) return;
   DOM.categorySelect.innerHTML = "";
+  
   Object.keys(conversionData).forEach((key) => {
-    const opt = new Option(conversionData[key].name, key);
+    const category = conversionData[key];
+    const icon = categoryIcons[key] || '📊';
+    const opt = new Option(`${icon} ${category.name}`, key);
     DOM.categorySelect.add(opt);
   });
+  
   DOM.categorySelect.value = currentCategory;
 }
 
@@ -93,7 +113,6 @@ async function loadCategory(key) {
 
   updateCurrencyWarning(key);
   
-  // Reset result when changing category
   if (DOM.toValue) DOM.toValue.value = "---";
 }
 
@@ -104,7 +123,6 @@ function populateUnitDropdowns(units, categoryKey) {
     units.forEach((u) => select.add(new Option(u.name || u.key, u.key)));
   });
   
-  // Set smart defaults based on category
   if (categoryKey === "Weight") {
     if (DOM.fromUnit) {
       const kgIndex = Array.from(DOM.fromUnit.options).findIndex(opt => opt.value === "Kilogram");
@@ -120,27 +138,16 @@ function populateUnitDropdowns(units, categoryKey) {
   }
 }
 
-/**
- * NEW: Smart decimal formatter
- * - Removes trailing zeros
- * - Max 5 decimal places
- * - Examples: 0.75000 → 0.75, 0.78451 → 0.78451, 1000 → 1,000
- */
 function formatNumber(num, maxDecimals = 5) {
   if (!isFinite(num)) return "Error";
   
-  // Round to max decimals
   const rounded = Number(num.toFixed(maxDecimals));
-  
-  // Convert to string and remove trailing zeros
   let str = rounded.toString();
   
-  // If number has decimal point, remove trailing zeros
   if (str.includes('.')) {
     str = str.replace(/\.?0+$/, '');
   }
   
-  // Add thousand separators for readability
   const parts = str.split('.');
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   
@@ -162,7 +169,6 @@ async function performConversionAndSave() {
       return;
     }
 
-    // Use smart decimal formatting (max 5 decimals, no trailing zeros)
     const formatted = formatNumber(result, 5);
     
     if (DOM.toValue) {
@@ -170,7 +176,6 @@ async function performConversionAndSave() {
       DOM.toValue.dataset.raw = result;
     }
 
-    // Save to history
     const entry = {
       category: currentCategory,
       fromUnit: DOM.fromUnit.value,
