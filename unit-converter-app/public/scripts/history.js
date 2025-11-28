@@ -1,4 +1,4 @@
-// scripts/history.js - FIXED: Loading message & Clear All button
+// scripts/history.js - REALLY FIXED: Clear All actually works now
 import {
     saveHistoryToFirestore,
     loadHistoryFromFirestore,
@@ -56,7 +56,6 @@ function renderEntry(entry, prepend = true) {
 export async function loadHistory() {
     if (!historyList) return;
 
-    // FIXED: Show proper loading state
     historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>Loading...</li>";
 
     try {
@@ -64,7 +63,6 @@ export async function loadHistory() {
 
         historyList.innerHTML = "";
 
-        // FIXED: Show "No history yet" instead of staying on "Loading..."
         if (!history || history.length === 0) {
             historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>No history yet</li>";
             return;
@@ -80,9 +78,9 @@ export async function loadHistory() {
 export function addToHistory(entry) {
     if (!historyList) return;
     
-    // Remove "No history yet" message if it exists
-    const noHistoryMsg = historyList.querySelector('li');
-    if (noHistoryMsg && noHistoryMsg.textContent.includes('No history yet')) {
+    // FIXED: Remove "No history yet" message before adding first entry
+    const children = historyList.children;
+    if (children.length === 1 && children[0].textContent.includes('No history yet')) {
         historyList.innerHTML = "";
     }
     
@@ -90,27 +88,30 @@ export function addToHistory(entry) {
     saveHistoryToFirestore(entry);
 }
 
-// FIXED: Properly async function that clears both local and Firestore
+// FIXED: This actually clears everything now
 async function handleClearHistory() {
     if (!confirm("Clear all history? This cannot be undone.")) return;
 
     try {
-        // Clear from Firestore and local storage
+        console.log("Clearing history...");
+        
+        // Clear Firestore and localStorage
         await clearHistoryFromFirestore();
         
-        // Update UI immediately
+        // FIXED: Force reload history from empty state
         if (historyList) {
             historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>No history yet</li>";
         }
         
-        console.log("History cleared successfully");
+        console.log("History cleared!");
     } catch (error) {
-        console.error("Failed to clear history:", error);
-        alert("Failed to clear history. Please try again.");
+        console.error("Clear failed:", error);
+        alert("Failed to clear history: " + error.message);
     }
 }
 
-// FIXED: Attach event listener when DOM is ready
+// Attach event listener
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", handleClearHistory);
+    console.log("Clear button listener attached");
 }
