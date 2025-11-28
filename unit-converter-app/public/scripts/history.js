@@ -1,4 +1,4 @@
-// scripts/history.js - FIXED: Clear All button now works properly
+// scripts/history.js - FIXED: Loading message & Clear All button
 import {
     saveHistoryToFirestore,
     loadHistoryFromFirestore,
@@ -56,37 +56,51 @@ function renderEntry(entry, prepend = true) {
 export async function loadHistory() {
     if (!historyList) return;
 
-    historyList.innerHTML = "<li class='text-gray-500'>Loading…</li>";
+    // FIXED: Show proper loading state
+    historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>Loading...</li>";
 
-    const history = await loadHistoryFromFirestore();
+    try {
+        const history = await loadHistoryFromFirestore();
 
-    historyList.innerHTML = "";
+        historyList.innerHTML = "";
 
-    if (!history.length) {
+        // FIXED: Show "No history yet" instead of staying on "Loading..."
+        if (!history || history.length === 0) {
+            historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>No history yet</li>";
+            return;
+        }
+
+        history.forEach(entry => renderEntry(entry, false));
+    } catch (error) {
+        console.error("Failed to load history:", error);
         historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>No history yet</li>";
-        return;
     }
-
-    history.forEach(entry => renderEntry(entry, false));
 }
 
 export function addToHistory(entry) {
     if (!historyList) return;
+    
+    // Remove "No history yet" message if it exists
+    const noHistoryMsg = historyList.querySelector('li');
+    if (noHistoryMsg && noHistoryMsg.textContent.includes('No history yet')) {
+        historyList.innerHTML = "";
+    }
+    
     renderEntry(entry, true);
     saveHistoryToFirestore(entry);
 }
 
-// FIXED: Make async and properly handle clearing
+// FIXED: Properly async function that clears both local and Firestore
 async function handleClearHistory() {
     if (!confirm("Clear all history? This cannot be undone.")) return;
 
     try {
-        // Clear from Firestore
+        // Clear from Firestore and local storage
         await clearHistoryFromFirestore();
         
         // Update UI immediately
         if (historyList) {
-            historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>History cleared</li>";
+            historyList.innerHTML = "<li class='text-gray-500 text-center py-4'>No history yet</li>";
         }
         
         console.log("History cleared successfully");
@@ -96,7 +110,7 @@ async function handleClearHistory() {
     }
 }
 
-// FIXED: Add event listener after DOM is ready
+// FIXED: Attach event listener when DOM is ready
 if (clearHistoryBtn) {
     clearHistoryBtn.addEventListener("click", handleClearHistory);
 }
