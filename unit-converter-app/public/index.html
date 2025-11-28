@@ -62,6 +62,37 @@
       </div>
     </section>
 
+    <!-- Quick Conversion Shortcuts -->
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-8">
+      <h2 class="text-xl font-bold text-emerald-600 mb-4 text-center">⚡ Quick Conversions</h2>
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Weight" data-from="Kilogram" data-to="Gram">
+          <div class="text-emerald-600 text-xs mb-1">Weight</div>
+          <div>kg → g</div>
+        </button>
+        
+        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Length" data-from="Meter" data-to="Centimeter">
+          <div class="text-emerald-600 text-xs mb-1">Length</div>
+          <div>m → cm</div>
+        </button>
+        
+        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Currency" data-from="GBP" data-to="USD">
+          <div class="text-emerald-600 text-xs mb-1">Currency</div>
+          <div>GBP → USD</div>
+        </button>
+        
+        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Currency" data-from="GBP" data-to="EUR">
+          <div class="text-emerald-600 text-xs mb-1">Currency</div>
+          <div>GBP → EUR</div>
+        </button>
+        
+        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Temperature" data-from="Celsius" data-to="Fahrenheit">
+          <div class="text-emerald-600 text-xs mb-1">Temperature</div>
+          <div>°C → °F</div>
+        </button>
+      </div>
+    </section>
+
     <!-- Converter Tool -->
     <section class="bg-white rounded-3xl shadow-2xl p-8 mb-8">
       <form id="converter-form" class="space-y-6">
@@ -200,12 +231,43 @@
     })();
   </script>
 
+  <!-- Shortcut Buttons Script -->
+  <script type="module">
+    import { loadCategory, performConversion } from '/scripts/ui.js';
+    
+    // Handle shortcut button clicks
+    document.querySelectorAll('.shortcut-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const category = btn.dataset.category;
+        const fromUnit = btn.dataset.from;
+        const toUnit = btn.dataset.to;
+        
+        // Load category
+        await loadCategory(category);
+        
+        // Set units
+        setTimeout(() => {
+          const fromSelect = document.getElementById('from-unit');
+          const toSelect = document.getElementById('to-unit');
+          const valueInput = document.getElementById('from-value');
+          
+          if (fromSelect && toSelect && valueInput) {
+            fromSelect.value = fromUnit;
+            toSelect.value = toUnit;
+            valueInput.value = '1';
+            valueInput.focus();
+          }
+        }, 100);
+      });
+    });
+  </script>
+
   <!-- Main App Scripts -->
   <script type="module" src="/scripts/ui.js"></script>
   
   <!-- Service Worker -->
   <script>
-    if ("serviceWorker" in navigator") {
+    if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("/sw.js")
           .then(reg => console.log("SW registered"))
