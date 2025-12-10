@@ -1,29 +1,33 @@
-{
-  "buildCommand": null,
-  "outputDirectory": "public",
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "headers": [
-    {
-      "source": "/ads.txt",
-      "headers": [
-        { "key": "Content-Type", "value": "text/plain" }
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        { "key": "Service-Worker-Allowed", "value": "/" },
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
-    },
-    {
-      "source": "/manifest.json",
-      "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" }
-      ]
-    }
-    // Remove the /sitemap.xml header for now to avoid conflicts
-  ]
-  // Remove all "rewrites" and "redirects" blocks
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://convertbuddy.vercel.app/</loc>
+    <lastmod>2024-11-28</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://convertbuddy.vercel.app/about.html</loc>
+    <lastmod>2024-11-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://convertbuddy.vercel.app/contact.html</loc>
+    <lastmod>2024-11-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://convertbuddy.vercel.app/terms.html</loc>
+    <lastmod>2024-11-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://convertbuddy.vercel.app/privacy.html</loc>
+    <lastmod>2024-11-28</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>
