@@ -23,12 +23,7 @@
         { "key": "Content-Type", "value": "application/manifest+json" }
       ]
     }
-  ],
-  "redirects": [
-    {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap-clean.xml",
-      "permanent": true
-    }
+    // Remove the /sitemap.xml header for now to avoid conflicts
   ]
+  // Remove all "rewrites" and "redirects" blocks
 }
