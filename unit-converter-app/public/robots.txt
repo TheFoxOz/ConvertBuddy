@@ -1,0 +1,5 @@
+# robots.txt for https://convertbuddy.vercel.app
+User-agent: *
+Allow: /
+
+Sitemap: https://convertbuddy.vercel.app/sitemap.xml
