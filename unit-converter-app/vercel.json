@@ -1,10 +1,11 @@
 {
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false,
 
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-    { "source": "/robots.txt",  "destination": "/robots.txt" }
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/ads.txt", "destination": "/ads.txt" }
   ],
 
   "headers": [
@@ -13,7 +14,8 @@
       "headers": [
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
-        { "key": "X-Robots-Tag", "value": "noindex" }
+        { "key": "X-Robots-Tag", "value": "noai, noindexifembedded" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     },
     {
@@ -32,8 +34,8 @@
     {
       "source": "/sw.js",
       "headers": [
-        { "key": "Service-Worker-Allowed", "value": "/" },
-        { "key": "Cache-Control", "value": "no-cache" }
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
       ]
     },
     {
@@ -41,17 +43,6 @@
       "headers": [
         { "key": "Content-Type", "value": "application/manifest+json" }
       ]
-    },
-
-    /* 🔥 HARD DISABLE ALL VERCEL EDGE OPTIMIZATIONS (this prevents injection) */
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "x-vercel-edge-cache", "value": "none" },
-        { "key": "x-vercel-cache", "value": "no-cache" },
-        { "key": "x-vercel-id", "value": "static" }
-      ]
     }
   ]
 }
-
