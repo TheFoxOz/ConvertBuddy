@@ -1,279 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ConvertBuddy - Free Unit & Currency Converter | 15+ Categories</title>
-  <meta name="description" content="Free online unit converter for currency, weight, length, temperature, and 15+ categories. Fast, accurate conversions with live exchange rates. No sign-up required!" />
-  <meta name="keywords" content="unit converter, currency converter, weight converter, metric converter, length converter, temperature converter, online calculator" />
-  
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#10b981" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/Icon-192.png" />
-  <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
-
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { theme: { extend: { colors: { emerald: { 50: '#f0fdf4' } } } } }
-  </script>
-  
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="/style.css" />
-</head>
-
-<body class="bg-emerald-50 text-gray-800 min-h-screen py-8 px-4 font-sans">
-  
-  <!-- Cookie Banner -->
-  <div id="cookie-banner" class="hidden fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 shadow-2xl z-50">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="text-sm flex-1">
-        <p class="font-semibold mb-1">🍪 We use cookies</p>
-        <p class="text-gray-300">We use cookies to provide functionality and show personalized ads. <a href="/privacy.html" class="underline hover:text-emerald-400">Privacy Policy</a></p>
-      </div>
-      <div class="flex gap-3 flex-shrink-0">
-        <button id="cookie-reject" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition">Reject</button>
-        <button id="cookie-accept" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm font-medium transition">Accept All</button>
-      </div>
-    </div>
-  </div>
-
-  <main class="max-w-6xl mx-auto">
-    <!-- Top SEO Content Section -->
-    <section class="bg-white rounded-3xl shadow-xl p-6 mb-8">
-      <div class="text-center mb-6">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-emerald-600 mb-3">ConvertBuddy - Free Unit Converter</h1>
-        <p class="text-lg text-gray-700 font-medium">All your conversions in one place</p>
-        <p class="text-sm text-gray-500 mt-2">Currency • Weight • Length • Temperature & 15+ categories</p>
-      </div>
-
-      <!-- SEO-Rich Content -->
-      <div class="prose max-w-none text-gray-700 text-sm leading-relaxed">
-        <p class="mb-4">
-          <strong>ConvertBuddy</strong> is the fastest and most accurate free online unit converter available. Whether you need to convert currency exchange rates, weight and mass measurements, distances and lengths, temperatures, or any of our 15+ specialized categories, ConvertBuddy delivers instant, precise results without complicated formulas.
-        </p>
-        <p class="mb-4">
-          Perfect for students, professionals, travelers, cooks, and anyone who needs quick unit conversions. Our tool supports metric to imperial conversions, international currency exchange with live rates updated daily, cooking measurements, scientific units, and more. No registration required - just enter your value and convert instantly.
-        </p>
-      </div>
-    </section>
-
-    <!-- Quick Conversion Shortcuts -->
-    <section class="bg-white rounded-3xl shadow-xl p-6 mb-8">
-      <h2 class="text-xl font-bold text-emerald-600 mb-4 text-center">⚡ Quick Conversions</h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Weight" data-from="Kilogram" data-to="Gram">
-          <div class="text-emerald-600 text-xs mb-1">Weight</div>
-          <div>kg → g</div>
-        </button>
-        
-        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Length" data-from="Meter" data-to="Centimeter">
-          <div class="text-emerald-600 text-xs mb-1">Length</div>
-          <div>m → cm</div>
-        </button>
-        
-        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Currency" data-from="GBP" data-to="USD">
-          <div class="text-emerald-600 text-xs mb-1">Currency</div>
-          <div>GBP → USD</div>
-        </button>
-        
-        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Currency" data-from="GBP" data-to="EUR">
-          <div class="text-emerald-600 text-xs mb-1">Currency</div>
-          <div>GBP → EUR</div>
-        </button>
-        
-        <button class="shortcut-btn bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 rounded-lg p-3 text-sm font-medium text-gray-800 transition-all hover:shadow-md" data-category="Temperature" data-from="Celsius" data-to="Fahrenheit">
-          <div class="text-emerald-600 text-xs mb-1">Temperature</div>
-          <div>°C → °F</div>
-        </button>
-      </div>
-    </section>
-
-    <!-- Converter Tool -->
-    <section class="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-      <form id="converter-form" class="space-y-6">
-        <!-- Category -->
-        <div>
-          <label for="category-select" class="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-          <select id="category-select" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none text-base"></select>
-        </div>
-
-        <!-- From / To Units -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label for="from-unit" class="block text-sm font-semibold text-gray-700 mb-2">From</label>
-            <select id="from-unit" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none"></select>
-          </div>
-          <div>
-            <label for="to-unit" class="block text-sm font-semibold text-gray-700 mb-2">To</label>
-            <select id="to-unit" class="w-full px-4 py-3 rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none"></select>
-          </div>
-        </div>
-
-        <!-- Input Value -->
-        <div>
-          <label for="from-value" class="block text-sm font-semibold text-gray-700 mb-2">Value</label>
-          <input type="number" id="from-value" value="1" step="any" class="w-full px-4 py-5 text-2xl text-center font-bold rounded-lg border-2 border-emerald-300 focus:border-emerald-500 focus:outline-none" placeholder="Enter value" />
-        </div>
-
-        <!-- Convert Button -->
-        <div class="flex justify-center">
-          <button type="button" id="convert-btn" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg rounded-lg shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]">Convert</button>
-        </div>
-
-        <!-- Swap Button -->
-        <div class="flex justify-center -mt-2">
-          <button type="button" id="swap-btn" class="w-12 h-12 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-md transition-all hover:scale-110 active:scale-95" title="Swap units">
-            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Result -->
-        <div>
-          <label for="to-value" class="block text-sm font-semibold text-gray-700 mb-2">Result</label>
-          <input type="text" id="to-value" readonly value="---" class="w-full px-4 py-5 text-2xl text-center font-bold bg-emerald-50 rounded-lg border-2 border-emerald-300 cursor-default" />
-        </div>
-
-        <!-- Currency Warning -->
-        <div id="currency-warning" class="hidden bg-amber-50 border border-amber-200 text-amber-800 text-sm p-4 rounded-lg text-center">
-          <span id="last-updated-text"></span>
-        </div>
-      </form>
-
-      <!-- History Section -->
-      <section class="mt-10 pt-8 border-t border-gray-200">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-bold text-gray-800">Recent Conversions</h2>
-          <button id="clear-history-button" class="text-sm text-red-600 hover:text-red-700 font-medium">Clear All</button>
-        </div>
-        <ul id="history-list" class="space-y-2 max-h-64 overflow-y-auto text-sm"></ul>
-      </section>
-    </section>
-
-    <!-- Features Section (SEO Content) -->
-    <section class="bg-white rounded-3xl shadow-xl p-8 mb-8">
-      <h2 class="text-2xl font-bold text-emerald-600 mb-6 text-center">Why Choose ConvertBuddy?</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="text-center">
-          <div class="text-4xl mb-3">⚡</div>
-          <h3 class="font-bold text-gray-800 mb-2">Lightning Fast</h3>
-          <p class="text-sm text-gray-600">Instant conversions without delays or loading times</p>
-        </div>
-        <div class="text-center">
-          <div class="text-4xl mb-3">🎯</div>
-          <h3 class="font-bold text-gray-800 mb-2">Highly Accurate</h3>
-          <p class="text-sm text-gray-600">Based on international standards and live currency rates</p>
-        </div>
-        <div class="text-center">
-          <div class="text-4xl mb-3">🔒</div>
-          <h3 class="font-bold text-gray-800 mb-2">Privacy Focused</h3>
-          <p class="text-sm text-gray-600">No registration required, minimal data collection</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Supported Categories (SEO) -->
-    <section class="bg-white rounded-3xl shadow-xl p-8">
-      <h2 class="text-2xl font-bold text-emerald-600 mb-4 text-center">15+ Conversion Categories</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Currency Exchange</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Weight & Mass</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Length & Distance</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Temperature</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Volume</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Area</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Speed & Velocity</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Time</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Digital Storage</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Energy</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Pressure</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Frequency</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Angles</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Power</div>
-        <div class="flex items-center"><span class="text-emerald-600 mr-2">✓</span> Force</div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="max-w-6xl mx-auto mt-12 py-6 border-t border-gray-300 text-center">
-    <div class="flex flex-wrap justify-center gap-4 text-sm mb-4">
-      <a href="/about.html" class="text-emerald-600 hover:text-emerald-800 underline">About</a>
-      <a href="/contact.html" class="text-emerald-600 hover:text-emerald-800 underline">Contact</a>
-      <a href="/privacy.html" class="text-emerald-600 hover:text-emerald-800 underline">Privacy Policy</a>
-      <a href="/terms.html" class="text-emerald-600 hover:text-emerald-800 underline">Terms of Service</a>
-    </div>
-    <p class="text-xs text-gray-500">© 2024 ConvertBuddy. All rights reserved.</p>
-  </footer>
-
-  <!-- Cookie Banner Script -->
-  <script>
-    (function() {
-      const banner = document.getElementById('cookie-banner');
-      const acceptBtn = document.getElementById('cookie-accept');
-      const rejectBtn = document.getElementById('cookie-reject');
-      const consent = localStorage.getItem('cookie-consent');
-      if (!consent) banner.classList.remove('hidden');
-      acceptBtn.addEventListener('click', () => {
-        localStorage.setItem('cookie-consent', 'accepted');
-        banner.classList.add('hidden');
-      });
-      rejectBtn.addEventListener('click', () => {
-        localStorage.setItem('cookie-consent', 'rejected');
-        banner.classList.add('hidden');
-      });
-    })();
-  </script>
-
-  <!-- Shortcut Buttons Script -->
-  <script type="module">
-    import { loadCategory, performConversion } from '/scripts/ui.js';
-    
-    // Handle shortcut button clicks
-    document.querySelectorAll('.shortcut-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const category = btn.dataset.category;
-        const fromUnit = btn.dataset.from;
-        const toUnit = btn.dataset.to;
-        
-        // Load category
-        await loadCategory(category);
-        
-        // Set units
-        setTimeout(() => {
-          const fromSelect = document.getElementById('from-unit');
-          const toSelect = document.getElementById('to-unit');
-          const valueInput = document.getElementById('from-value');
-          
-          if (fromSelect && toSelect && valueInput) {
-            fromSelect.value = fromUnit;
-            toSelect.value = toUnit;
-            valueInput.value = '1';
-            valueInput.focus();
-          }
-        }, 100);
-      });
-    });
-  </script>
-
-  <!-- Main App Scripts -->
-  <script type="module" src="/scripts/ui.js"></script>
-  
-  <!-- Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js")
-          .then(reg => console.log("SW registered"))
-          .catch(err => console.log("SW failed:", err));
-      });
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Content-Type", "value": "application/xml" },
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "x-middleware-skip", "value": "1" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain" },
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
+        { "key": "x-middleware-skip", "value": "1" }
+      ]
+    },
+    {
+      "source": "/ads.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain" },
+        { "key": "x-middleware-skip", "value": "1" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/manifest+json" },
+        { "key": "x-middleware-skip", "value": "1" }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Service-Worker-Allowed", "value": "/" },
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "x-middleware-skip", "value": "1" }
+      ]
     }
-  </script>
-</body>
-</html>
+  ]
+}
