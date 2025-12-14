@@ -1,5 +1,11 @@
-# robots.txt for https://convertbuddy.vercel.app
+# ConvertBuddy - Robots.txt
 User-agent: *
 Allow: /
+Disallow: /scripts/
+Disallow: /icons/
 
+# Sitemaps
 Sitemap: https://convertbuddy.vercel.app/sitemap.xml
+
+# Crawl-delay (optional, prevents aggressive crawling)
+Crawl-delay: 1
